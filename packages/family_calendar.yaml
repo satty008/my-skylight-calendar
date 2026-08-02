@@ -181,7 +181,10 @@ script:
                   summary: "{{ states('input_text.calendar_event_title') }}"
                   description: "{{ states('input_text.calendar_event_description') }}"
                   start_date: "{{ states('input_datetime.calendar_day_event_start') }}"
-                  end_date: "{{ states('input_datetime.calendar_day_event_end') }}"
+                  # Google's all-day end_date is exclusive, so a same-day pick (the normal
+                  # case for a single-day event) needs +1 day or the API rejects it as
+                  # zero-duration ("Expected minimum event duration of 0:00:01")
+                  end_date: "{{ (states('input_datetime.calendar_day_event_end') | as_datetime + timedelta(days=1)).strftime('%Y-%m-%d') }}"
           
           # Scenario B: Timed Event
           - conditions:
