@@ -34,7 +34,7 @@ views:
                   border: none !important;
                 }
           - type: custom:weather-card
-            entity: weather.home   # <--- UPDATE THIS ENTITY
+            entity: weather.forecast_home
             current: true
             details: true
             forecast: false
@@ -44,7 +44,7 @@ views:
           - type: weather-forecast
             show_current: false
             show_forecast: true
-            entity: weather.home   # <--- UPDATE THIS ENTITY
+            entity: weather.forecast_home
             forecast_type: daily
             name: Weather Forecast
             grid_options:
@@ -91,7 +91,8 @@ views:
               - type: custom:bubble-card
                 card_type: button
                 button_type: state
-                entity: person.calendar1  # <--- UPDATE THIS ENTITY
+                entity: person.ram_sambamurthy
+                name: Satty
                 show_icon: true
                 show_name: true
                 tap_action:
@@ -105,7 +106,8 @@ views:
               - type: custom:bubble-card
                 card_type: button
                 button_type: state
-                entity: person.calendar2    # <--- UPDATE THIS ENTITY
+                entity: person.bhavi
+                name: Bhavi
                 show_icon: true
                 show_name: true
                 tap_action:
@@ -118,8 +120,9 @@ views:
                   }
               - type: custom:bubble-card
                 card_type: button
-                button_type: state
-                entity: person.calendar3  # <--- UPDATE THIS ENTITY
+                button_type: name
+                name: Priya
+                icon: mdi:face-woman
                 show_icon: true
                 show_name: true
                 tap_action:
@@ -132,8 +135,9 @@ views:
                   }
               - type: custom:bubble-card
                 card_type: button
-                button_type: state
-                entity: person.calendar4    # <--- UPDATE THIS ENTITY
+                button_type: name
+                name: "Us ❤️"
+                icon: mdi:heart
                 show_icon: true
                 show_name: true
                 tap_action:
@@ -270,32 +274,48 @@ views:
               type: custom:week-planner-card
               calendars:
                 # --- MAP CALENDARS HERE ---
-                - entity: calendar.calendar1 # <--- UPDATE THIS ENTITY
-                  name: calendar1
+                - entity: calendar.srnarayanan1989_gmail_com
+                  name: Satty
                   color: "var(--calendar1-default-primary-color)"
                   filter: ${ CAL1CAL }
-                - entity: calendar.calendar2 # <--- UPDATE THIS ENTITY
-                  name: calendar2
+                - entity: calendar.160294bpl_gmail_com
+                  name: Bhavi
                   color: "var(--calendar2-default-primary-color)"
                   filter: ${ CAL2CAL }
-                - entity: calendar.calendar3 # <--- UPDATE THIS ENTITY
-                  name: calendar3
+                - entity: calendar.priyabpl50_gmail_com
+                  name: Priya
                   color: "var(--calendar3-default-primary-color)"
                   filter: ${ CAL3CAL }
-                - entity: calendar.calendar4 # <--- UPDATE THIS ENTITY
-                  name: calendar4
+                - entity: calendar.bhavi_ram1608_gmail_com
+                  name: "Us ❤️"
                   color: "var(--calendar4-default-primary-color)"
                   filter: ${ CAL4CAL }
-                - entity: calendar.family # <--- UPDATE THIS ENTITY
+                - entity: calendar.family
                   name: Family
                   color: "var(--family-default-primary-color)"
                   filter: ${ FAMCAL }
-                - entity: calendar.birthdays # <--- UPDATE THIS ENTITY
-                  name: Birthdays
+                - entity: calendar.birthdays
+                  name: Birthdays (Satty)
                   color: "var(--birthdays-default-primary-color)"
                   filter: ${ BIRCAL }
-                - entity: calendar.holidays # <--- UPDATE THIS ENTITY , Check this entity ID after adding integration
-                  name: Holidays
+                - entity: calendar.birthdays_2
+                  name: Birthdays (Bhavi)
+                  color: "var(--birthdays-default-primary-color)"
+                  filter: ${ BIRCAL }
+                - entity: calendar.birthdays_3
+                  name: Birthdays (Priya)
+                  color: "var(--birthdays-default-primary-color)"
+                  filter: ${ BIRCAL }
+                - entity: calendar.birthdays_4
+                  name: "Birthdays (Us)"
+                  color: "var(--birthdays-default-primary-color)"
+                  filter: ${ BIRCAL }
+                - entity: calendar.holidays_in_germany
+                  name: Holidays (Germany)
+                  color: "var(--holidays-default-primary-color)"
+                  filter: ${ HOLCAL }
+                - entity: calendar.holidays_in_india
+                  name: Holidays (India)
                   color: "var(--holidays-default-primary-color)"
                   filter: ${ HOLCAL }
               days: ${ DAYS }
@@ -311,7 +331,7 @@ views:
                 showTemperature: true
                 showLowTemperature: true
                 useTwiceDaily: false
-                entity: weather.home # <--- UPDATE THIS ENTITY
+                entity: weather.forecast_home
               locale: en
               showLocation: true
               hidePastEvents: false
@@ -560,12 +580,12 @@ views:
                 show_name: true
                 styles: |
                   .bubble-button-card-container {
-                    background: 
-                    ${hass.states['input_select.calendar_select'].state == 'calendar1' ? 'var(--calendar1-default-primary-color)' 
-                    : hass.states['input_select.calendar_select'].state == 'calendar2' ? 'var(--calendar2-default-primary-color)' 
-                    : hass.states['input_select.calendar_select'].state == 'calendar3' ? 'var(--calendar3-default-primary-color)' 
-                    : hass.states['input_select.calendar_select'].state == 'calendar4' ? 'var(--calendar4-default-primary-color)' 
-                    : hass.states['input_select.calendar_select'].state == 'Family' ? 'var(--family-default-primary-color)' 
+                    background:
+                    ${hass.states['input_select.calendar_select'].state == 'Satty' ? 'var(--calendar1-default-primary-color)'
+                    : hass.states['input_select.calendar_select'].state == 'Bhavi' ? 'var(--calendar2-default-primary-color)'
+                    : hass.states['input_select.calendar_select'].state == 'Priya' ? 'var(--calendar3-default-primary-color)'
+                    : hass.states['input_select.calendar_select'].state == 'Us ❤️' ? 'var(--calendar4-default-primary-color)'
+                    : hass.states['input_select.calendar_select'].state == 'Family' ? 'var(--family-default-primary-color)'
                     : 'gray'} !important;
                   }
               - type: vertical-stack
@@ -612,13 +632,13 @@ views:
                       card:
                         - background-color: |
                             [[[
-                              if (states['input_select.calendar_select'].state == 'calendar1') return "var(--calendar1-default-primary-color)";
-                              if (states['input_select.calendar_select'].state == 'calendar2') return "var(--calendar2-default-primary-color)";
-                              if (states['input_select.calendar_select'].state == 'calendar3') return "var(--calendar3-default-primary-color)";
-                              if (states['input_select.calendar_select'].state == 'calendar4') return "var(--calendar4-default-primary-color)";
+                              if (states['input_select.calendar_select'].state == 'Satty') return "var(--calendar1-default-primary-color)";
+                              if (states['input_select.calendar_select'].state == 'Bhavi') return "var(--calendar2-default-primary-color)";
+                              if (states['input_select.calendar_select'].state == 'Priya') return "var(--calendar3-default-primary-color)";
+                              if (states['input_select.calendar_select'].state == 'Us ❤️') return "var(--calendar4-default-primary-color)";
                               if (states['input_select.calendar_select'].state == 'Family') return "var(--family-default-primary-color)";
                               return "gray";
-                            ]]]                
+                            ]]]
     cards: []
     icon: mdi:calendar-blank-multiple
     background:

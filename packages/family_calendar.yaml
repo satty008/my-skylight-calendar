@@ -47,10 +47,10 @@ input_select:
   calendar_select:
     name: Select Calendar
     options:
-      - calendar1
-      - calendar2
-      - calendar3
-      - calendar4
+      - Satty
+      - Bhavi
+      - Priya
+      - "Us ❤️"
       - Family
     icon: mdi:calendar-check
   
@@ -164,14 +164,14 @@ script:
           # Map the Dropdown Name (Left) to your Entity ID (Right).
           # ====================================================================
           calendar_map:
-            "calendar1": "calendar.calendar1" #<--- UPDATE THIS ENTITY
-            "calendar2": "calendar.calendar2" #<--- UPDATE THIS ENTITY
-            "calendar3": "calendar.calendar3" #<--- UPDATE THIS ENTITY
-            "calendar4": "calendar.calendar4" #<--- UPDATE THIS ENTITY
-            "Family": "calendar.family" #<--- UPDATE THIS ENTITY
+            "Satty": "calendar.srnarayanan1989_gmail_com"
+            "Bhavi": "calendar.160294bpl_gmail_com"
+            "Priya": "calendar.priyabpl50_gmail_com"
+            "Us ❤️": "calendar.bhavi_ram1608_gmail_com"
+            "Family": "calendar.family"
           
           # Selects the entity based on the map above
-          target_calendar: "{{ calendar_map.get(states('input_select.calendar_select'), 'calendar.family') }}" #<--- UPDATE THIS ENTITY
+          target_calendar: "{{ calendar_map.get(states('input_select.calendar_select'), 'calendar.family') }}"
 
       - choose:
           # Scenario A: All Day Event
