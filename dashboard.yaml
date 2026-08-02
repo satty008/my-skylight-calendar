@@ -211,8 +211,8 @@ views:
                   const calendarView = states['input_select.calendar_view']?.state;
                   if (calendarView === 'Today') return 'today';
                   if (calendarView === 'Tomorrow') return 'tomorrow';
-                  // Fallback
-                  return 'monday'; # <--- UPDATE THIS IF NEEDED, valid values are: monday, tuesday, wednesday, thursday, friday, saturday, sunday
+                  // Fallback (valid values: monday, tuesday, wednesday, thursday, friday, saturday, sunday)
+                  return 'monday';
                 })()
               DAYS: |
                 (() => {
@@ -228,7 +228,7 @@ views:
               type: custom:week-planner-card
               calendars:
                 # --- MAP CALENDARS HERE ---
-                - entity: calendar.srnarayanan1989_gmail_com
+                - entity: calendar.srnarayanan89_gmail_com
                   name: Satty
                   color: "var(--calendar1-default-primary-color)"
                   filter: ${ CAL1CAL }
