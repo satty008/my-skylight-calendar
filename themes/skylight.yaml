@@ -73,3 +73,16 @@ Skylight:
   family-default-primary-color: "#4A90E2"
   birthdays-default-primary-color: "#33a02c"
   holidays-default-primary-color: "#ff7f00"
+
+  ###################################
+  #### Dark Mode Base Colors
+  ###################################
+  primary-background-color: "#121212"
+  secondary-background-color: "#1e1e1e"
+  card-background-color: "#1e1e1eBF"
+  ha-card-background: "#1e1e1eBF"
+  primary-text-color: "#f5f5f5"
+  secondary-text-color: "#cfcfcf"
+  text-primary-color: "#f5f5f5"
+  app-header-background-color: "#121212"
+  divider-color: "#3a3a3a"
