@@ -6,13 +6,19 @@
 #  Immich API key lives in /config/.immich_api_key (not in this file, not in
 #  git) and is read by /config/immich_background.sh, which the shell_command
 #  below invokes. That script fetches a random asset ID via Immich's
-#  /search/random endpoint and downloads its preview thumbnail to
-#  /config/www/immich_background.jpg, which the dashboard serves at
-#  /local/immich_background.jpg.
+#  /search/random endpoint (filtered against a blacklist of album IDs, see
+#  below) and downloads its preview thumbnail to /config/www/immich_background.jpg,
+#  which the dashboard serves at /local/immich_background.jpg.
+#
+#  Blacklisted albums (never shown - Mental Health, Medical/ID docs, doc
+#  scans, WhatsApp clutter, etc.) are resolved to an asset-ID exclusion list
+#  cached at /config/.immich_excluded_assets.txt by immich_refresh_exclusions.py,
+#  refreshed daily since album membership changes over time.
 # ==============================================================================
 
 shell_command:
   immich_random_background: "sh /config/immich_background.sh"
+  immich_refresh_exclusions: "python3 /config/immich_refresh_exclusions.py"
 
 automation:
   - alias: Immich Background Rotation
@@ -28,3 +34,13 @@ automation:
           seconds: 5
       - action: browser_mod.refresh
         data: {}
+
+  - alias: Immich Exclusion List Refresh
+    id: immich_exclusion_refresh
+    trigger:
+      - platform: time
+        at: "03:17:00"
+      - platform: homeassistant
+        event: start
+    action:
+      - action: shell_command.immich_refresh_exclusions

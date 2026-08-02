@@ -605,8 +605,8 @@ views:
     background:
       opacity: 18
       alignment: center
-      size: cover
-      repeat: repeat
+      size: contain
+      repeat: no-repeat
       attachment: fixed
       # Rotating background sourced from Immich - see packages/immich_background.yaml
       image: /local/immich_background.jpg
