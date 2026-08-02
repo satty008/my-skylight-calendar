@@ -49,9 +49,7 @@ input_select:
     options:
       - Satty
       - Bhavi
-      - Priya
       - "Us ❤️"
-      - Family
     icon: mdi:calendar-check
   
   # The View selector (Week, Month, etc)
@@ -166,9 +164,7 @@ script:
           calendar_map:
             "Satty": "calendar.srnarayanan1989_gmail_com"
             "Bhavi": "calendar.160294bpl_gmail_com"
-            "Priya": "calendar.priyabpl50_gmail_com"
-            "Us ❤️": "calendar.bhavi_ram1608_gmail_com"
-            "Family": "calendar.family"
+            "Us ❤️": "calendar.family"
           
           # Selects the entity based on the map above
           target_calendar: "{{ calendar_map.get(states('input_select.calendar_select'), 'calendar.family') }}"

@@ -121,21 +121,6 @@ views:
               - type: custom:bubble-card
                 card_type: button
                 button_type: name
-                name: Priya
-                icon: mdi:face-woman
-                show_icon: true
-                show_name: true
-                tap_action:
-                  action: perform-action
-                  perform_action: script.calendar3_calendar_visible_filter
-                styles: |
-                  .bubble-button-background {
-                    opacity: 1 !important;
-                    background-color: ${hass.states['input_text.calendar3_calendar_filter'].state === '.*' ? 'light-grey' : 'var(--calendar3-default-primary-color)'} !important;
-                  }
-              - type: custom:bubble-card
-                card_type: button
-                button_type: name
                 name: "Us ❤️"
                 icon: mdi:heart
                 show_icon: true
@@ -148,22 +133,6 @@ views:
                     opacity: 1 !important;
                     background-color: ${hass.states['input_text.calendar4_calendar_filter'].state === '.*' ? 'light-grey' : 'var(--calendar4-default-primary-color)'} !important;
                   }
-              - type: custom:bubble-card
-                card_type: button
-                button_type: switch
-                name: Family
-                icon: mdi:human-male-female-child
-                show_icon: true
-                show_name: true
-                tap_action:
-                  action: perform-action
-                  perform_action: script.family_calendar_visible_filter
-                styles: |
-                  .bubble-button-background {
-                    opacity: 1 !important;
-                    background-color: ${hass.states['input_text.family_calendar_filter'].state === '.*' ? 'light-grey' : '#4A90E2'} !important;
-                  }
-                entity: input_boolean.family_calendar_show
               - type: custom:bubble-card
                 card_type: button
                 button_type: name
@@ -282,18 +251,14 @@ views:
                   name: Bhavi
                   color: "var(--calendar2-default-primary-color)"
                   filter: ${ CAL2CAL }
-                - entity: calendar.priyabpl50_gmail_com
-                  name: Priya
-                  color: "var(--calendar3-default-primary-color)"
-                  filter: ${ CAL3CAL }
                 - entity: calendar.bhavi_ram1608_gmail_com
                   name: "Us ❤️"
                   color: "var(--calendar4-default-primary-color)"
                   filter: ${ CAL4CAL }
                 - entity: calendar.family
-                  name: Family
-                  color: "var(--family-default-primary-color)"
-                  filter: ${ FAMCAL }
+                  name: "Us ❤️ (Family)"
+                  color: "var(--calendar4-default-primary-color)"
+                  filter: ${ CAL4CAL }
                 - entity: calendar.birthdays
                   name: Birthdays (Satty)
                   color: "var(--birthdays-default-primary-color)"
@@ -583,9 +548,7 @@ views:
                     background:
                     ${hass.states['input_select.calendar_select'].state == 'Satty' ? 'var(--calendar1-default-primary-color)'
                     : hass.states['input_select.calendar_select'].state == 'Bhavi' ? 'var(--calendar2-default-primary-color)'
-                    : hass.states['input_select.calendar_select'].state == 'Priya' ? 'var(--calendar3-default-primary-color)'
                     : hass.states['input_select.calendar_select'].state == 'Us ❤️' ? 'var(--calendar4-default-primary-color)'
-                    : hass.states['input_select.calendar_select'].state == 'Family' ? 'var(--family-default-primary-color)'
                     : 'gray'} !important;
                   }
               - type: vertical-stack
@@ -634,9 +597,7 @@ views:
                             [[[
                               if (states['input_select.calendar_select'].state == 'Satty') return "var(--calendar1-default-primary-color)";
                               if (states['input_select.calendar_select'].state == 'Bhavi') return "var(--calendar2-default-primary-color)";
-                              if (states['input_select.calendar_select'].state == 'Priya') return "var(--calendar3-default-primary-color)";
                               if (states['input_select.calendar_select'].state == 'Us ❤️') return "var(--calendar4-default-primary-color)";
-                              if (states['input_select.calendar_select'].state == 'Family') return "var(--family-default-primary-color)";
                               return "gray";
                             ]]]
     cards: []
