@@ -608,5 +608,5 @@ views:
       size: cover
       repeat: repeat
       attachment: fixed
-      # Use File Editor and upload calbackgrd.png to /www/ folder, this translates to /local on this dashboard, so leave /local here.
-      image: /local/calbackgrd.png # <--- UPDATE THIS ENTITY
+      # Rotating background sourced from Immich - see packages/immich_background.yaml
+      image: /local/immich_background.jpg

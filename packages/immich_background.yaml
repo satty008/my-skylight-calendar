@@ -1,0 +1,30 @@
+# ==============================================================================
+#  IMMICH RANDOM BACKGROUND
+# ==============================================================================
+#  Rotates the Family Calendar dashboard's background photo using a random
+#  image pulled from Immich (https://immich.bhavibhavan.duckdns.org). The
+#  Immich API key lives in /config/.immich_api_key (not in this file, not in
+#  git) and is read by /config/immich_background.sh, which the shell_command
+#  below invokes. That script fetches a random asset ID via Immich's
+#  /search/random endpoint and downloads its preview thumbnail to
+#  /config/www/immich_background.jpg, which the dashboard serves at
+#  /local/immich_background.jpg.
+# ==============================================================================
+
+shell_command:
+  immich_random_background: "sh /config/immich_background.sh"
+
+automation:
+  - alias: Immich Background Rotation
+    id: immich_background_rotation
+    trigger:
+      - platform: time_pattern
+        minutes: "/10"
+      - platform: homeassistant
+        event: start
+    action:
+      - action: shell_command.immich_random_background
+      - delay:
+          seconds: 5
+      - action: browser_mod.refresh
+        data: {}
