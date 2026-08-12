@@ -578,3 +578,65 @@ views:
     cards: []
     icon: mdi:calendar-blank-multiple
     # No background image - plain dark theme background (primary-background-color in themes/skylight.yaml)
+
+  # ===========================================================================
+  # NEW VIEW: Daylight Calendar Card (trial)
+  # ---------------------------------------------------------------------------
+  # The original week-planner-card view above is left completely untouched so
+  # you can compare the two. This second tab renders the same family calendars
+  # through https://github.com/superdingo101/daylight-calendar-card.
+  #
+  # PREREQUISITE: install "Daylight Calendar Card" from HACS (Frontend), or add
+  # /local/skylight-calendar-card.js as a JavaScript-Module dashboard resource.
+  # The card provides its own header (clock + weather), view switcher, calendar
+  # filters and a built-in Add/Edit event UI, so none of the bubble-card /
+  # config-template-card / input_text filter plumbing is needed here.
+  # ===========================================================================
+  - type: sections
+    max_columns: 1
+    title: Family (Daylight)
+    path: family-daylight
+    theme: Skylight
+    icon: mdi:calendar-heart
+    sections:
+      - type: grid
+        cards:
+          - type: custom:daylight-calendar-card
+            title: Family Calendar
+            default_view: month          # month | week-compact | week-standard | agenda
+            first_day_of_week: 1          # 1 = Monday (matches the week-planner view)
+            color_scheme: dark            # auto | light | dark
+            header_weather_sensor: weather.forecast_home
+            enable_event_management: true # built-in add/edit/delete events
+            show_event_location: true
+            show_current_time_bar: true
+            # --- Calendars (same entities as the week-planner view) ---
+            entities:
+              - calendar.srnarayanan89_gmail_com
+              - calendar.160294bpl_gmail_com
+              - calendar.birthdays
+              - calendar.birthdays_2
+              - calendar.birthdays_3
+              - calendar.birthdays_4
+              - calendar.holidays_in_germany
+              - calendar.holidays_in_india
+            # --- Display names per calendar ---
+            calendar_names:
+              calendar.srnarayanan89_gmail_com: Satty
+              calendar.160294bpl_gmail_com: Bhavi
+              calendar.birthdays: Birthdays (Satty)
+              calendar.birthdays_2: Birthdays (Bhavi)
+              calendar.birthdays_3: Birthdays (Priya)
+              calendar.birthdays_4: Birthdays (Us)
+              calendar.holidays_in_germany: Holidays (Germany)
+              calendar.holidays_in_india: Holidays (India)
+            # --- Colors per calendar (hex values from themes/skylight.yaml) ---
+            colors:
+              calendar.srnarayanan89_gmail_com: "#fb8072"   # Satty
+              calendar.160294bpl_gmail_com: "#fdbf6f"       # Bhavi
+              calendar.birthdays: "#33a02c"                 # Birthdays
+              calendar.birthdays_2: "#33a02c"
+              calendar.birthdays_3: "#33a02c"
+              calendar.birthdays_4: "#33a02c"
+              calendar.holidays_in_germany: "#ff7f00"       # Holidays
+              calendar.holidays_in_india: "#ff7f00"

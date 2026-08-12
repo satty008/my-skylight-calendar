@@ -92,6 +92,7 @@ You must have [HACS](https://hacs.xyz/) installed. Please install the following 
 * `browser_mod` (Required for the popups to work)
 * `layout-card` (Required for the Sections view)
 * `button-card` (Required for the popup to add event)
+* `daylight-calendar-card` (Optional — powers the alternate "Family (Daylight)" tab. See https://github.com/superdingo101/daylight-calendar-card)
 
 *Note: In Settings → Devices & Services, make sure Browser Mod appears as an Integration (tile) and not only under HACS. 
 If it isn’t there, click Add Integration → Browser Mod and finish the flow, then restart HA.
