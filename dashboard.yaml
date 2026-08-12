@@ -118,38 +118,8 @@ views:
                     opacity: 1 !important;
                     background-color: ${hass.states['input_text.calendar2_calendar_filter'].state === '.*' ? 'light-grey' : 'var(--calendar2-default-primary-color)'} !important;
                   }
-              - type: custom:bubble-card
-                card_type: button
-                button_type: name
-                name: Birthdays
-                icon: mdi:cake-variant
-                show_icon: true
-                show_name: true
-                tap_action:
-                  action: perform-action
-                  perform_action: script.birthdays_calendar_visible_filter
-                styles: |
-                  .bubble-button-background {
-                    opacity: 1 !important;
-                    background-color: ${hass.states['input_text.birthdays_calendar_filter'].state === '.*' ? 'light-grey' : '#33a02c'} !important;
-                  }
-              - type: custom:bubble-card
-                card_type: button
-                button_type: name
-                name: Holidays
-                icon: mdi:bag-personal
-                show_icon: true
-                show_name: true
-                tap_action:
-                  action: perform-action
-                  perform_action: script.holidays_calendar_visible_filter
-                styles: |
-                  .bubble-button-background {
-                    opacity: 1 !important;
-                    background-color: ${hass.states['input_text.holidays_calendar_filter'].state === '.*' ? 'light-grey' : '#ff7f00'} !important;
-                  }
             grid_options:
-              columns: 45
+              columns: 25
               rows: auto
           - type: markdown
             content: " "
@@ -194,8 +164,6 @@ views:
               - input_text.calendar3_calendar_filter
               - input_text.calendar4_calendar_filter
               - input_text.family_calendar_filter
-              - input_text.holidays_calendar_filter
-              - input_text.birthdays_calendar_filter
               - input_select.calendar_view
             variables:
               CAL1CAL: states['input_text.calendar1_calendar_filter']?.state
@@ -203,8 +171,6 @@ views:
               CAL3CAL: states['input_text.calendar3_calendar_filter']?.state
               CAL4CAL: states['input_text.calendar4_calendar_filter']?.state
               FAMCAL: states['input_text.family_calendar_filter']?.state
-              HOLCAL: states['input_text.holidays_calendar_filter']?.state
-              BIRCAL: states['input_text.birthdays_calendar_filter']?.state
               VIEW: states['input_select.calendar_view']?.state
               STARTDAY: |
                 (() => {
@@ -228,7 +194,7 @@ views:
               type: custom:week-planner-card
               calendars:
                 # --- MAP CALENDARS HERE ---
-                - entity: calendar.srnarayanan89_gmail_com
+                - entity: calendar.srnarayanan1989_gmail_com
                   name: Satty
                   color: "var(--calendar1-default-primary-color)"
                   filter: ${ CAL1CAL }
@@ -236,30 +202,6 @@ views:
                   name: Bhavi
                   color: "var(--calendar2-default-primary-color)"
                   filter: ${ CAL2CAL }
-                - entity: calendar.birthdays
-                  name: Birthdays (Satty)
-                  color: "var(--birthdays-default-primary-color)"
-                  filter: ${ BIRCAL }
-                - entity: calendar.birthdays_2
-                  name: Birthdays (Bhavi)
-                  color: "var(--birthdays-default-primary-color)"
-                  filter: ${ BIRCAL }
-                - entity: calendar.birthdays_3
-                  name: Birthdays (Priya)
-                  color: "var(--birthdays-default-primary-color)"
-                  filter: ${ BIRCAL }
-                - entity: calendar.birthdays_4
-                  name: "Birthdays (Us)"
-                  color: "var(--birthdays-default-primary-color)"
-                  filter: ${ BIRCAL }
-                - entity: calendar.holidays_in_germany
-                  name: Holidays (Germany)
-                  color: "var(--holidays-default-primary-color)"
-                  filter: ${ HOLCAL }
-                - entity: calendar.holidays_in_india
-                  name: Holidays (India)
-                  color: "var(--holidays-default-primary-color)"
-                  filter: ${ HOLCAL }
               days: ${ DAYS }
               startingDay: ${ STARTDAY }
               showNavigation: true
