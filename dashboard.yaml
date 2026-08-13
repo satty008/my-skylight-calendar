@@ -5,7 +5,7 @@ views:
     path: family-calendar
     theme: Skylight
     sections:
-      # --- START HEADER SECTION (Date & Weather) ---
+      # --- START HEADER SECTION (Date) ---
       - type: grid
         cards:
           - type: custom:better-moment-card
@@ -19,37 +19,13 @@ views:
               - parentStyle: |
                   font-size:1.5em; text-align:center; margin-top:5px;
                 templateRaw: |
-                  {{moment format=LLLL dd, yyyy}}              
+                  {{moment format=LLLL dd, yyyy}}
               - parentStyle: |
                   font-size:4em;  text-align:center; font-weight:400;
                 templateRaw: |
-                  {{moment format=HH:mm}} 
+                  {{moment format=HH:mm}}
             grid_options:
-              columns: 20
-            card_mod:
-              style: |
-                ha-card {
-                  background: transparent !important;
-                  box-shadow: none !important;
-                  border: none !important;
-                }
-          - type: custom:weather-card
-            entity: weather.forecast_home
-            current: true
-            details: true
-            forecast: false
-            grid_options:
-              columns: 20
-              rows: 3
-          - type: weather-forecast
-            show_current: false
-            show_forecast: true
-            entity: weather.forecast_home
-            forecast_type: daily
-            name: Weather Forecast
-            grid_options:
-              columns: 20
-              rows: 3
+              columns: 120
             card_mod:
               style: |
                 ha-card {
@@ -58,7 +34,7 @@ views:
                   border: none !important;
                 }
         column_span: 10
-      # --- End HEADER SECTION (Date & Weather) ---  
+      # --- End HEADER SECTION (Date) ---
       # --- START CONTROLS SECTION (Buttons) ---
       - type: grid
         cards:
@@ -123,6 +99,9 @@ views:
               rows: auto
           - type: markdown
             content: " "
+            card_mod:
+              style: |
+                ha-card { background: none; box-shadow: none; border: none; }
             grid_options:
               columns: 3
               rows: auto
@@ -153,7 +132,40 @@ views:
             show_last_changed: false
             show_attribute: false
         column_span: 10
-      # --- End CONTROLS SECTION (Buttons) ---        
+      # --- End CONTROLS SECTION (Buttons) ---
+      # --- START CHORES SECTION (Tap to complete) ---
+      - type: grid
+        cards:
+          - type: custom:calendar-tasks-card
+            title: Chores
+            show_title: true
+            todos:
+              - todo.satty_chores
+              - todo.bhavi_chores
+            entity_colors:
+              todo.satty_chores: "#fb8072"
+              todo.bhavi_chores: "#fdbf6f"
+            allow_complete: true
+            show_completed: true
+            completed_days: 3
+            show_overdue: true
+            show_relative_time: true
+            show_refresh: false
+            show_add_event: true
+            compact_mode: false
+            language: en
+            card_mod:
+              style: |
+                ha-card {
+                  background: rgba(20, 20, 26, 0.75) !important;
+                  border-radius: 24px !important;
+                  box-shadow: none !important;
+                }
+            grid_options:
+              columns: 120
+              rows: 1
+        column_span: 10
+      # --- End CHORES SECTION ---
       # --- START CALENDAR SECTION (Week Planner Card) ---
       - type: grid
         cards:
@@ -243,7 +255,7 @@ views:
                     /* === GRID LAYOUT === */
                     .container {
                       display: grid !important;
-                      grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+                      grid-template-columns: repeat(auto-fit, minmax(0, 1fr)) !important;
                       grid-auto-flow: row dense !important;
                       gap: 0 !important;
                     }
@@ -277,6 +289,54 @@ views:
                       box-sizing: border-box !important;
                       align-self: stretch !important;
                       justify-self: stretch !important;
+                      container-type: inline-size !important;
+                      container-name: daycell !important;
+                    }
+
+                    /* === WIDE DAY CELL (Today/Tomorrow views: 1-2 days fill the row) ===
+                       The .weather badge is absolutely positioned top-right by the card
+                       itself, which only works when the date number stays small (narrow
+                       week-view cells). In a wide cell that number grows large enough to
+                       collide with it, so above a width threshold we take the weather
+                       block out of flow and lay the header out with flexbox instead. */
+                    @container daycell (min-width: 260px) {
+                      .day .date {
+                        display: flex !important;
+                        align-items: baseline !important;
+                        gap: 0.4em !important;
+                        padding: 0.3em 0.5em !important;
+                      }
+                      .day .date .number {
+                        font-size: 5em !important;
+                        line-height: 1 !important;
+                      }
+                      .day .date .text {
+                        font-size: 1.4em !important;
+                      }
+                      .day .weather {
+                        position: static !important;
+                        display: flex !important;
+                        align-items: center !important;
+                        gap: 0.5em !important;
+                        margin-left: auto !important;
+                        width: auto !important;
+                      }
+                      .day .weather .temperature {
+                        display: flex !important;
+                        flex-direction: column !important;
+                        font-size: 1.2em !important;
+                      }
+                      .day .weather .icon img {
+                        width: 44px !important;
+                        height: 44px !important;
+                      }
+                      .day .events {
+                        padding: 0 0.5em !important;
+                      }
+                      .day .event {
+                        font-size: 1.3em !important;
+                        padding: 0.5em 0.7em !important;
+                      }
                     }
 
                     /* === YOUR ORIGINAL VISUAL RULES === */
@@ -449,39 +509,6 @@ views:
               showDescription: false
         column_span: 10
       # --- End CALENDAR SECTION (Week Planner Card) ---
-      # --- START CHORES SECTION (Tap to complete) ---
-      - type: grid
-        cards:
-          - type: custom:calendar-tasks-card
-            title: Chores
-            show_title: true
-            todos:
-              - todo.satty_chores
-              - todo.bhavi_chores
-            entity_colors:
-              todo.satty_chores: "#fb8072"
-              todo.bhavi_chores: "#fdbf6f"
-            allow_complete: true
-            show_completed: true
-            completed_days: 3
-            show_overdue: true
-            show_relative_time: true
-            show_refresh: false
-            show_add_event: true
-            compact_mode: false
-            language: en
-            card_mod:
-              style: |
-                ha-card {
-                  background: rgba(20, 20, 26, 0.75) !important;
-                  border-radius: 24px !important;
-                  box-shadow: none !important;
-                }
-            grid_options:
-              columns: 120
-              rows: 1
-        column_span: 10
-      # --- End CHORES SECTION ---
       # --- START POPUP SECTION (Hidden) ---
       - type: grid
         cards:
