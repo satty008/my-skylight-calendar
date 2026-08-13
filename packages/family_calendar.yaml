@@ -89,12 +89,6 @@ input_datetime:
   calendar_day_event_end:
     has_date: true
     has_time: false
-  # Custom-date picker for the chore postpone menu (see chore_postpone_apply
-  # script below) - set via the "Custom date..." row in the postpone popup.
-  chore_postpone_custom_date:
-    name: Postpone To
-    has_date: true
-    has_time: false
 
 input_boolean:
   # UI Toggles
@@ -247,10 +241,12 @@ script:
   # --- Chore postpone (long-press a chore tile) ---
   # Called from the "Tomorrow" / "Same day next week" / "Next month" /
   # "Custom date..." rows of the postpone popup (built inline in each chore
-  # tile's hold_action in dashboard.yaml - see button-card JS templates
-  # there). offset is one of tomorrow|next_week|next_month|custom; for
-  # custom the target date comes from input_datetime.chore_postpone_custom_date
-  # (set via that popup's date row) instead of being computed here.
+  # tile's hold_action in dashboard.yaml via button-card JS templates -
+  # uses browser_mod's fire-dom-event "Browser call" so it works without
+  # registering the browser, unlike a plain browser_mod.popup service call).
+  # offset is one of tomorrow|next_week|next_month|custom; for custom,
+  # custom_date (YYYY-MM-DD) comes from the popup's own date form field,
+  # forwarded automatically by browser_mod as part of right_button_action.
   chore_postpone_apply:
     alias: Postpone a chore's due date
     fields:
@@ -260,6 +256,8 @@ script:
         example: Satty
       offset:
         example: tomorrow
+      custom_date:
+        example: "2026-08-20"
     sequence:
       - variables:
           due_date: >-
@@ -275,15 +273,13 @@ script:
               {% set safe_day = [base.day, days_in_target] | min %}
               {{ base.replace(year=target_year, month=target_month, day=safe_day).strftime('%Y-%m-%dT23:59:00') }}
             {% else %}
-              {{ states('input_datetime.chore_postpone_custom_date') }}T23:59:00
+              {{ custom_date }}T23:59:00
             {% endif %}
       - action: choreops.set_chore_due_date
         data:
           chore_name: "{{ chore_name }}"
           user_name: "{{ user_name }}"
           due_date: "{{ due_date }}"
-      - action: browser_mod.close_popup
-        data: {}
 
   calendar3_calendar_visible_filter:
     alias: Toggle calendar3 Calendar
