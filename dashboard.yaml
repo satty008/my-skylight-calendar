@@ -167,11 +167,16 @@ views:
                   [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
                 tap_action: |
                   [[[
-                    const done = states[entity.entity_id].state === 'completed';
-                    const target = done
-                      ? 'button.satty_choreops_disapprove_chore_take_out_trash'
-                      : 'button.satty_choreops_claim_chore_take_out_trash';
-                    return {action: 'call-service', service: 'button.press', service_data: {entity_id: target}};
+                    // ChoreOps has no per-chore "undo" service (only a global
+                    // reset-all-chores service) - disapprove_chore only works
+                    // on a pending approval, which auto-approved chores skip
+                    // entirely. So a completed chore stays completed until its
+                    // own schedule resets it; tapping it again is a no-op
+                    // instead of showing an error toast.
+                    if (states[entity.entity_id].state === 'completed') {
+                      return {action: 'none'};
+                    }
+                    return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.satty_choreops_claim_chore_take_out_trash'}};
                   ]]]
                 styles:
                   card:
@@ -200,11 +205,10 @@ views:
                   [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
                 tap_action: |
                   [[[
-                    const done = states[entity.entity_id].state === 'completed';
-                    const target = done
-                      ? 'button.bhavi_choreops_disapprove_chore_vacuum_living_room'
-                      : 'button.bhavi_choreops_claim_chore_vacuum_living_room';
-                    return {action: 'call-service', service: 'button.press', service_data: {entity_id: target}};
+                    if (states[entity.entity_id].state === 'completed') {
+                      return {action: 'none'};
+                    }
+                    return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.bhavi_choreops_claim_chore_vacuum_living_room'}};
                   ]]]
                 styles:
                   card:
