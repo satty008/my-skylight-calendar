@@ -374,52 +374,6 @@ views:
                       container-name: daycell !important;
                     }
 
-                    /* === WIDE DAY CELL (Today/Tomorrow views: 1-2 days fill the row) ===
-                       The .weather badge is absolutely positioned top-right by the card
-                       itself, which only works when the date number stays small (narrow
-                       week-view cells). In a wide cell that number grows large enough to
-                       collide with it, so above a width threshold we take the weather
-                       block out of flow and lay the header out with flexbox instead. */
-                    @container daycell (min-width: 260px) {
-                      .day .date {
-                        display: flex !important;
-                        align-items: baseline !important;
-                        gap: 0.4em !important;
-                        padding: 0.3em 0.5em !important;
-                      }
-                      .day .date .number {
-                        font-size: 5em !important;
-                        line-height: 1 !important;
-                      }
-                      .day .date .text {
-                        font-size: 1.4em !important;
-                      }
-                      .day .weather {
-                        position: static !important;
-                        display: flex !important;
-                        align-items: center !important;
-                        gap: 0.5em !important;
-                        margin-left: auto !important;
-                        width: auto !important;
-                      }
-                      .day .weather .temperature {
-                        display: flex !important;
-                        flex-direction: column !important;
-                        font-size: 1.2em !important;
-                      }
-                      .day .weather .icon img {
-                        width: 44px !important;
-                        height: 44px !important;
-                      }
-                      .day .events {
-                        padding: 0 0.5em !important;
-                      }
-                      .day .event {
-                        font-size: 1.3em !important;
-                        padding: 0.5em 0.7em !important;
-                      }
-                    }
-
                     /* === YOUR ORIGINAL VISUAL RULES === */
                     .event.past {
                       opacity: .2 !important;
@@ -582,6 +536,60 @@ views:
                         display: -webkit-box !important;
                         -webkit-line-clamp: 2 !important;
                         overflow: hidden !important;
+                      }
+                    }
+
+                    /* === WIDE DAY CELL (Today/Tomorrow views: 1-2 days fill the row) ===
+                       Must stay LAST in this stylesheet: it has to win the cascade over
+                       the unconditional ".day .date .number { font-size: 3em }" etc.
+                       rules above. Both are !important with equal specificity, so with
+                       @container earlier in the file the plain rule below always won
+                       regardless of whether the container query matched - this was
+                       silently broken (verified: container-type/name were set correctly
+                       and the .day element WAS >260px wide, but font-size stayed at the
+                       narrow-cell 3em) until this block was moved here.
+                       The .weather badge is absolutely positioned top-right by the card
+                       itself, which only works when the date number stays small (narrow
+                       week-view cells). In a wide cell that number grows large enough to
+                       collide with it, so above a width threshold we take the weather
+                       block out of flow and lay the header out with flexbox instead. */
+                    @container daycell (min-width: 260px) {
+                      .day .date {
+                        display: flex !important;
+                        align-items: baseline !important;
+                        gap: 0.4em !important;
+                        padding: 0.3em 0.5em !important;
+                      }
+                      .day .date .number {
+                        font-size: 5em !important;
+                        line-height: 1 !important;
+                      }
+                      .day .date .text {
+                        font-size: 1.4em !important;
+                      }
+                      .day .weather {
+                        position: static !important;
+                        display: flex !important;
+                        align-items: center !important;
+                        gap: 0.5em !important;
+                        margin-left: auto !important;
+                        width: auto !important;
+                      }
+                      .day .weather .temperature {
+                        display: flex !important;
+                        flex-direction: column !important;
+                        font-size: 1.2em !important;
+                      }
+                      .day .weather .icon img {
+                        width: 44px !important;
+                        height: 44px !important;
+                      }
+                      .day .events {
+                        padding: 0 0.5em !important;
+                      }
+                      .day .event {
+                        font-size: 1.3em !important;
+                        padding: 0.5em 0.7em !important;
                       }
                     }
             grid_options:
