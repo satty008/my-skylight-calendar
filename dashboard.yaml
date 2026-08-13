@@ -273,14 +273,18 @@ views:
                                       type: 'button',
                                       name: name,
                                       show_icon: false,
-                                      tap_action: [
-                                        {
-                                          action: 'call-service',
-                                          service: 'script.chore_postpone_apply',
-                                          service_data: {chore_name: choreName, user_name: userName, offset: offset}
-                                        },
-                                        closeAction
-                                      ]
+                                      tap_action: {
+                                        action: 'fire-dom-event',
+                                        browser_mod: {
+                                          service: 'browser_mod.sequence',
+                                          data: {
+                                            sequence: [
+                                              {service: 'script.chore_postpone_apply', data: {chore_name: choreName, user_name: userName, offset: offset}},
+                                              {service: 'browser_mod.close_popup', data: {}}
+                                            ]
+                                          }
+                                        }
+                                      }
                                     });
                                     return {
                                       action: 'fire-dom-event',
@@ -306,14 +310,10 @@ views:
                                                       title: 'Pick a new due date',
                                                       right_button: 'Confirm',
                                                       left_button: 'Cancel',
-                                                      right_button_action: [
-                                                        {
-                                                          action: 'call-service',
-                                                          service: 'script.chore_postpone_apply',
-                                                          service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
-                                                        },
-                                                        closeAction
-                                                      ],
+                                                      right_button_action: {
+                                                        service: 'script.chore_postpone_apply',
+                                                        data: {chore_name: choreName, user_name: userName, offset: 'custom'}
+                                                      },
                                                       left_button_action: closeAction,
                                                       content: [
                                                         {
@@ -413,14 +413,18 @@ views:
                                       type: 'button',
                                       name: name,
                                       show_icon: false,
-                                      tap_action: [
-                                        {
-                                          action: 'call-service',
-                                          service: 'script.chore_postpone_apply',
-                                          service_data: {chore_name: choreName, user_name: userName, offset: offset}
-                                        },
-                                        closeAction
-                                      ]
+                                      tap_action: {
+                                        action: 'fire-dom-event',
+                                        browser_mod: {
+                                          service: 'browser_mod.sequence',
+                                          data: {
+                                            sequence: [
+                                              {service: 'script.chore_postpone_apply', data: {chore_name: choreName, user_name: userName, offset: offset}},
+                                              {service: 'browser_mod.close_popup', data: {}}
+                                            ]
+                                          }
+                                        }
+                                      }
                                     });
                                     return {
                                       action: 'fire-dom-event',
@@ -446,14 +450,10 @@ views:
                                                       title: 'Pick a new due date',
                                                       right_button: 'Confirm',
                                                       left_button: 'Cancel',
-                                                      right_button_action: [
-                                                        {
-                                                          action: 'call-service',
-                                                          service: 'script.chore_postpone_apply',
-                                                          service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
-                                                        },
-                                                        closeAction
-                                                      ],
+                                                      right_button_action: {
+                                                        service: 'script.chore_postpone_apply',
+                                                        data: {chore_name: choreName, user_name: userName, offset: 'custom'}
+                                                      },
                                                       left_button_action: closeAction,
                                                       content: [
                                                         {
@@ -553,14 +553,18 @@ views:
                                       type: 'button',
                                       name: name,
                                       show_icon: false,
-                                      tap_action: [
-                                        {
-                                          action: 'call-service',
-                                          service: 'script.chore_postpone_apply',
-                                          service_data: {chore_name: choreName, user_name: userName, offset: offset}
-                                        },
-                                        closeAction
-                                      ]
+                                      tap_action: {
+                                        action: 'fire-dom-event',
+                                        browser_mod: {
+                                          service: 'browser_mod.sequence',
+                                          data: {
+                                            sequence: [
+                                              {service: 'script.chore_postpone_apply', data: {chore_name: choreName, user_name: userName, offset: offset}},
+                                              {service: 'browser_mod.close_popup', data: {}}
+                                            ]
+                                          }
+                                        }
+                                      }
                                     });
                                     return {
                                       action: 'fire-dom-event',
@@ -586,14 +590,10 @@ views:
                                                       title: 'Pick a new due date',
                                                       right_button: 'Confirm',
                                                       left_button: 'Cancel',
-                                                      right_button_action: [
-                                                        {
-                                                          action: 'call-service',
-                                                          service: 'script.chore_postpone_apply',
-                                                          service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
-                                                        },
-                                                        closeAction
-                                                      ],
+                                                      right_button_action: {
+                                                        service: 'script.chore_postpone_apply',
+                                                        data: {chore_name: choreName, user_name: userName, offset: 'custom'}
+                                                      },
                                                       left_button_action: closeAction,
                                                       content: [
                                                         {
@@ -693,14 +693,18 @@ views:
                                       type: 'button',
                                       name: name,
                                       show_icon: false,
-                                      tap_action: [
-                                        {
-                                          action: 'call-service',
-                                          service: 'script.chore_postpone_apply',
-                                          service_data: {chore_name: choreName, user_name: userName, offset: offset}
-                                        },
-                                        closeAction
-                                      ]
+                                      tap_action: {
+                                        action: 'fire-dom-event',
+                                        browser_mod: {
+                                          service: 'browser_mod.sequence',
+                                          data: {
+                                            sequence: [
+                                              {service: 'script.chore_postpone_apply', data: {chore_name: choreName, user_name: userName, offset: offset}},
+                                              {service: 'browser_mod.close_popup', data: {}}
+                                            ]
+                                          }
+                                        }
+                                      }
                                     });
                                     return {
                                       action: 'fire-dom-event',
@@ -726,14 +730,10 @@ views:
                                                       title: 'Pick a new due date',
                                                       right_button: 'Confirm',
                                                       left_button: 'Cancel',
-                                                      right_button_action: [
-                                                        {
-                                                          action: 'call-service',
-                                                          service: 'script.chore_postpone_apply',
-                                                          service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
-                                                        },
-                                                        closeAction
-                                                      ],
+                                                      right_button_action: {
+                                                        service: 'script.chore_postpone_apply',
+                                                        data: {chore_name: choreName, user_name: userName, offset: 'custom'}
+                                                      },
                                                       left_button_action: closeAction,
                                                       content: [
                                                         {
@@ -833,14 +833,18 @@ views:
                                       type: 'button',
                                       name: name,
                                       show_icon: false,
-                                      tap_action: [
-                                        {
-                                          action: 'call-service',
-                                          service: 'script.chore_postpone_apply',
-                                          service_data: {chore_name: choreName, user_name: userName, offset: offset}
-                                        },
-                                        closeAction
-                                      ]
+                                      tap_action: {
+                                        action: 'fire-dom-event',
+                                        browser_mod: {
+                                          service: 'browser_mod.sequence',
+                                          data: {
+                                            sequence: [
+                                              {service: 'script.chore_postpone_apply', data: {chore_name: choreName, user_name: userName, offset: offset}},
+                                              {service: 'browser_mod.close_popup', data: {}}
+                                            ]
+                                          }
+                                        }
+                                      }
                                     });
                                     return {
                                       action: 'fire-dom-event',
@@ -866,14 +870,10 @@ views:
                                                       title: 'Pick a new due date',
                                                       right_button: 'Confirm',
                                                       left_button: 'Cancel',
-                                                      right_button_action: [
-                                                        {
-                                                          action: 'call-service',
-                                                          service: 'script.chore_postpone_apply',
-                                                          service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
-                                                        },
-                                                        closeAction
-                                                      ],
+                                                      right_button_action: {
+                                                        service: 'script.chore_postpone_apply',
+                                                        data: {chore_name: choreName, user_name: userName, offset: 'custom'}
+                                                      },
                                                       left_button_action: closeAction,
                                                       content: [
                                                         {
@@ -1290,14 +1290,18 @@ views:
                                       type: 'button',
                                       name: name,
                                       show_icon: false,
-                                      tap_action: [
-                                        {
-                                          action: 'call-service',
-                                          service: 'script.chore_postpone_apply',
-                                          service_data: {chore_name: choreName, user_name: userName, offset: offset}
-                                        },
-                                        closeAction
-                                      ]
+                                      tap_action: {
+                                        action: 'fire-dom-event',
+                                        browser_mod: {
+                                          service: 'browser_mod.sequence',
+                                          data: {
+                                            sequence: [
+                                              {service: 'script.chore_postpone_apply', data: {chore_name: choreName, user_name: userName, offset: offset}},
+                                              {service: 'browser_mod.close_popup', data: {}}
+                                            ]
+                                          }
+                                        }
+                                      }
                                     });
                                     return {
                                       action: 'fire-dom-event',
@@ -1323,14 +1327,10 @@ views:
                                                       title: 'Pick a new due date',
                                                       right_button: 'Confirm',
                                                       left_button: 'Cancel',
-                                                      right_button_action: [
-                                                        {
-                                                          action: 'call-service',
-                                                          service: 'script.chore_postpone_apply',
-                                                          service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
-                                                        },
-                                                        closeAction
-                                                      ],
+                                                      right_button_action: {
+                                                        service: 'script.chore_postpone_apply',
+                                                        data: {chore_name: choreName, user_name: userName, offset: 'custom'}
+                                                      },
                                                       left_button_action: closeAction,
                                                       content: [
                                                         {
@@ -1430,14 +1430,18 @@ views:
                                       type: 'button',
                                       name: name,
                                       show_icon: false,
-                                      tap_action: [
-                                        {
-                                          action: 'call-service',
-                                          service: 'script.chore_postpone_apply',
-                                          service_data: {chore_name: choreName, user_name: userName, offset: offset}
-                                        },
-                                        closeAction
-                                      ]
+                                      tap_action: {
+                                        action: 'fire-dom-event',
+                                        browser_mod: {
+                                          service: 'browser_mod.sequence',
+                                          data: {
+                                            sequence: [
+                                              {service: 'script.chore_postpone_apply', data: {chore_name: choreName, user_name: userName, offset: offset}},
+                                              {service: 'browser_mod.close_popup', data: {}}
+                                            ]
+                                          }
+                                        }
+                                      }
                                     });
                                     return {
                                       action: 'fire-dom-event',
@@ -1463,14 +1467,10 @@ views:
                                                       title: 'Pick a new due date',
                                                       right_button: 'Confirm',
                                                       left_button: 'Cancel',
-                                                      right_button_action: [
-                                                        {
-                                                          action: 'call-service',
-                                                          service: 'script.chore_postpone_apply',
-                                                          service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
-                                                        },
-                                                        closeAction
-                                                      ],
+                                                      right_button_action: {
+                                                        service: 'script.chore_postpone_apply',
+                                                        data: {chore_name: choreName, user_name: userName, offset: 'custom'}
+                                                      },
                                                       left_button_action: closeAction,
                                                       content: [
                                                         {
@@ -1570,14 +1570,18 @@ views:
                                       type: 'button',
                                       name: name,
                                       show_icon: false,
-                                      tap_action: [
-                                        {
-                                          action: 'call-service',
-                                          service: 'script.chore_postpone_apply',
-                                          service_data: {chore_name: choreName, user_name: userName, offset: offset}
-                                        },
-                                        closeAction
-                                      ]
+                                      tap_action: {
+                                        action: 'fire-dom-event',
+                                        browser_mod: {
+                                          service: 'browser_mod.sequence',
+                                          data: {
+                                            sequence: [
+                                              {service: 'script.chore_postpone_apply', data: {chore_name: choreName, user_name: userName, offset: offset}},
+                                              {service: 'browser_mod.close_popup', data: {}}
+                                            ]
+                                          }
+                                        }
+                                      }
                                     });
                                     return {
                                       action: 'fire-dom-event',
@@ -1603,14 +1607,10 @@ views:
                                                       title: 'Pick a new due date',
                                                       right_button: 'Confirm',
                                                       left_button: 'Cancel',
-                                                      right_button_action: [
-                                                        {
-                                                          action: 'call-service',
-                                                          service: 'script.chore_postpone_apply',
-                                                          service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
-                                                        },
-                                                        closeAction
-                                                      ],
+                                                      right_button_action: {
+                                                        service: 'script.chore_postpone_apply',
+                                                        data: {chore_name: choreName, user_name: userName, offset: 'custom'}
+                                                      },
                                                       left_button_action: closeAction,
                                                       content: [
                                                         {
@@ -1710,14 +1710,18 @@ views:
                                       type: 'button',
                                       name: name,
                                       show_icon: false,
-                                      tap_action: [
-                                        {
-                                          action: 'call-service',
-                                          service: 'script.chore_postpone_apply',
-                                          service_data: {chore_name: choreName, user_name: userName, offset: offset}
-                                        },
-                                        closeAction
-                                      ]
+                                      tap_action: {
+                                        action: 'fire-dom-event',
+                                        browser_mod: {
+                                          service: 'browser_mod.sequence',
+                                          data: {
+                                            sequence: [
+                                              {service: 'script.chore_postpone_apply', data: {chore_name: choreName, user_name: userName, offset: offset}},
+                                              {service: 'browser_mod.close_popup', data: {}}
+                                            ]
+                                          }
+                                        }
+                                      }
                                     });
                                     return {
                                       action: 'fire-dom-event',
@@ -1743,14 +1747,10 @@ views:
                                                       title: 'Pick a new due date',
                                                       right_button: 'Confirm',
                                                       left_button: 'Cancel',
-                                                      right_button_action: [
-                                                        {
-                                                          action: 'call-service',
-                                                          service: 'script.chore_postpone_apply',
-                                                          service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
-                                                        },
-                                                        closeAction
-                                                      ],
+                                                      right_button_action: {
+                                                        service: 'script.chore_postpone_apply',
+                                                        data: {chore_name: choreName, user_name: userName, offset: 'custom'}
+                                                      },
                                                       left_button_action: closeAction,
                                                       content: [
                                                         {
@@ -1850,14 +1850,18 @@ views:
                                       type: 'button',
                                       name: name,
                                       show_icon: false,
-                                      tap_action: [
-                                        {
-                                          action: 'call-service',
-                                          service: 'script.chore_postpone_apply',
-                                          service_data: {chore_name: choreName, user_name: userName, offset: offset}
-                                        },
-                                        closeAction
-                                      ]
+                                      tap_action: {
+                                        action: 'fire-dom-event',
+                                        browser_mod: {
+                                          service: 'browser_mod.sequence',
+                                          data: {
+                                            sequence: [
+                                              {service: 'script.chore_postpone_apply', data: {chore_name: choreName, user_name: userName, offset: offset}},
+                                              {service: 'browser_mod.close_popup', data: {}}
+                                            ]
+                                          }
+                                        }
+                                      }
                                     });
                                     return {
                                       action: 'fire-dom-event',
@@ -1883,14 +1887,10 @@ views:
                                                       title: 'Pick a new due date',
                                                       right_button: 'Confirm',
                                                       left_button: 'Cancel',
-                                                      right_button_action: [
-                                                        {
-                                                          action: 'call-service',
-                                                          service: 'script.chore_postpone_apply',
-                                                          service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
-                                                        },
-                                                        closeAction
-                                                      ],
+                                                      right_button_action: {
+                                                        service: 'script.chore_postpone_apply',
+                                                        data: {chore_name: choreName, user_name: userName, offset: 'custom'}
+                                                      },
                                                       left_button_action: closeAction,
                                                       content: [
                                                         {
