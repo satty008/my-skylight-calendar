@@ -434,31 +434,18 @@ views:
                                                 mkBtn('Same day next week', 'next_week'),
                                                 mkBtn('Next month', 'next_month'),
                                                 {
-                                                  type: 'button',
-                                                  name: 'Custom date...',
-                                                  show_icon: false,
-                                                  tap_action: {
-                                                    action: 'fire-dom-event',
-                                                    browser_mod: {
-                                                      service: 'browser_mod.popup',
-                                                      data: {
-                                                        title: 'Pick a new due date',
-                                                        content: {
-                                                          type: 'entities',
-                                                          entities: [
-                                                            {entity: 'input_datetime.chore_postpone_custom_date', name: 'New due date'},
-                                                            {
-                                                              type: 'call-service',
-                                                              name: 'Confirm',
-                                                              icon: 'mdi:check',
-                                                              service: 'script.chore_postpone_apply',
-                                                              service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
-                                                            }
-                                                          ]
-                                                        }
-                                                      }
+                                                  type: 'entities',
+                                                  title: 'Or pick a custom date',
+                                                  entities: [
+                                                    {entity: 'input_datetime.chore_postpone_custom_date', name: 'Custom date'},
+                                                    {
+                                                      type: 'call-service',
+                                                      name: 'Confirm custom date',
+                                                      icon: 'mdi:check',
+                                                      service: 'script.chore_postpone_apply',
+                                                      service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
                                                     }
-                                                  }
+                                                  ]
                                                 },
                                                 {
                                                   type: 'button',
@@ -668,31 +655,18 @@ views:
                                                 mkBtn('Same day next week', 'next_week'),
                                                 mkBtn('Next month', 'next_month'),
                                                 {
-                                                  type: 'button',
-                                                  name: 'Custom date...',
-                                                  show_icon: false,
-                                                  tap_action: {
-                                                    action: 'fire-dom-event',
-                                                    browser_mod: {
-                                                      service: 'browser_mod.popup',
-                                                      data: {
-                                                        title: 'Pick a new due date',
-                                                        content: {
-                                                          type: 'entities',
-                                                          entities: [
-                                                            {entity: 'input_datetime.chore_postpone_custom_date', name: 'New due date'},
-                                                            {
-                                                              type: 'call-service',
-                                                              name: 'Confirm',
-                                                              icon: 'mdi:check',
-                                                              service: 'script.chore_postpone_apply',
-                                                              service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
-                                                            }
-                                                          ]
-                                                        }
-                                                      }
+                                                  type: 'entities',
+                                                  title: 'Or pick a custom date',
+                                                  entities: [
+                                                    {entity: 'input_datetime.chore_postpone_custom_date', name: 'Custom date'},
+                                                    {
+                                                      type: 'call-service',
+                                                      name: 'Confirm custom date',
+                                                      icon: 'mdi:check',
+                                                      service: 'script.chore_postpone_apply',
+                                                      service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
                                                     }
-                                                  }
+                                                  ]
                                                 },
                                                 {
                                                   type: 'button',
@@ -902,31 +876,18 @@ views:
                                                 mkBtn('Same day next week', 'next_week'),
                                                 mkBtn('Next month', 'next_month'),
                                                 {
-                                                  type: 'button',
-                                                  name: 'Custom date...',
-                                                  show_icon: false,
-                                                  tap_action: {
-                                                    action: 'fire-dom-event',
-                                                    browser_mod: {
-                                                      service: 'browser_mod.popup',
-                                                      data: {
-                                                        title: 'Pick a new due date',
-                                                        content: {
-                                                          type: 'entities',
-                                                          entities: [
-                                                            {entity: 'input_datetime.chore_postpone_custom_date', name: 'New due date'},
-                                                            {
-                                                              type: 'call-service',
-                                                              name: 'Confirm',
-                                                              icon: 'mdi:check',
-                                                              service: 'script.chore_postpone_apply',
-                                                              service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
-                                                            }
-                                                          ]
-                                                        }
-                                                      }
+                                                  type: 'entities',
+                                                  title: 'Or pick a custom date',
+                                                  entities: [
+                                                    {entity: 'input_datetime.chore_postpone_custom_date', name: 'Custom date'},
+                                                    {
+                                                      type: 'call-service',
+                                                      name: 'Confirm custom date',
+                                                      icon: 'mdi:check',
+                                                      service: 'script.chore_postpone_apply',
+                                                      service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
                                                     }
-                                                  }
+                                                  ]
                                                 },
                                                 {
                                                   type: 'button',
@@ -1136,31 +1097,18 @@ views:
                                                 mkBtn('Same day next week', 'next_week'),
                                                 mkBtn('Next month', 'next_month'),
                                                 {
-                                                  type: 'button',
-                                                  name: 'Custom date...',
-                                                  show_icon: false,
-                                                  tap_action: {
-                                                    action: 'fire-dom-event',
-                                                    browser_mod: {
-                                                      service: 'browser_mod.popup',
-                                                      data: {
-                                                        title: 'Pick a new due date',
-                                                        content: {
-                                                          type: 'entities',
-                                                          entities: [
-                                                            {entity: 'input_datetime.chore_postpone_custom_date', name: 'New due date'},
-                                                            {
-                                                              type: 'call-service',
-                                                              name: 'Confirm',
-                                                              icon: 'mdi:check',
-                                                              service: 'script.chore_postpone_apply',
-                                                              service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
-                                                            }
-                                                          ]
-                                                        }
-                                                      }
+                                                  type: 'entities',
+                                                  title: 'Or pick a custom date',
+                                                  entities: [
+                                                    {entity: 'input_datetime.chore_postpone_custom_date', name: 'Custom date'},
+                                                    {
+                                                      type: 'call-service',
+                                                      name: 'Confirm custom date',
+                                                      icon: 'mdi:check',
+                                                      service: 'script.chore_postpone_apply',
+                                                      service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
                                                     }
-                                                  }
+                                                  ]
                                                 },
                                                 {
                                                   type: 'button',
@@ -1370,31 +1318,18 @@ views:
                                                 mkBtn('Same day next week', 'next_week'),
                                                 mkBtn('Next month', 'next_month'),
                                                 {
-                                                  type: 'button',
-                                                  name: 'Custom date...',
-                                                  show_icon: false,
-                                                  tap_action: {
-                                                    action: 'fire-dom-event',
-                                                    browser_mod: {
-                                                      service: 'browser_mod.popup',
-                                                      data: {
-                                                        title: 'Pick a new due date',
-                                                        content: {
-                                                          type: 'entities',
-                                                          entities: [
-                                                            {entity: 'input_datetime.chore_postpone_custom_date', name: 'New due date'},
-                                                            {
-                                                              type: 'call-service',
-                                                              name: 'Confirm',
-                                                              icon: 'mdi:check',
-                                                              service: 'script.chore_postpone_apply',
-                                                              service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
-                                                            }
-                                                          ]
-                                                        }
-                                                      }
+                                                  type: 'entities',
+                                                  title: 'Or pick a custom date',
+                                                  entities: [
+                                                    {entity: 'input_datetime.chore_postpone_custom_date', name: 'Custom date'},
+                                                    {
+                                                      type: 'call-service',
+                                                      name: 'Confirm custom date',
+                                                      icon: 'mdi:check',
+                                                      service: 'script.chore_postpone_apply',
+                                                      service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
                                                     }
-                                                  }
+                                                  ]
                                                 },
                                                 {
                                                   type: 'button',
@@ -1921,31 +1856,18 @@ views:
                                                 mkBtn('Same day next week', 'next_week'),
                                                 mkBtn('Next month', 'next_month'),
                                                 {
-                                                  type: 'button',
-                                                  name: 'Custom date...',
-                                                  show_icon: false,
-                                                  tap_action: {
-                                                    action: 'fire-dom-event',
-                                                    browser_mod: {
-                                                      service: 'browser_mod.popup',
-                                                      data: {
-                                                        title: 'Pick a new due date',
-                                                        content: {
-                                                          type: 'entities',
-                                                          entities: [
-                                                            {entity: 'input_datetime.chore_postpone_custom_date', name: 'New due date'},
-                                                            {
-                                                              type: 'call-service',
-                                                              name: 'Confirm',
-                                                              icon: 'mdi:check',
-                                                              service: 'script.chore_postpone_apply',
-                                                              service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
-                                                            }
-                                                          ]
-                                                        }
-                                                      }
+                                                  type: 'entities',
+                                                  title: 'Or pick a custom date',
+                                                  entities: [
+                                                    {entity: 'input_datetime.chore_postpone_custom_date', name: 'Custom date'},
+                                                    {
+                                                      type: 'call-service',
+                                                      name: 'Confirm custom date',
+                                                      icon: 'mdi:check',
+                                                      service: 'script.chore_postpone_apply',
+                                                      service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
                                                     }
-                                                  }
+                                                  ]
                                                 },
                                                 {
                                                   type: 'button',
@@ -2155,31 +2077,18 @@ views:
                                                 mkBtn('Same day next week', 'next_week'),
                                                 mkBtn('Next month', 'next_month'),
                                                 {
-                                                  type: 'button',
-                                                  name: 'Custom date...',
-                                                  show_icon: false,
-                                                  tap_action: {
-                                                    action: 'fire-dom-event',
-                                                    browser_mod: {
-                                                      service: 'browser_mod.popup',
-                                                      data: {
-                                                        title: 'Pick a new due date',
-                                                        content: {
-                                                          type: 'entities',
-                                                          entities: [
-                                                            {entity: 'input_datetime.chore_postpone_custom_date', name: 'New due date'},
-                                                            {
-                                                              type: 'call-service',
-                                                              name: 'Confirm',
-                                                              icon: 'mdi:check',
-                                                              service: 'script.chore_postpone_apply',
-                                                              service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
-                                                            }
-                                                          ]
-                                                        }
-                                                      }
+                                                  type: 'entities',
+                                                  title: 'Or pick a custom date',
+                                                  entities: [
+                                                    {entity: 'input_datetime.chore_postpone_custom_date', name: 'Custom date'},
+                                                    {
+                                                      type: 'call-service',
+                                                      name: 'Confirm custom date',
+                                                      icon: 'mdi:check',
+                                                      service: 'script.chore_postpone_apply',
+                                                      service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
                                                     }
-                                                  }
+                                                  ]
                                                 },
                                                 {
                                                   type: 'button',
@@ -2389,31 +2298,18 @@ views:
                                                 mkBtn('Same day next week', 'next_week'),
                                                 mkBtn('Next month', 'next_month'),
                                                 {
-                                                  type: 'button',
-                                                  name: 'Custom date...',
-                                                  show_icon: false,
-                                                  tap_action: {
-                                                    action: 'fire-dom-event',
-                                                    browser_mod: {
-                                                      service: 'browser_mod.popup',
-                                                      data: {
-                                                        title: 'Pick a new due date',
-                                                        content: {
-                                                          type: 'entities',
-                                                          entities: [
-                                                            {entity: 'input_datetime.chore_postpone_custom_date', name: 'New due date'},
-                                                            {
-                                                              type: 'call-service',
-                                                              name: 'Confirm',
-                                                              icon: 'mdi:check',
-                                                              service: 'script.chore_postpone_apply',
-                                                              service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
-                                                            }
-                                                          ]
-                                                        }
-                                                      }
+                                                  type: 'entities',
+                                                  title: 'Or pick a custom date',
+                                                  entities: [
+                                                    {entity: 'input_datetime.chore_postpone_custom_date', name: 'Custom date'},
+                                                    {
+                                                      type: 'call-service',
+                                                      name: 'Confirm custom date',
+                                                      icon: 'mdi:check',
+                                                      service: 'script.chore_postpone_apply',
+                                                      service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
                                                     }
-                                                  }
+                                                  ]
                                                 },
                                                 {
                                                   type: 'button',
@@ -2623,31 +2519,18 @@ views:
                                                 mkBtn('Same day next week', 'next_week'),
                                                 mkBtn('Next month', 'next_month'),
                                                 {
-                                                  type: 'button',
-                                                  name: 'Custom date...',
-                                                  show_icon: false,
-                                                  tap_action: {
-                                                    action: 'fire-dom-event',
-                                                    browser_mod: {
-                                                      service: 'browser_mod.popup',
-                                                      data: {
-                                                        title: 'Pick a new due date',
-                                                        content: {
-                                                          type: 'entities',
-                                                          entities: [
-                                                            {entity: 'input_datetime.chore_postpone_custom_date', name: 'New due date'},
-                                                            {
-                                                              type: 'call-service',
-                                                              name: 'Confirm',
-                                                              icon: 'mdi:check',
-                                                              service: 'script.chore_postpone_apply',
-                                                              service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
-                                                            }
-                                                          ]
-                                                        }
-                                                      }
+                                                  type: 'entities',
+                                                  title: 'Or pick a custom date',
+                                                  entities: [
+                                                    {entity: 'input_datetime.chore_postpone_custom_date', name: 'Custom date'},
+                                                    {
+                                                      type: 'call-service',
+                                                      name: 'Confirm custom date',
+                                                      icon: 'mdi:check',
+                                                      service: 'script.chore_postpone_apply',
+                                                      service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
                                                     }
-                                                  }
+                                                  ]
                                                 },
                                                 {
                                                   type: 'button',
@@ -2857,31 +2740,18 @@ views:
                                                 mkBtn('Same day next week', 'next_week'),
                                                 mkBtn('Next month', 'next_month'),
                                                 {
-                                                  type: 'button',
-                                                  name: 'Custom date...',
-                                                  show_icon: false,
-                                                  tap_action: {
-                                                    action: 'fire-dom-event',
-                                                    browser_mod: {
-                                                      service: 'browser_mod.popup',
-                                                      data: {
-                                                        title: 'Pick a new due date',
-                                                        content: {
-                                                          type: 'entities',
-                                                          entities: [
-                                                            {entity: 'input_datetime.chore_postpone_custom_date', name: 'New due date'},
-                                                            {
-                                                              type: 'call-service',
-                                                              name: 'Confirm',
-                                                              icon: 'mdi:check',
-                                                              service: 'script.chore_postpone_apply',
-                                                              service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
-                                                            }
-                                                          ]
-                                                        }
-                                                      }
+                                                  type: 'entities',
+                                                  title: 'Or pick a custom date',
+                                                  entities: [
+                                                    {entity: 'input_datetime.chore_postpone_custom_date', name: 'Custom date'},
+                                                    {
+                                                      type: 'call-service',
+                                                      name: 'Confirm custom date',
+                                                      icon: 'mdi:check',
+                                                      service: 'script.chore_postpone_apply',
+                                                      service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}
                                                     }
-                                                  }
+                                                  ]
                                                 },
                                                 {
                                                   type: 'button',
