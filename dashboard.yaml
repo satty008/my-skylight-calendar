@@ -23,7 +23,8 @@ views:
           - type: vertical-stack
             card_mod:
               style: |
-                ha-card {
+                :host {
+                  display: block !important;
                   max-width: 25% !important;
                   margin-right: auto !important;
                   background: rgba(20, 20, 26, 0.75) !important;
@@ -31,6 +32,7 @@ views:
                   border-radius: 24px !important;
                   box-shadow: none !important;
                   padding: 0.3em 0.8em !important;
+                  box-sizing: border-box !important;
                 }
             cards:
               - type: weather-forecast
