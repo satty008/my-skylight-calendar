@@ -449,11 +449,11 @@ views:
                                   [[[
                                     const due = states[entity.entity_id].attributes.due_date;
                                     if (!due) return 'none';
-                                    const d = new Date(due);
+                                    const dueDay = due.slice(0, 10);
                                     const t = new Date();
                                     t.setDate(t.getDate() + 1);
-                                    const same = d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate();
-                                    return same ? 'grid' : 'none';
+                                    const tomorrowDay = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+                                    return dueDay === tomorrowDay ? 'grid' : 'none';
                                   ]]]
                             grid:
                               - grid-template-areas: '"i n"'
@@ -489,11 +489,11 @@ views:
                                   [[[
                                     const due = states[entity.entity_id].attributes.due_date;
                                     if (!due) return 'none';
-                                    const d = new Date(due);
+                                    const dueDay = due.slice(0, 10);
                                     const t = new Date();
                                     t.setDate(t.getDate() + 1);
-                                    const same = d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate();
-                                    return same ? 'grid' : 'none';
+                                    const tomorrowDay = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+                                    return dueDay === tomorrowDay ? 'grid' : 'none';
                                   ]]]
                             grid:
                               - grid-template-areas: '"i n"'
@@ -529,11 +529,11 @@ views:
                                   [[[
                                     const due = states[entity.entity_id].attributes.due_date;
                                     if (!due) return 'none';
-                                    const d = new Date(due);
+                                    const dueDay = due.slice(0, 10);
                                     const t = new Date();
                                     t.setDate(t.getDate() + 1);
-                                    const same = d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate();
-                                    return same ? 'grid' : 'none';
+                                    const tomorrowDay = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+                                    return dueDay === tomorrowDay ? 'grid' : 'none';
                                   ]]]
                             grid:
                               - grid-template-areas: '"i n"'
@@ -569,11 +569,11 @@ views:
                                   [[[
                                     const due = states[entity.entity_id].attributes.due_date;
                                     if (!due) return 'none';
-                                    const d = new Date(due);
+                                    const dueDay = due.slice(0, 10);
                                     const t = new Date();
                                     t.setDate(t.getDate() + 1);
-                                    const same = d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate();
-                                    return same ? 'grid' : 'none';
+                                    const tomorrowDay = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+                                    return dueDay === tomorrowDay ? 'grid' : 'none';
                                   ]]]
                             grid:
                               - grid-template-areas: '"i n"'
@@ -609,11 +609,11 @@ views:
                                   [[[
                                     const due = states[entity.entity_id].attributes.due_date;
                                     if (!due) return 'none';
-                                    const d = new Date(due);
+                                    const dueDay = due.slice(0, 10);
                                     const t = new Date();
                                     t.setDate(t.getDate() + 1);
-                                    const same = d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate();
-                                    return same ? 'grid' : 'none';
+                                    const tomorrowDay = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+                                    return dueDay === tomorrowDay ? 'grid' : 'none';
                                   ]]]
                             grid:
                               - grid-template-areas: '"i n"'
@@ -870,11 +870,11 @@ views:
                                   [[[
                                     const due = states[entity.entity_id].attributes.due_date;
                                     if (!due) return 'none';
-                                    const d = new Date(due);
+                                    const dueDay = due.slice(0, 10);
                                     const t = new Date();
                                     t.setDate(t.getDate() + 1);
-                                    const same = d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate();
-                                    return same ? 'grid' : 'none';
+                                    const tomorrowDay = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+                                    return dueDay === tomorrowDay ? 'grid' : 'none';
                                   ]]]
                             grid:
                               - grid-template-areas: '"i n"'
@@ -910,11 +910,11 @@ views:
                                   [[[
                                     const due = states[entity.entity_id].attributes.due_date;
                                     if (!due) return 'none';
-                                    const d = new Date(due);
+                                    const dueDay = due.slice(0, 10);
                                     const t = new Date();
                                     t.setDate(t.getDate() + 1);
-                                    const same = d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate();
-                                    return same ? 'grid' : 'none';
+                                    const tomorrowDay = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+                                    return dueDay === tomorrowDay ? 'grid' : 'none';
                                   ]]]
                             grid:
                               - grid-template-areas: '"i n"'
@@ -950,11 +950,11 @@ views:
                                   [[[
                                     const due = states[entity.entity_id].attributes.due_date;
                                     if (!due) return 'none';
-                                    const d = new Date(due);
+                                    const dueDay = due.slice(0, 10);
                                     const t = new Date();
                                     t.setDate(t.getDate() + 1);
-                                    const same = d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate();
-                                    return same ? 'grid' : 'none';
+                                    const tomorrowDay = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+                                    return dueDay === tomorrowDay ? 'grid' : 'none';
                                   ]]]
                             grid:
                               - grid-template-areas: '"i n"'
@@ -990,11 +990,11 @@ views:
                                   [[[
                                     const due = states[entity.entity_id].attributes.due_date;
                                     if (!due) return 'none';
-                                    const d = new Date(due);
+                                    const dueDay = due.slice(0, 10);
                                     const t = new Date();
                                     t.setDate(t.getDate() + 1);
-                                    const same = d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate();
-                                    return same ? 'grid' : 'none';
+                                    const tomorrowDay = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+                                    return dueDay === tomorrowDay ? 'grid' : 'none';
                                   ]]]
                             grid:
                               - grid-template-areas: '"i n"'
@@ -1030,11 +1030,11 @@ views:
                                   [[[
                                     const due = states[entity.entity_id].attributes.due_date;
                                     if (!due) return 'none';
-                                    const d = new Date(due);
+                                    const dueDay = due.slice(0, 10);
                                     const t = new Date();
                                     t.setDate(t.getDate() + 1);
-                                    const same = d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate();
-                                    return same ? 'grid' : 'none';
+                                    const tomorrowDay = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+                                    return dueDay === tomorrowDay ? 'grid' : 'none';
                                   ]]]
                             grid:
                               - grid-template-areas: '"i n"'
