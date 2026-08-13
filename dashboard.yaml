@@ -13,18 +13,19 @@ views:
       # the page title rather than buried under the temperature/time
       # block. Same compact (zoom: 0.55) weather-forecast cards as
       # before, just relocated.
-      # column_span: 3 (of max_columns: 10) keeps this to about a
-      # quarter of the page width instead of the full row - HA's
-      # "sections" strategy packs sections left-to-right within a row
-      # when they fit, so the CONTROLS SECTION right after this one
-      # (column_span: 10, too wide to fit the remaining columns) wraps
-      # to its own row below rather than sitting beside this one.
+      # column_span alone (tried 3 of 10) did NOT narrow this section -
+      # confirmed live via getBoundingClientRect, it still rendered full
+      # width regardless. Constrained via max-width in card_mod instead
+      # (the same reliable approach already used for Select View/Show
+      # Events), left-aligned via margin-right: auto.
       - type: grid
         cards:
           - type: vertical-stack
             card_mod:
               style: |
                 ha-card {
+                  max-width: 25% !important;
+                  margin-right: auto !important;
                   background: rgba(20, 20, 26, 0.75) !important;
                   border: solid 1px rgba(255, 255, 255, 0.15) !important;
                   border-radius: 24px !important;
@@ -51,7 +52,7 @@ views:
             grid_options:
               columns: 120
               rows: auto
-        column_span: 3
+        column_span: 10
       # --- End FORECAST SECTION ---
       # --- START CONTROLS SECTION (Buttons) ---
       # Slimmed down: the big "Family Calendar" title text and the
