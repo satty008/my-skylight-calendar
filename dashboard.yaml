@@ -548,11 +548,10 @@ views:
                        silently broken (verified: container-type/name were set correctly
                        and the .day element WAS >260px wide, but font-size stayed at the
                        narrow-cell 3em) until this block was moved here.
-                       The .weather badge is absolutely positioned top-right by the card
-                       itself, which only works when the date number stays small (narrow
-                       week-view cells). In a wide cell that number grows large enough to
-                       collide with it, so above a width threshold we take the weather
-                       block out of flow and lay the header out with flexbox instead. */
+                       The .weather badge keeps the card's own top-right absolute
+                       positioning (just made more compact + single-line), since in a
+                       wide cell the date number no longer stretches far enough right
+                       to collide with it once padded off the edge. */
                     @container daycell (min-width: 260px) {
                       .day .date {
                         display: flex !important;
@@ -568,21 +567,24 @@ views:
                         font-size: 1.4em !important;
                       }
                       .day .weather {
-                        position: static !important;
+                        position: absolute !important;
+                        top: 0.5em !important;
+                        right: 0.7em !important;
                         display: flex !important;
                         align-items: center !important;
-                        gap: 0.5em !important;
-                        margin-left: auto !important;
+                        gap: 0.4em !important;
                         width: auto !important;
                       }
                       .day .weather .temperature {
                         display: flex !important;
-                        flex-direction: column !important;
-                        font-size: 1.2em !important;
+                        flex-direction: row !important;
+                        gap: 0.3em !important;
+                        font-size: 1.1em !important;
+                        white-space: nowrap !important;
                       }
                       .day .weather .icon img {
-                        width: 44px !important;
-                        height: 44px !important;
+                        width: 32px !important;
+                        height: 32px !important;
                       }
                       .day .events {
                         padding: 0 0.5em !important;
