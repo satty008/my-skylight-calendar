@@ -191,14 +191,23 @@ views:
                     </div>
                   </div>
                 card_mod:
-                  style: |
-                    ha-card { background: none; box-shadow: none; border: none; padding: 0.2em 0.2em 0.6em 0.2em; }
-                    ha-markdown-element > div { display: flex !important; justify-content: space-between !important; align-items: center !important; }
-                    ha-markdown-element > div > div:first-child { display: flex !important; align-items: baseline !important; gap: 0.5em !important; }
-                    ha-markdown-element > div > div:first-child > span:first-child { font-size: 3em !important; font-weight: bold !important; line-height: 1 !important; background: orange !important; color: #1a1a1a !important; border-radius: 8px !important; padding: 0 0.2em !important; }
-                    ha-markdown-element > div > div:first-child > span:last-child { font-size: 1.3em !important; font-weight: 600 !important; }
-                    ha-markdown-element > div > div:last-child { display: flex !important; align-items: center !important; gap: 0.4em !important; font-size: 1.3em !important; white-space: nowrap !important; }
-                    ha-markdown-element > div > div:last-child > ha-icon { width: 32px !important; height: 32px !important; color: #f5c542 !important; }
+                  style:
+                    # ha-markdown has its OWN nested shadow root wrapping
+                    # ha-markdown-element, one boundary further in than the
+                    # markdown card's own root (where a plain `style: |`
+                    # string lands) - confirmed the plain string's <style>
+                    # tag was present but in the wrong shadow root, so the
+                    # selectors above never matched anything. card_mod's
+                    # `<tag>$:` key pierces into that child's shadow root.
+                    ".": |
+                      ha-card { background: none !important; box-shadow: none !important; border: none !important; padding: 0.2em 0.2em 0.6em 0.2em !important; }
+                    ha-markdown$: |
+                      ha-markdown-element > div { display: flex !important; justify-content: space-between !important; align-items: center !important; }
+                      ha-markdown-element > div > div:first-child { display: flex !important; align-items: baseline !important; gap: 0.5em !important; }
+                      ha-markdown-element > div > div:first-child > span:first-child { font-size: 3em !important; font-weight: bold !important; line-height: 1 !important; background: orange !important; color: #1a1a1a !important; border-radius: 8px !important; padding: 0 0.2em !important; }
+                      ha-markdown-element > div > div:first-child > span:last-child { font-size: 1.3em !important; font-weight: 600 !important; }
+                      ha-markdown-element > div > div:last-child { display: flex !important; align-items: center !important; gap: 0.4em !important; font-size: 1.3em !important; white-space: nowrap !important; }
+                      ha-markdown-element > div > div:last-child > ha-icon { width: 32px !important; height: 32px !important; color: #f5c542 !important; }
               - type: conditional
                 conditions:
                   - condition: state
