@@ -107,19 +107,22 @@ views:
               rows: auto
           - type: custom:bubble-card
             card_type: button
-            button_type: name
-            card_layout: large
-            name: Add Event
-            icon: mdi:calendar-plus
+            button_type: state
+            entity: input_boolean.family_calendar_show
+            name: Show Events
+            icon: mdi:calendar-eye
+            show_icon: true
+            show_name: true
             tap_action:
-              action: navigate
-              navigation_path: "#addcalendarevent"
+              action: perform-action
+              perform_action: input_boolean.toggle
+              target:
+                entity_id: input_boolean.family_calendar_show
             styles: |
-              * { font-size: 1.05em !important; }
-              ha-card { --bubble-main-background-color: #393745 !important; width: 300px; }    
-              .bubble-icon { --mdc-icon-size: 30px !important; color: snow !important; opacity: 1; }
-              .bubble-icon-container { background: #393745 !important; display: flex; }
-              .bubble-name { color: snow !important; opacity: 1; display: flex; line-height: 18px; flex-direction: row; justify-content: center; flex-grow: 1; margin: 0 40px 0 0; pointer-events: none; position: relative; overflow: hidden; }
+              .bubble-button-background {
+                opacity: 1 !important;
+                background-color: ${hass.states['input_boolean.family_calendar_show'].state === 'on' ? 'var(--calendar1-default-primary-color)' : 'light-grey'} !important;
+              }
             grid_options:
               columns: 10
               rows: 1
@@ -146,15 +149,16 @@ views:
       # entry below pointing at its claim/disapprove button entities
       # (button.<person>_choreops_claim_chore_<chore> /
       #  button.<person>_choreops_disapprove_chore_<chore>).
-      # This box merges the date/weather header with the chores list (was a
-      # separate "Chores" section above the calendar; moved inside the same
-      # bordered box as the date/temp display per request). Each person's
-      # row is wrapped in a `conditional` card keyed off the SAME
-      # input_text.calendar1/2_calendar_filter helpers the Satty/Bhavi
+      # This is the single "main" block (date/weather header + two chore
+      # columns) - no separate calendar block sits alongside it by default.
+      # Each person's column is a name heading + their chores stacked
+      # vertically, and is wrapped in a `conditional` card keyed off the
+      # SAME input_text.calendar1/2_calendar_filter helpers the Satty/Bhavi
       # buttons above already toggle (".*" = shown, "^$" = hidden), so
       # selecting a person filters both their calendar events AND their
-      # chores together. Each tile gets a top-right name badge (card_mod
-      # ::after) so it's clear whose task it is when both rows are visible.
+      # chore column together. The actual Google Calendar (week-planner-card)
+      # section further below is hidden by default and only appears when
+      # "Show Events" (input_boolean.family_calendar_show) is toggled on.
       - type: grid
         cards:
           - type: vertical-stack
@@ -170,14 +174,14 @@ views:
             cards:
               - type: markdown
                 # ha-markdown-element strips BOTH style="..." and class="..."
-                # attributes via DOMPurify (confirmed via getComputedStyle -
-                # class ended up "" on every rendered node even though the
-                # source markdown had class="..."). ha-icon's icon="..."
-                # attribute does survive. Since neither style nor class can
-                # be attached to the rendered HTML, this header is styled
-                # entirely with structural/positional selectors below
-                # (ha-markdown-element's DOM shape is fixed: div > div >
-                # span,span  and  div > span,ha-icon) instead of classes.
+                # attributes via DOMPurify (confirmed via getComputedStyle - class
+                # ended up "" on every rendered node even though the source markdown
+                # had class="..."). ha-icon's icon="..." attribute does survive.
+                # Styled entirely with structural/positional selectors below instead
+                # (ha-markdown-element's DOM shape is fixed: div > div > span,span
+                # and div > span,ha-icon). card_mod must ALSO pierce ha-markdown's
+                # own nested shadow root via the "ha-markdown$:" key - a plain
+                # top-level `style: |` string lands one shadow boundary too shallow.
                 content: |
                   {% set icons = {'sunny':'mdi:weather-sunny','clear-night':'mdi:weather-night','cloudy':'mdi:weather-cloudy','partlycloudy':'mdi:weather-partly-cloudy','rainy':'mdi:weather-rainy','pouring':'mdi:weather-pouring','snowy':'mdi:weather-snowy','snowy-rainy':'mdi:weather-snowy-rainy','fog':'mdi:weather-fog','windy':'mdi:weather-windy','windy-variant':'mdi:weather-windy','hail':'mdi:weather-hail','lightning':'mdi:weather-lightning','lightning-rainy':'mdi:weather-lightning-rainy','exceptional':'mdi:alert'} %}
                   <div>
@@ -192,13 +196,6 @@ views:
                   </div>
                 card_mod:
                   style:
-                    # ha-markdown has its OWN nested shadow root wrapping
-                    # ha-markdown-element, one boundary further in than the
-                    # markdown card's own root (where a plain `style: |`
-                    # string lands) - confirmed the plain string's <style>
-                    # tag was present but in the wrong shadow root, so the
-                    # selectors above never matched anything. card_mod's
-                    # `<tag>$:` key pierces into that child's shadow root.
                     ".": |
                       ha-card { background: none !important; box-shadow: none !important; border: none !important; padding: 0.2em 0.2em 0.6em 0.2em !important; }
                     ha-markdown$: |
@@ -208,482 +205,450 @@ views:
                       ha-markdown-element > div > div:first-child > span:last-child { font-size: 1.3em !important; font-weight: 600 !important; }
                       ha-markdown-element > div > div:last-child { display: flex !important; align-items: center !important; gap: 0.4em !important; font-size: 1.3em !important; white-space: nowrap !important; }
                       ha-markdown-element > div > div:last-child > ha-icon { width: 32px !important; height: 32px !important; color: #f5c542 !important; }
-              - type: conditional
-                conditions:
-                  - condition: state
-                    entity: input_text.calendar1_calendar_filter
-                    state: ".*"
-                card:
-                  type: horizontal-stack
-                  cards:
-                    - type: custom:button-card
-                      entity: sensor.satty_choreops_chore_status_take_out_trash
-                      name: Take out trash
-                      show_state: false
-                      show_icon: true
-                      icon: |
-                        [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
-                      tap_action: |
-                        [[[
-                          if (states[entity.entity_id].state === 'completed') {
-                            return {action: 'none'};
-                          }
-                          return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.satty_choreops_claim_chore_take_out_trash'}};
-                        ]]]
-                      styles:
-                        card:
-                          - background-color: rgba(20, 20, 26, 0.75)
-                          - border-left: 4px solid var(--calendar1-default-primary-color)
-                          - border-radius: 10px
-                          - padding: 10px
-                        icon:
-                          - width: 30px
-                          - color: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar1-default-primary-color)' : 'white' ]]]
-                        name:
-                          - font-size: 0.95em
-                          - text-decoration: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
-                          - opacity: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
-                      card_mod:
-                        style: |
-                          ha-card { position: relative !important; }
-                          ha-card::after {
-                            content: "Satty";
-                            position: absolute;
-                            top: 4px;
-                            right: 6px;
-                            font-size: 0.6em;
-                            font-weight: 700;
-                            background: var(--calendar1-default-primary-color);
-                            color: #1a1a1a;
-                            padding: 1px 6px;
-                            border-radius: 8px;
-                            z-index: 2;
-                          }
-                    - type: custom:button-card
-                      entity: sensor.satty_choreops_chore_status_test_daily_satty
-                      name: Daily
-                      show_state: false
-                      show_icon: true
-                      icon: |
-                        [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
-                      tap_action: |
-                        [[[
-                          if (states[entity.entity_id].state === 'completed') {
-                            return {action: 'none'};
-                          }
-                          return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.satty_choreops_claim_chore_test_daily_satty'}};
-                        ]]]
-                      styles:
-                        card:
-                          - background-color: rgba(20, 20, 26, 0.75)
-                          - border-left: 4px solid var(--calendar1-default-primary-color)
-                          - border-radius: 10px
-                          - padding: 10px
-                        icon:
-                          - width: 30px
-                          - color: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar1-default-primary-color)' : 'white' ]]]
-                        name:
-                          - font-size: 0.95em
-                          - text-decoration: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
-                          - opacity: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
-                      card_mod:
-                        style: |
-                          ha-card { position: relative !important; }
-                          ha-card::after {
-                            content: "Satty";
-                            position: absolute;
-                            top: 4px;
-                            right: 6px;
-                            font-size: 0.6em;
-                            font-weight: 700;
-                            background: var(--calendar1-default-primary-color);
-                            color: #1a1a1a;
-                            padding: 1px 6px;
-                            border-radius: 8px;
-                            z-index: 2;
-                          }
-                    - type: custom:button-card
-                      entity: sensor.satty_choreops_chore_status_test_weekly_satty
-                      name: Weekly
-                      show_state: false
-                      show_icon: true
-                      icon: |
-                        [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
-                      tap_action: |
-                        [[[
-                          if (states[entity.entity_id].state === 'completed') {
-                            return {action: 'none'};
-                          }
-                          return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.satty_choreops_claim_chore_test_weekly_satty'}};
-                        ]]]
-                      styles:
-                        card:
-                          - background-color: rgba(20, 20, 26, 0.75)
-                          - border-left: 4px solid var(--calendar1-default-primary-color)
-                          - border-radius: 10px
-                          - padding: 10px
-                        icon:
-                          - width: 30px
-                          - color: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar1-default-primary-color)' : 'white' ]]]
-                        name:
-                          - font-size: 0.95em
-                          - text-decoration: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
-                          - opacity: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
-                      card_mod:
-                        style: |
-                          ha-card { position: relative !important; }
-                          ha-card::after {
-                            content: "Satty";
-                            position: absolute;
-                            top: 4px;
-                            right: 6px;
-                            font-size: 0.6em;
-                            font-weight: 700;
-                            background: var(--calendar1-default-primary-color);
-                            color: #1a1a1a;
-                            padding: 1px 6px;
-                            border-radius: 8px;
-                            z-index: 2;
-                          }
-                    - type: custom:button-card
-                      entity: sensor.satty_choreops_chore_status_test_monthly_satty
-                      name: Monthly
-                      show_state: false
-                      show_icon: true
-                      icon: |
-                        [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
-                      tap_action: |
-                        [[[
-                          if (states[entity.entity_id].state === 'completed') {
-                            return {action: 'none'};
-                          }
-                          return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.satty_choreops_claim_chore_test_monthly_satty'}};
-                        ]]]
-                      styles:
-                        card:
-                          - background-color: rgba(20, 20, 26, 0.75)
-                          - border-left: 4px solid var(--calendar1-default-primary-color)
-                          - border-radius: 10px
-                          - padding: 10px
-                        icon:
-                          - width: 30px
-                          - color: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar1-default-primary-color)' : 'white' ]]]
-                        name:
-                          - font-size: 0.95em
-                          - text-decoration: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
-                          - opacity: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
-                      card_mod:
-                        style: |
-                          ha-card { position: relative !important; }
-                          ha-card::after {
-                            content: "Satty";
-                            position: absolute;
-                            top: 4px;
-                            right: 6px;
-                            font-size: 0.6em;
-                            font-weight: 700;
-                            background: var(--calendar1-default-primary-color);
-                            color: #1a1a1a;
-                            padding: 1px 6px;
-                            border-radius: 8px;
-                            z-index: 2;
-                          }
-                    - type: custom:button-card
-                      entity: sensor.satty_choreops_chore_status_test_quarterly_satty
-                      name: Quarterly
-                      show_state: false
-                      show_icon: true
-                      icon: |
-                        [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
-                      tap_action: |
-                        [[[
-                          if (states[entity.entity_id].state === 'completed') {
-                            return {action: 'none'};
-                          }
-                          return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.satty_choreops_claim_chore_test_quarterly_satty'}};
-                        ]]]
-                      styles:
-                        card:
-                          - background-color: rgba(20, 20, 26, 0.75)
-                          - border-left: 4px solid var(--calendar1-default-primary-color)
-                          - border-radius: 10px
-                          - padding: 10px
-                        icon:
-                          - width: 30px
-                          - color: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar1-default-primary-color)' : 'white' ]]]
-                        name:
-                          - font-size: 0.95em
-                          - text-decoration: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
-                          - opacity: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
-                      card_mod:
-                        style: |
-                          ha-card { position: relative !important; }
-                          ha-card::after {
-                            content: "Satty";
-                            position: absolute;
-                            top: 4px;
-                            right: 6px;
-                            font-size: 0.6em;
-                            font-weight: 700;
-                            background: var(--calendar1-default-primary-color);
-                            color: #1a1a1a;
-                            padding: 1px 6px;
-                            border-radius: 8px;
-                            z-index: 2;
-                          }
-              - type: conditional
-                conditions:
-                  - condition: state
-                    entity: input_text.calendar2_calendar_filter
-                    state: ".*"
-                card:
-                  type: horizontal-stack
-                  cards:
-                    - type: custom:button-card
-                      entity: sensor.bhavi_choreops_chore_status_vacuum_living_room
-                      name: Vacuum living room
-                      show_state: false
-                      show_icon: true
-                      icon: |
-                        [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
-                      tap_action: |
-                        [[[
-                          if (states[entity.entity_id].state === 'completed') {
-                            return {action: 'none'};
-                          }
-                          return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.bhavi_choreops_claim_chore_vacuum_living_room'}};
-                        ]]]
-                      styles:
-                        card:
-                          - background-color: rgba(20, 20, 26, 0.75)
-                          - border-left: 4px solid var(--calendar2-default-primary-color)
-                          - border-radius: 10px
-                          - padding: 10px
-                        icon:
-                          - width: 30px
-                          - color: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar2-default-primary-color)' : 'white' ]]]
-                        name:
-                          - font-size: 0.95em
-                          - text-decoration: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
-                          - opacity: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
-                      card_mod:
-                        style: |
-                          ha-card { position: relative !important; }
-                          ha-card::after {
-                            content: "Bhavi";
-                            position: absolute;
-                            top: 4px;
-                            right: 6px;
-                            font-size: 0.6em;
-                            font-weight: 700;
-                            background: var(--calendar2-default-primary-color);
-                            color: #1a1a1a;
-                            padding: 1px 6px;
-                            border-radius: 8px;
-                            z-index: 2;
-                          }
-                    - type: custom:button-card
-                      entity: sensor.bhavi_choreops_chore_status_test_daily_bhavi
-                      name: Daily
-                      show_state: false
-                      show_icon: true
-                      icon: |
-                        [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
-                      tap_action: |
-                        [[[
-                          if (states[entity.entity_id].state === 'completed') {
-                            return {action: 'none'};
-                          }
-                          return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.bhavi_choreops_claim_chore_test_daily_bhavi'}};
-                        ]]]
-                      styles:
-                        card:
-                          - background-color: rgba(20, 20, 26, 0.75)
-                          - border-left: 4px solid var(--calendar2-default-primary-color)
-                          - border-radius: 10px
-                          - padding: 10px
-                        icon:
-                          - width: 30px
-                          - color: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar2-default-primary-color)' : 'white' ]]]
-                        name:
-                          - font-size: 0.95em
-                          - text-decoration: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
-                          - opacity: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
-                      card_mod:
-                        style: |
-                          ha-card { position: relative !important; }
-                          ha-card::after {
-                            content: "Bhavi";
-                            position: absolute;
-                            top: 4px;
-                            right: 6px;
-                            font-size: 0.6em;
-                            font-weight: 700;
-                            background: var(--calendar2-default-primary-color);
-                            color: #1a1a1a;
-                            padding: 1px 6px;
-                            border-radius: 8px;
-                            z-index: 2;
-                          }
-                    - type: custom:button-card
-                      entity: sensor.bhavi_choreops_chore_status_test_weekly_bhavi
-                      name: Weekly
-                      show_state: false
-                      show_icon: true
-                      icon: |
-                        [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
-                      tap_action: |
-                        [[[
-                          if (states[entity.entity_id].state === 'completed') {
-                            return {action: 'none'};
-                          }
-                          return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.bhavi_choreops_claim_chore_test_weekly_bhavi'}};
-                        ]]]
-                      styles:
-                        card:
-                          - background-color: rgba(20, 20, 26, 0.75)
-                          - border-left: 4px solid var(--calendar2-default-primary-color)
-                          - border-radius: 10px
-                          - padding: 10px
-                        icon:
-                          - width: 30px
-                          - color: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar2-default-primary-color)' : 'white' ]]]
-                        name:
-                          - font-size: 0.95em
-                          - text-decoration: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
-                          - opacity: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
-                      card_mod:
-                        style: |
-                          ha-card { position: relative !important; }
-                          ha-card::after {
-                            content: "Bhavi";
-                            position: absolute;
-                            top: 4px;
-                            right: 6px;
-                            font-size: 0.6em;
-                            font-weight: 700;
-                            background: var(--calendar2-default-primary-color);
-                            color: #1a1a1a;
-                            padding: 1px 6px;
-                            border-radius: 8px;
-                            z-index: 2;
-                          }
-                    - type: custom:button-card
-                      entity: sensor.bhavi_choreops_chore_status_test_monthly_bhavi
-                      name: Monthly
-                      show_state: false
-                      show_icon: true
-                      icon: |
-                        [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
-                      tap_action: |
-                        [[[
-                          if (states[entity.entity_id].state === 'completed') {
-                            return {action: 'none'};
-                          }
-                          return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.bhavi_choreops_claim_chore_test_monthly_bhavi'}};
-                        ]]]
-                      styles:
-                        card:
-                          - background-color: rgba(20, 20, 26, 0.75)
-                          - border-left: 4px solid var(--calendar2-default-primary-color)
-                          - border-radius: 10px
-                          - padding: 10px
-                        icon:
-                          - width: 30px
-                          - color: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar2-default-primary-color)' : 'white' ]]]
-                        name:
-                          - font-size: 0.95em
-                          - text-decoration: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
-                          - opacity: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
-                      card_mod:
-                        style: |
-                          ha-card { position: relative !important; }
-                          ha-card::after {
-                            content: "Bhavi";
-                            position: absolute;
-                            top: 4px;
-                            right: 6px;
-                            font-size: 0.6em;
-                            font-weight: 700;
-                            background: var(--calendar2-default-primary-color);
-                            color: #1a1a1a;
-                            padding: 1px 6px;
-                            border-radius: 8px;
-                            z-index: 2;
-                          }
-                    - type: custom:button-card
-                      entity: sensor.bhavi_choreops_chore_status_test_quarterly_bhavi
-                      name: Quarterly
-                      show_state: false
-                      show_icon: true
-                      icon: |
-                        [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
-                      tap_action: |
-                        [[[
-                          if (states[entity.entity_id].state === 'completed') {
-                            return {action: 'none'};
-                          }
-                          return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.bhavi_choreops_claim_chore_test_quarterly_bhavi'}};
-                        ]]]
-                      styles:
-                        card:
-                          - background-color: rgba(20, 20, 26, 0.75)
-                          - border-left: 4px solid var(--calendar2-default-primary-color)
-                          - border-radius: 10px
-                          - padding: 10px
-                        icon:
-                          - width: 30px
-                          - color: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar2-default-primary-color)' : 'white' ]]]
-                        name:
-                          - font-size: 0.95em
-                          - text-decoration: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
-                          - opacity: |
-                              [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
-                      card_mod:
-                        style: |
-                          ha-card { position: relative !important; }
-                          ha-card::after {
-                            content: "Bhavi";
-                            position: absolute;
-                            top: 4px;
-                            right: 6px;
-                            font-size: 0.6em;
-                            font-weight: 700;
-                            background: var(--calendar2-default-primary-color);
-                            color: #1a1a1a;
-                            padding: 1px 6px;
-                            border-radius: 8px;
-                            z-index: 2;
-                          }
+              - type: horizontal-stack
+                cards:
+                  - type: conditional
+                    conditions:
+                      - condition: state
+                        entity: input_text.calendar1_calendar_filter
+                        state: ".*"
+                    card:
+                      type: vertical-stack
+                      cards:
+                        - type: markdown
+                          content: "### Satty"
+                          card_mod:
+                            style:
+                              ".": |
+                                ha-card { background: none !important; box-shadow: none !important; border: none !important; padding: 0 0 0.2em 0.3em !important; }
+                              ha-markdown$: |
+                                ha-markdown-element h3 { margin: 0 !important; font-size: 1.3em !important; font-weight: 700 !important; color: var(--calendar1-default-primary-color) !important; }
+                        - type: custom:button-card
+                          entity: sensor.satty_choreops_chore_status_take_out_trash
+                          name: Take out trash
+                          show_state: false
+                          show_icon: true
+                          icon: |
+                            [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                          tap_action: |
+                            [[[
+                              if (states[entity.entity_id].state === 'completed') {
+                                return {action: 'none'};
+                              }
+                              return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.satty_choreops_claim_chore_take_out_trash'}};
+                            ]]]
+                          styles:
+                            card:
+                              - background-color: rgba(20, 20, 26, 0.75)
+                              - border-left: 4px solid var(--calendar1-default-primary-color)
+                              - border-radius: 8px
+                              - padding: 6px 10px
+                              - margin-bottom: 6px
+                              - display: grid
+                            grid:
+                              - grid-template-areas: '"i n"'
+                              - grid-template-columns: 28px 1fr
+                              - grid-template-rows: 1fr
+                            icon:
+                              - grid-area: i
+                              - justify-self: center
+                              - width: 22px
+                              - color: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar1-default-primary-color)' : 'white' ]]]
+                            name:
+                              - grid-area: n
+                              - justify-self: start
+                              - padding-left: 8px
+                              - font-size: 0.95em
+                              - text-decoration: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
+                              - opacity: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                        - type: custom:button-card
+                          entity: sensor.satty_choreops_chore_status_test_daily_satty
+                          name: Daily
+                          show_state: false
+                          show_icon: true
+                          icon: |
+                            [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                          tap_action: |
+                            [[[
+                              if (states[entity.entity_id].state === 'completed') {
+                                return {action: 'none'};
+                              }
+                              return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.satty_choreops_claim_chore_test_daily_satty'}};
+                            ]]]
+                          styles:
+                            card:
+                              - background-color: rgba(20, 20, 26, 0.75)
+                              - border-left: 4px solid var(--calendar1-default-primary-color)
+                              - border-radius: 8px
+                              - padding: 6px 10px
+                              - margin-bottom: 6px
+                              - display: grid
+                            grid:
+                              - grid-template-areas: '"i n"'
+                              - grid-template-columns: 28px 1fr
+                              - grid-template-rows: 1fr
+                            icon:
+                              - grid-area: i
+                              - justify-self: center
+                              - width: 22px
+                              - color: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar1-default-primary-color)' : 'white' ]]]
+                            name:
+                              - grid-area: n
+                              - justify-self: start
+                              - padding-left: 8px
+                              - font-size: 0.95em
+                              - text-decoration: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
+                              - opacity: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                        - type: custom:button-card
+                          entity: sensor.satty_choreops_chore_status_test_weekly_satty
+                          name: Weekly
+                          show_state: false
+                          show_icon: true
+                          icon: |
+                            [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                          tap_action: |
+                            [[[
+                              if (states[entity.entity_id].state === 'completed') {
+                                return {action: 'none'};
+                              }
+                              return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.satty_choreops_claim_chore_test_weekly_satty'}};
+                            ]]]
+                          styles:
+                            card:
+                              - background-color: rgba(20, 20, 26, 0.75)
+                              - border-left: 4px solid var(--calendar1-default-primary-color)
+                              - border-radius: 8px
+                              - padding: 6px 10px
+                              - margin-bottom: 6px
+                              - display: grid
+                            grid:
+                              - grid-template-areas: '"i n"'
+                              - grid-template-columns: 28px 1fr
+                              - grid-template-rows: 1fr
+                            icon:
+                              - grid-area: i
+                              - justify-self: center
+                              - width: 22px
+                              - color: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar1-default-primary-color)' : 'white' ]]]
+                            name:
+                              - grid-area: n
+                              - justify-self: start
+                              - padding-left: 8px
+                              - font-size: 0.95em
+                              - text-decoration: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
+                              - opacity: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                        - type: custom:button-card
+                          entity: sensor.satty_choreops_chore_status_test_monthly_satty
+                          name: Monthly
+                          show_state: false
+                          show_icon: true
+                          icon: |
+                            [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                          tap_action: |
+                            [[[
+                              if (states[entity.entity_id].state === 'completed') {
+                                return {action: 'none'};
+                              }
+                              return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.satty_choreops_claim_chore_test_monthly_satty'}};
+                            ]]]
+                          styles:
+                            card:
+                              - background-color: rgba(20, 20, 26, 0.75)
+                              - border-left: 4px solid var(--calendar1-default-primary-color)
+                              - border-radius: 8px
+                              - padding: 6px 10px
+                              - margin-bottom: 6px
+                              - display: grid
+                            grid:
+                              - grid-template-areas: '"i n"'
+                              - grid-template-columns: 28px 1fr
+                              - grid-template-rows: 1fr
+                            icon:
+                              - grid-area: i
+                              - justify-self: center
+                              - width: 22px
+                              - color: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar1-default-primary-color)' : 'white' ]]]
+                            name:
+                              - grid-area: n
+                              - justify-self: start
+                              - padding-left: 8px
+                              - font-size: 0.95em
+                              - text-decoration: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
+                              - opacity: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                        - type: custom:button-card
+                          entity: sensor.satty_choreops_chore_status_test_quarterly_satty
+                          name: Quarterly
+                          show_state: false
+                          show_icon: true
+                          icon: |
+                            [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                          tap_action: |
+                            [[[
+                              if (states[entity.entity_id].state === 'completed') {
+                                return {action: 'none'};
+                              }
+                              return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.satty_choreops_claim_chore_test_quarterly_satty'}};
+                            ]]]
+                          styles:
+                            card:
+                              - background-color: rgba(20, 20, 26, 0.75)
+                              - border-left: 4px solid var(--calendar1-default-primary-color)
+                              - border-radius: 8px
+                              - padding: 6px 10px
+                              - margin-bottom: 6px
+                              - display: grid
+                            grid:
+                              - grid-template-areas: '"i n"'
+                              - grid-template-columns: 28px 1fr
+                              - grid-template-rows: 1fr
+                            icon:
+                              - grid-area: i
+                              - justify-self: center
+                              - width: 22px
+                              - color: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar1-default-primary-color)' : 'white' ]]]
+                            name:
+                              - grid-area: n
+                              - justify-self: start
+                              - padding-left: 8px
+                              - font-size: 0.95em
+                              - text-decoration: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
+                              - opacity: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                  - type: conditional
+                    conditions:
+                      - condition: state
+                        entity: input_text.calendar2_calendar_filter
+                        state: ".*"
+                    card:
+                      type: vertical-stack
+                      cards:
+                        - type: markdown
+                          content: "### Bhavi"
+                          card_mod:
+                            style:
+                              ".": |
+                                ha-card { background: none !important; box-shadow: none !important; border: none !important; padding: 0 0 0.2em 0.3em !important; }
+                              ha-markdown$: |
+                                ha-markdown-element h3 { margin: 0 !important; font-size: 1.3em !important; font-weight: 700 !important; color: var(--calendar2-default-primary-color) !important; }
+                        - type: custom:button-card
+                          entity: sensor.bhavi_choreops_chore_status_vacuum_living_room
+                          name: Vacuum living room
+                          show_state: false
+                          show_icon: true
+                          icon: |
+                            [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                          tap_action: |
+                            [[[
+                              if (states[entity.entity_id].state === 'completed') {
+                                return {action: 'none'};
+                              }
+                              return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.bhavi_choreops_claim_chore_vacuum_living_room'}};
+                            ]]]
+                          styles:
+                            card:
+                              - background-color: rgba(20, 20, 26, 0.75)
+                              - border-left: 4px solid var(--calendar2-default-primary-color)
+                              - border-radius: 8px
+                              - padding: 6px 10px
+                              - margin-bottom: 6px
+                              - display: grid
+                            grid:
+                              - grid-template-areas: '"i n"'
+                              - grid-template-columns: 28px 1fr
+                              - grid-template-rows: 1fr
+                            icon:
+                              - grid-area: i
+                              - justify-self: center
+                              - width: 22px
+                              - color: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar2-default-primary-color)' : 'white' ]]]
+                            name:
+                              - grid-area: n
+                              - justify-self: start
+                              - padding-left: 8px
+                              - font-size: 0.95em
+                              - text-decoration: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
+                              - opacity: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                        - type: custom:button-card
+                          entity: sensor.bhavi_choreops_chore_status_test_daily_bhavi
+                          name: Daily
+                          show_state: false
+                          show_icon: true
+                          icon: |
+                            [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                          tap_action: |
+                            [[[
+                              if (states[entity.entity_id].state === 'completed') {
+                                return {action: 'none'};
+                              }
+                              return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.bhavi_choreops_claim_chore_test_daily_bhavi'}};
+                            ]]]
+                          styles:
+                            card:
+                              - background-color: rgba(20, 20, 26, 0.75)
+                              - border-left: 4px solid var(--calendar2-default-primary-color)
+                              - border-radius: 8px
+                              - padding: 6px 10px
+                              - margin-bottom: 6px
+                              - display: grid
+                            grid:
+                              - grid-template-areas: '"i n"'
+                              - grid-template-columns: 28px 1fr
+                              - grid-template-rows: 1fr
+                            icon:
+                              - grid-area: i
+                              - justify-self: center
+                              - width: 22px
+                              - color: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar2-default-primary-color)' : 'white' ]]]
+                            name:
+                              - grid-area: n
+                              - justify-self: start
+                              - padding-left: 8px
+                              - font-size: 0.95em
+                              - text-decoration: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
+                              - opacity: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                        - type: custom:button-card
+                          entity: sensor.bhavi_choreops_chore_status_test_weekly_bhavi
+                          name: Weekly
+                          show_state: false
+                          show_icon: true
+                          icon: |
+                            [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                          tap_action: |
+                            [[[
+                              if (states[entity.entity_id].state === 'completed') {
+                                return {action: 'none'};
+                              }
+                              return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.bhavi_choreops_claim_chore_test_weekly_bhavi'}};
+                            ]]]
+                          styles:
+                            card:
+                              - background-color: rgba(20, 20, 26, 0.75)
+                              - border-left: 4px solid var(--calendar2-default-primary-color)
+                              - border-radius: 8px
+                              - padding: 6px 10px
+                              - margin-bottom: 6px
+                              - display: grid
+                            grid:
+                              - grid-template-areas: '"i n"'
+                              - grid-template-columns: 28px 1fr
+                              - grid-template-rows: 1fr
+                            icon:
+                              - grid-area: i
+                              - justify-self: center
+                              - width: 22px
+                              - color: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar2-default-primary-color)' : 'white' ]]]
+                            name:
+                              - grid-area: n
+                              - justify-self: start
+                              - padding-left: 8px
+                              - font-size: 0.95em
+                              - text-decoration: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
+                              - opacity: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                        - type: custom:button-card
+                          entity: sensor.bhavi_choreops_chore_status_test_monthly_bhavi
+                          name: Monthly
+                          show_state: false
+                          show_icon: true
+                          icon: |
+                            [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                          tap_action: |
+                            [[[
+                              if (states[entity.entity_id].state === 'completed') {
+                                return {action: 'none'};
+                              }
+                              return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.bhavi_choreops_claim_chore_test_monthly_bhavi'}};
+                            ]]]
+                          styles:
+                            card:
+                              - background-color: rgba(20, 20, 26, 0.75)
+                              - border-left: 4px solid var(--calendar2-default-primary-color)
+                              - border-radius: 8px
+                              - padding: 6px 10px
+                              - margin-bottom: 6px
+                              - display: grid
+                            grid:
+                              - grid-template-areas: '"i n"'
+                              - grid-template-columns: 28px 1fr
+                              - grid-template-rows: 1fr
+                            icon:
+                              - grid-area: i
+                              - justify-self: center
+                              - width: 22px
+                              - color: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar2-default-primary-color)' : 'white' ]]]
+                            name:
+                              - grid-area: n
+                              - justify-self: start
+                              - padding-left: 8px
+                              - font-size: 0.95em
+                              - text-decoration: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
+                              - opacity: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                        - type: custom:button-card
+                          entity: sensor.bhavi_choreops_chore_status_test_quarterly_bhavi
+                          name: Quarterly
+                          show_state: false
+                          show_icon: true
+                          icon: |
+                            [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                          tap_action: |
+                            [[[
+                              if (states[entity.entity_id].state === 'completed') {
+                                return {action: 'none'};
+                              }
+                              return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.bhavi_choreops_claim_chore_test_quarterly_bhavi'}};
+                            ]]]
+                          styles:
+                            card:
+                              - background-color: rgba(20, 20, 26, 0.75)
+                              - border-left: 4px solid var(--calendar2-default-primary-color)
+                              - border-radius: 8px
+                              - padding: 6px 10px
+                              - margin-bottom: 6px
+                              - display: grid
+                            grid:
+                              - grid-template-areas: '"i n"'
+                              - grid-template-columns: 28px 1fr
+                              - grid-template-rows: 1fr
+                            icon:
+                              - grid-area: i
+                              - justify-self: center
+                              - width: 22px
+                              - color: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar2-default-primary-color)' : 'white' ]]]
+                            name:
+                              - grid-area: n
+                              - justify-self: start
+                              - padding-left: 8px
+                              - font-size: 0.95em
+                              - text-decoration: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
+                              - opacity: |
+                                  [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
             grid_options:
               columns: 120
               rows: auto
@@ -692,368 +657,374 @@ views:
       # --- START CALENDAR SECTION (Week Planner Card) ---
       - type: grid
         cards:
-          - type: custom:config-template-card
-            entities:
-              - input_text.calendar1_calendar_filter
-              - input_text.calendar2_calendar_filter
-              - input_text.calendar3_calendar_filter
-              - input_text.calendar4_calendar_filter
-              - input_text.family_calendar_filter
-              - input_select.calendar_view
-            variables:
-              CAL1CAL: states['input_text.calendar1_calendar_filter']?.state
-              CAL2CAL: states['input_text.calendar2_calendar_filter']?.state
-              CAL3CAL: states['input_text.calendar3_calendar_filter']?.state
-              CAL4CAL: states['input_text.calendar4_calendar_filter']?.state
-              FAMCAL: states['input_text.family_calendar_filter']?.state
-              VIEW: states['input_select.calendar_view']?.state
-              STARTDAY: |
-                (() => {
-                  const calendarView = states['input_select.calendar_view']?.state;
-                  if (calendarView === 'Today') return 'today';
-                  if (calendarView === 'Tomorrow') return 'tomorrow';
-                  // Fallback (valid values: monday, tuesday, wednesday, thursday, friday, saturday, sunday)
-                  return 'monday';
-                })()
-              DAYS: |
-                (() => {
-                  const calendarView = states['input_select.calendar_view']?.state;
-                  if (calendarView === 'Today') return 1;
-                  if (calendarView === 'Tomorrow') return 2;
-                  if (calendarView === 'Week') return 7;
-                  if (calendarView === 'Biweek') return 14;
-                  // else return "month"
-                  return "month";
-                })()
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: input_boolean.family_calendar_show
+                state: "on"
             card:
-              type: custom:week-planner-card
-              calendars:
-                # --- MAP CALENDARS HERE ---
-                - entity: calendar.srnarayanan1989_gmail_com
-                  name: Satty
-                  color: "var(--calendar1-default-primary-color)"
-                  filter: ${ CAL1CAL }
-                - entity: calendar.160294bpl_gmail_com
-                  name: Bhavi
-                  color: "var(--calendar2-default-primary-color)"
-                  filter: ${ CAL2CAL }
-              days: ${ DAYS }
-              startingDay: ${ STARTDAY }
-              showNavigation: true
-              showWeekDayText: false # <--- Requires week-planner-card v1.13.0 or higher
-              startingDayOffset: 0
-              hideWeekend: false
-              noCardBackground: false
-              compact: false
-              weather:
-                showCondition: true
-                showTemperature: true
-                showLowTemperature: true
-                useTwiceDaily: false
-                entity: weather.forecast_home
-              locale: en
-              showLocation: true
-              hidePastEvents: false
-              hideDaysWithoutEvents: false
-              hideTodayWithoutEvents: false
-              combineSimilarEvents: true
-              showLegend: false
-              legendToggle: false
-              card_mod:
-                style: |
-                    /* === BASE SAFETY === */
-                    :host {
-                      overflow: hidden;
-                    }
-
-                    /* === CARD BASE === */
-                    ha-card {
-                      background: rgba(20, 20, 26, 0.75) !important;
-                      border-radius: 24px !important;
-                      box-shadow: none !important;
-                      height: clamp(480px, 70vh, 900px) !important;
-                      max-height: clamp(480px, 70vh, 900px) !important;
-                    }
-
-                    /* === GRID LAYOUT === */
-                    .container {
-                      display: grid !important;
-                      grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
-                      grid-auto-flow: row dense !important;
-                      gap: 0 !important;
-                    }
-
-                    /* Today/Tomorrow views render only 1-2 .day cells, but the
-                       header/navigation row spans "1 / -1" across whatever column
-                       count is declared above, which stops auto-fit from collapsing
-                       the unused columns (they're not "empty" - the spanning header
-                       occupies them). So instead of relying on auto-fit, explicitly
-                       redeclare the column count based on how many .day cells the
-                       card actually rendered. */
-                    .container:not(:has(.day ~ .day)) {
-                      grid-template-columns: 1fr !important;
-                    }
-                    .container:has(.day ~ .day):not(:has(.day ~ .day ~ .day)) {
-                      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-                    }
-
-                    .container .navigation,
-                    .container .header {
-                      grid-column: 1 / -1 !important;
-                    }
-
-                    /* WEEKDAY LABEL CELLS */
-                    .day.header {
-                      display: block !important;
-                      grid-column: auto !important;
-                      margin: 0 !important;
-                      padding: 0.2em !important;
-                      text-align: center !important;
-                      box-sizing: border-box !important;
-                    }
-
-                    .day.header .date .text {
-                      font-weight: 600 !important;
-                    }
-
-                    /* === DAY TILES === */
-                    .day {
-                      border: solid 1px rgba(255, 255, 255, 0.15) !important;
-                      padding: 0.2% !important;
-                      width: auto !important;
-                      min-width: 0 !important;
-                      margin: 0 !important;
-                      box-sizing: border-box !important;
-                      align-self: stretch !important;
-                      justify-self: stretch !important;
-                      container-type: inline-size !important;
-                      container-name: daycell !important;
-                    }
-
-                    /* === YOUR ORIGINAL VISUAL RULES === */
-                    .event.past {
-                      opacity: .2 !important;
-                      background-color: gray !important;
-                    }
-
-                    .time {
-                      color: #e0e0e0 !important;
-                      font-size: 0.8em !important;
-                    }
-
-                    .event {
-                      color: #f0f0f0 !important;
-                      line-height: 16px !important;
-                      background-color: var(--border-color) !important;
-                      border-radius: 10px !important;
-                      max-height: 80px !important;
-                      overflow: hidden !important;
-                      font-size: 1.1em !important;
-                    }
-
-                    .none {
-                      background-color: transparent !important;
-                    }
-
-                    .today .number {
-                      border-radius: 5px !important;
-                      background-color: orange !important;
-                      padding-left: 4px !important;
-                      padding-right: 4px !important;
-                    }
-
-                    .day .date .text {
-                      font-size: 1em !important;
-                      font-weight: bold !important;
-                    }
-
-                    .day .date .number {
-                      font-weight: bold !important;
-                      font-size: 3em !important;
-                    }
-
-                    /* Weekday colors */
-                    
-                    /* When showWeekDayText is true */
-                    .day[data-weekday="1"] .date .text,
-                    .day[data-weekday="2"] .date .text,
-                    .day[data-weekday="3"] .date .text,
-                    .day[data-weekday="4"] .date .text,
-                    .day[data-weekday="5"] .date .text {
-                      color: #2e7d32 !important;
-                    }
-
-                    .day[data-weekday="6"] .date .text,
-                    .day[data-weekday="7"] .date .text {
-                      color: #d32f2f !important;
-                    }
-                    /* When showWeekDayText is false */
-                    .container > .day.header .text {
-                      color: #2e7d32 !important;
-                    }
-                    /* Saturday = column 7 */
-                    .container > .day.header:nth-of-type(7) .text {
-                      color: #d32f2f !important;
-                    }
-                    /* Sunday = column 8 */
-                    .container > .day.header:nth-of-type(8) .text {
-                      color: #d32f2f !important;
-                    }
-
-
-                    /* === RESPONSIVE BREAKPOINTS === */
-                    @media (max-width: 1024px) {
-                      .day .date .number { font-size: 2em !important; }
-                      .day .date .text   { font-size: 0.95em !important; }
-                    }
-
-                    @media (max-width: 768px) {
-                      .day .date .number { font-size: 1.6em !important; }
-                      .day .date .text   { font-size: 0.85em !important; }
-                      .event { font-size: 0.85em !important; line-height: 1.1em !important; }
-                      .time  { font-size: 0.75em !important; }
-                    }
-
-                    /* ========================================================= */
-                    /* === MOBILE OVERLAP FIX + TWO‑LINE WRAP FOR TITLES ======== */
-                    /* ========================================================= */
-                    @media (max-width: 480px) {
-
+              type: custom:config-template-card
+              entities:
+                - input_text.calendar1_calendar_filter
+                - input_text.calendar2_calendar_filter
+                - input_text.calendar3_calendar_filter
+                - input_text.calendar4_calendar_filter
+                - input_text.family_calendar_filter
+                - input_select.calendar_view
+              variables:
+                CAL1CAL: states['input_text.calendar1_calendar_filter']?.state
+                CAL2CAL: states['input_text.calendar2_calendar_filter']?.state
+                CAL3CAL: states['input_text.calendar3_calendar_filter']?.state
+                CAL4CAL: states['input_text.calendar4_calendar_filter']?.state
+                FAMCAL: states['input_text.family_calendar_filter']?.state
+                VIEW: states['input_select.calendar_view']?.state
+                STARTDAY: |
+                  (() => {
+                    const calendarView = states['input_select.calendar_view']?.state;
+                    if (calendarView === 'Today') return 'today';
+                    if (calendarView === 'Tomorrow') return 'tomorrow';
+                    // Fallback (valid values: monday, tuesday, wednesday, thursday, friday, saturday, sunday)
+                    return 'monday';
+                  })()
+                DAYS: |
+                  (() => {
+                    const calendarView = states['input_select.calendar_view']?.state;
+                    if (calendarView === 'Today') return 1;
+                    if (calendarView === 'Tomorrow') return 2;
+                    if (calendarView === 'Week') return 7;
+                    if (calendarView === 'Biweek') return 14;
+                    // else return "month"
+                    return "month";
+                  })()
+              card:
+                type: custom:week-planner-card
+                calendars:
+                  # --- MAP CALENDARS HERE ---
+                  - entity: calendar.srnarayanan1989_gmail_com
+                    name: Satty
+                    color: "var(--calendar1-default-primary-color)"
+                    filter: ${ CAL1CAL }
+                  - entity: calendar.160294bpl_gmail_com
+                    name: Bhavi
+                    color: "var(--calendar2-default-primary-color)"
+                    filter: ${ CAL2CAL }
+                days: ${ DAYS }
+                startingDay: ${ STARTDAY }
+                showNavigation: true
+                showWeekDayText: false # <--- Requires week-planner-card v1.13.0 or higher
+                startingDayOffset: 0
+                hideWeekend: false
+                noCardBackground: false
+                compact: false
+                weather:
+                  showCondition: true
+                  showTemperature: true
+                  showLowTemperature: true
+                  useTwiceDaily: false
+                  entity: weather.forecast_home
+                locale: en
+                showLocation: true
+                hidePastEvents: false
+                hideDaysWithoutEvents: false
+                hideTodayWithoutEvents: false
+                combineSimilarEvents: true
+                showLegend: false
+                legendToggle: false
+                card_mod:
+                  style: |
+                      /* === BASE SAFETY === */
                       :host {
-                        font-size: clamp(10px, 2.6vw, 13px) !important;
+                        overflow: hidden;
                       }
 
-                      /* Condensed headers */
-                      .container .header,
-                      .container .navigation {
-                        padding: 0.25em 0.4em !important;
+                      /* === CARD BASE === */
+                      ha-card {
+                        background: rgba(20, 20, 26, 0.75) !important;
+                        border-radius: 24px !important;
+                        box-shadow: none !important;
+                        height: clamp(480px, 70vh, 900px) !important;
+                        max-height: clamp(480px, 70vh, 900px) !important;
                       }
 
-                      /* Day tiles tighter */
+                      /* === GRID LAYOUT === */
+                      .container {
+                        display: grid !important;
+                        grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+                        grid-auto-flow: row dense !important;
+                        gap: 0 !important;
+                      }
+
+                      /* Today/Tomorrow views render only 1-2 .day cells, but the
+                         header/navigation row spans "1 / -1" across whatever column
+                         count is declared above, which stops auto-fit from collapsing
+                         the unused columns (they're not "empty" - the spanning header
+                         occupies them). So instead of relying on auto-fit, explicitly
+                         redeclare the column count based on how many .day cells the
+                         card actually rendered. */
+                      .container:not(:has(.day ~ .day)) {
+                        grid-template-columns: 1fr !important;
+                      }
+                      .container:has(.day ~ .day):not(:has(.day ~ .day ~ .day)) {
+                        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                      }
+
+                      .container .navigation,
+                      .container .header {
+                        grid-column: 1 / -1 !important;
+                      }
+
+                      /* WEEKDAY LABEL CELLS */
+                      .day.header {
+                        display: block !important;
+                        grid-column: auto !important;
+                        margin: 0 !important;
+                        padding: 0.2em !important;
+                        text-align: center !important;
+                        box-sizing: border-box !important;
+                      }
+
+                      .day.header .date .text {
+                        font-weight: 600 !important;
+                      }
+
+                      /* === DAY TILES === */
                       .day {
-                        padding: 0.15em !important;
+                        border: solid 1px rgba(255, 255, 255, 0.15) !important;
+                        padding: 0.2% !important;
+                        width: auto !important;
                         min-width: 0 !important;
+                        margin: 0 !important;
+                        box-sizing: border-box !important;
+                        align-self: stretch !important;
+                        justify-self: stretch !important;
+                        container-type: inline-size !important;
+                        container-name: daycell !important;
                       }
 
-                      /* Smaller date numbers */
-                      .day .date .number {
-                        font-size: clamp(1.1em, 4.5vw, 1.4em) !important;
-                        line-height: 1.1 !important;
-                      }
-                      .day .date .text {
-                        font-size: clamp(0.72em, 3.2vw, 0.85em) !important;
-                        line-height: 1.1 !important;
-                      }
-
-                      /* Event chip reduced */
-                      .event {
-                        font-size: clamp(0.72em, 2.9vw, 0.85em) !important;
-                        line-height: 1.05em !important;
-                        padding: 0.25em 0.35em !important;
-                        max-height: 62px !important;
+                      /* === YOUR ORIGINAL VISUAL RULES === */
+                      .event.past {
+                        opacity: .2 !important;
+                        background-color: gray !important;
                       }
 
                       .time {
-                        font-size: clamp(0.65em, 2.5vw, 0.78em) !important;
-                      }
-
-                      /* === TWO-LINE WRAP FOR TITLES === */
-                      .event .title,
-                      .event .name,
-                      .event .summary,
-                      .event .location,
-                      .event .desc,
-                      .event .description {
-                        display: -webkit-box !important;
-                        -webkit-box-orient: vertical !important;
-                        -webkit-line-clamp: 2 !important;   /* <<< Two lines max */
-                        overflow: hidden !important;
-                        text-overflow: ellipsis !important;
-                        white-space: normal !important;
-                        line-height: 1.1em !important;
-                        max-height: calc(1.1em * 2) !important;
-                      }
-                    }
-
-                    /* Slightly larger phones / small tablets */
-                    @media (min-width: 481px) and (max-width: 768px) {
-
-                      :host {
-                        font-size: clamp(11px, 2.2vw, 14px) !important;
+                        color: #e0e0e0 !important;
+                        font-size: 0.8em !important;
                       }
 
                       .event {
-                        max-height: 72px !important;
-                      }
-
-                      .event .title,
-                      .event .name,
-                      .event .summary {
-                        display: -webkit-box !important;
-                        -webkit-line-clamp: 2 !important;
+                        color: #f0f0f0 !important;
+                        line-height: 16px !important;
+                        background-color: var(--border-color) !important;
+                        border-radius: 10px !important;
+                        max-height: 80px !important;
                         overflow: hidden !important;
-                      }
-                    }
-
-                    /* === WIDE DAY CELL (Today/Tomorrow views: 1-2 days fill the row) ===
-                       Must stay LAST in this stylesheet: it has to win the cascade over
-                       the unconditional ".day .date .number { font-size: 3em }" etc.
-                       rules above. Both are !important with equal specificity, so with
-                       @container earlier in the file the plain rule below always won
-                       regardless of whether the container query matched - this was
-                       silently broken (verified: container-type/name were set correctly
-                       and the .day element WAS >260px wide, but font-size stayed at the
-                       narrow-cell 3em) until this block was moved here.
-                       The .weather badge keeps the card's own top-right absolute
-                       positioning (just made more compact + single-line), since in a
-                       wide cell the date number no longer stretches far enough right
-                       to collide with it once padded off the edge. */
-                    @container daycell (min-width: 260px) {
-                      .day .date {
-                        display: flex !important;
-                        align-items: baseline !important;
-                        gap: 0.4em !important;
-                        padding: 0.3em 0.5em !important;
-                      }
-                      .day .date .number {
-                        font-size: 5em !important;
-                        line-height: 1 !important;
-                      }
-                      .day .date .text {
-                        font-size: 1.4em !important;
-                      }
-                      .day .weather {
-                        position: absolute !important;
-                        top: 0.5em !important;
-                        right: 0.7em !important;
-                        display: flex !important;
-                        align-items: center !important;
-                        gap: 0.4em !important;
-                        width: auto !important;
-                      }
-                      .day .weather .temperature {
-                        display: flex !important;
-                        flex-direction: row !important;
-                        gap: 0.3em !important;
                         font-size: 1.1em !important;
-                        white-space: nowrap !important;
                       }
-                      .day .weather .icon img {
-                        width: 32px !important;
-                        height: 32px !important;
+
+                      .none {
+                        background-color: transparent !important;
                       }
-                      .day .events {
-                        padding: 0 0.5em !important;
+
+                      .today .number {
+                        border-radius: 5px !important;
+                        background-color: orange !important;
+                        padding-left: 4px !important;
+                        padding-right: 4px !important;
                       }
-                      .day .event {
-                        font-size: 1.3em !important;
-                        padding: 0.5em 0.7em !important;
+
+                      .day .date .text {
+                        font-size: 1em !important;
+                        font-weight: bold !important;
                       }
-                    }
-            grid_options:
-              columns: 120
-              rows: auto
-              showDescription: false
+
+                      .day .date .number {
+                        font-weight: bold !important;
+                        font-size: 3em !important;
+                      }
+
+                      /* Weekday colors */
+                    
+                      /* When showWeekDayText is true */
+                      .day[data-weekday="1"] .date .text,
+                      .day[data-weekday="2"] .date .text,
+                      .day[data-weekday="3"] .date .text,
+                      .day[data-weekday="4"] .date .text,
+                      .day[data-weekday="5"] .date .text {
+                        color: #2e7d32 !important;
+                      }
+
+                      .day[data-weekday="6"] .date .text,
+                      .day[data-weekday="7"] .date .text {
+                        color: #d32f2f !important;
+                      }
+                      /* When showWeekDayText is false */
+                      .container > .day.header .text {
+                        color: #2e7d32 !important;
+                      }
+                      /* Saturday = column 7 */
+                      .container > .day.header:nth-of-type(7) .text {
+                        color: #d32f2f !important;
+                      }
+                      /* Sunday = column 8 */
+                      .container > .day.header:nth-of-type(8) .text {
+                        color: #d32f2f !important;
+                      }
+
+
+                      /* === RESPONSIVE BREAKPOINTS === */
+                      @media (max-width: 1024px) {
+                        .day .date .number { font-size: 2em !important; }
+                        .day .date .text   { font-size: 0.95em !important; }
+                      }
+
+                      @media (max-width: 768px) {
+                        .day .date .number { font-size: 1.6em !important; }
+                        .day .date .text   { font-size: 0.85em !important; }
+                        .event { font-size: 0.85em !important; line-height: 1.1em !important; }
+                        .time  { font-size: 0.75em !important; }
+                      }
+
+                      /* ========================================================= */
+                      /* === MOBILE OVERLAP FIX + TWO‑LINE WRAP FOR TITLES ======== */
+                      /* ========================================================= */
+                      @media (max-width: 480px) {
+
+                        :host {
+                          font-size: clamp(10px, 2.6vw, 13px) !important;
+                        }
+
+                        /* Condensed headers */
+                        .container .header,
+                        .container .navigation {
+                          padding: 0.25em 0.4em !important;
+                        }
+
+                        /* Day tiles tighter */
+                        .day {
+                          padding: 0.15em !important;
+                          min-width: 0 !important;
+                        }
+
+                        /* Smaller date numbers */
+                        .day .date .number {
+                          font-size: clamp(1.1em, 4.5vw, 1.4em) !important;
+                          line-height: 1.1 !important;
+                        }
+                        .day .date .text {
+                          font-size: clamp(0.72em, 3.2vw, 0.85em) !important;
+                          line-height: 1.1 !important;
+                        }
+
+                        /* Event chip reduced */
+                        .event {
+                          font-size: clamp(0.72em, 2.9vw, 0.85em) !important;
+                          line-height: 1.05em !important;
+                          padding: 0.25em 0.35em !important;
+                          max-height: 62px !important;
+                        }
+
+                        .time {
+                          font-size: clamp(0.65em, 2.5vw, 0.78em) !important;
+                        }
+
+                        /* === TWO-LINE WRAP FOR TITLES === */
+                        .event .title,
+                        .event .name,
+                        .event .summary,
+                        .event .location,
+                        .event .desc,
+                        .event .description {
+                          display: -webkit-box !important;
+                          -webkit-box-orient: vertical !important;
+                          -webkit-line-clamp: 2 !important;   /* <<< Two lines max */
+                          overflow: hidden !important;
+                          text-overflow: ellipsis !important;
+                          white-space: normal !important;
+                          line-height: 1.1em !important;
+                          max-height: calc(1.1em * 2) !important;
+                        }
+                      }
+
+                      /* Slightly larger phones / small tablets */
+                      @media (min-width: 481px) and (max-width: 768px) {
+
+                        :host {
+                          font-size: clamp(11px, 2.2vw, 14px) !important;
+                        }
+
+                        .event {
+                          max-height: 72px !important;
+                        }
+
+                        .event .title,
+                        .event .name,
+                        .event .summary {
+                          display: -webkit-box !important;
+                          -webkit-line-clamp: 2 !important;
+                          overflow: hidden !important;
+                        }
+                      }
+
+                      /* === WIDE DAY CELL (Today/Tomorrow views: 1-2 days fill the row) ===
+                         Must stay LAST in this stylesheet: it has to win the cascade over
+                         the unconditional ".day .date .number { font-size: 3em }" etc.
+                         rules above. Both are !important with equal specificity, so with
+                         @container earlier in the file the plain rule below always won
+                         regardless of whether the container query matched - this was
+                         silently broken (verified: container-type/name were set correctly
+                         and the .day element WAS >260px wide, but font-size stayed at the
+                         narrow-cell 3em) until this block was moved here.
+                         The .weather badge keeps the card's own top-right absolute
+                         positioning (just made more compact + single-line), since in a
+                         wide cell the date number no longer stretches far enough right
+                         to collide with it once padded off the edge. */
+                      @container daycell (min-width: 260px) {
+                        .day .date {
+                          display: flex !important;
+                          align-items: baseline !important;
+                          gap: 0.4em !important;
+                          padding: 0.3em 0.5em !important;
+                        }
+                        .day .date .number {
+                          font-size: 5em !important;
+                          line-height: 1 !important;
+                        }
+                        .day .date .text {
+                          font-size: 1.4em !important;
+                        }
+                        .day .weather {
+                          position: absolute !important;
+                          top: 0.5em !important;
+                          right: 0.7em !important;
+                          display: flex !important;
+                          align-items: center !important;
+                          gap: 0.4em !important;
+                          width: auto !important;
+                        }
+                        .day .weather .temperature {
+                          display: flex !important;
+                          flex-direction: row !important;
+                          gap: 0.3em !important;
+                          font-size: 1.1em !important;
+                          white-space: nowrap !important;
+                        }
+                        .day .weather .icon img {
+                          width: 32px !important;
+                          height: 32px !important;
+                        }
+                        .day .events {
+                          padding: 0 0.5em !important;
+                        }
+                        .day .event {
+                          font-size: 1.3em !important;
+                          padding: 0.5em 0.7em !important;
+                        }
+                      }
+              grid_options:
+                columns: 120
+                rows: auto
+                showDescription: false
         column_span: 10
       # --- End CALENDAR SECTION (Week Planner Card) ---
       # --- START POPUP SECTION (Hidden) ---

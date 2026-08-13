@@ -83,7 +83,9 @@ input_boolean:
     name: All Day Event
     icon: mdi:calendar-clock
   family_calendar_show:
-    name: Show Family Calendar
+    name: Show Events
+    icon: mdi:calendar-eye
+    initial: false
 
 # 2. SCRIPTS (The Logic)
 script:
