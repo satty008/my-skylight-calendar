@@ -209,6 +209,8 @@ views:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 24px 28px 1fr
                                     - grid-template-rows: 1fr
+                                    - width: 100%
+                                    - justify-content: stretch
                                   custom_fields:
                                     photo:
                                       - justify-self: start
@@ -265,6 +267,8 @@ views:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 24px 28px 1fr
                                     - grid-template-rows: 1fr
+                                    - width: 100%
+                                    - justify-content: stretch
                                   custom_fields:
                                     photo:
                                       - justify-self: start
@@ -321,6 +325,8 @@ views:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 24px 28px 1fr
                                     - grid-template-rows: 1fr
+                                    - width: 100%
+                                    - justify-content: stretch
                                   custom_fields:
                                     photo:
                                       - justify-self: start
@@ -377,6 +383,8 @@ views:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 24px 28px 1fr
                                     - grid-template-rows: 1fr
+                                    - width: 100%
+                                    - justify-content: stretch
                                   custom_fields:
                                     photo:
                                       - justify-self: start
@@ -433,6 +441,8 @@ views:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 24px 28px 1fr
                                     - grid-template-rows: 1fr
+                                    - width: 100%
+                                    - justify-content: stretch
                                   custom_fields:
                                     photo:
                                       - justify-self: start
@@ -493,6 +503,8 @@ views:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
                                     - grid-template-rows: 1fr
+                                    - width: 100%
+                                    - justify-content: stretch
                                   custom_fields:
                                     photo:
                                       - justify-self: start
@@ -540,6 +552,8 @@ views:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
                                     - grid-template-rows: 1fr
+                                    - width: 100%
+                                    - justify-content: stretch
                                   custom_fields:
                                     photo:
                                       - justify-self: start
@@ -587,6 +601,8 @@ views:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
                                     - grid-template-rows: 1fr
+                                    - width: 100%
+                                    - justify-content: stretch
                                   custom_fields:
                                     photo:
                                       - justify-self: start
@@ -634,6 +650,8 @@ views:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
                                     - grid-template-rows: 1fr
+                                    - width: 100%
+                                    - justify-content: stretch
                                   custom_fields:
                                     photo:
                                       - justify-self: start
@@ -681,6 +699,8 @@ views:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
                                     - grid-template-rows: 1fr
+                                    - width: 100%
+                                    - justify-content: stretch
                                   custom_fields:
                                     photo:
                                       - justify-self: start
@@ -757,6 +777,8 @@ views:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 24px 28px 1fr
                                     - grid-template-rows: 1fr
+                                    - width: 100%
+                                    - justify-content: stretch
                                   custom_fields:
                                     photo:
                                       - justify-self: start
@@ -813,6 +835,8 @@ views:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 24px 28px 1fr
                                     - grid-template-rows: 1fr
+                                    - width: 100%
+                                    - justify-content: stretch
                                   custom_fields:
                                     photo:
                                       - justify-self: start
@@ -869,6 +893,8 @@ views:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 24px 28px 1fr
                                     - grid-template-rows: 1fr
+                                    - width: 100%
+                                    - justify-content: stretch
                                   custom_fields:
                                     photo:
                                       - justify-self: start
@@ -925,6 +951,8 @@ views:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 24px 28px 1fr
                                     - grid-template-rows: 1fr
+                                    - width: 100%
+                                    - justify-content: stretch
                                   custom_fields:
                                     photo:
                                       - justify-self: start
@@ -981,6 +1009,8 @@ views:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 24px 28px 1fr
                                     - grid-template-rows: 1fr
+                                    - width: 100%
+                                    - justify-content: stretch
                                   custom_fields:
                                     photo:
                                       - justify-self: start
@@ -1041,6 +1071,8 @@ views:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
                                     - grid-template-rows: 1fr
+                                    - width: 100%
+                                    - justify-content: stretch
                                   custom_fields:
                                     photo:
                                       - justify-self: start
@@ -1088,6 +1120,8 @@ views:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
                                     - grid-template-rows: 1fr
+                                    - width: 100%
+                                    - justify-content: stretch
                                   custom_fields:
                                     photo:
                                       - justify-self: start
@@ -1135,6 +1169,8 @@ views:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
                                     - grid-template-rows: 1fr
+                                    - width: 100%
+                                    - justify-content: stretch
                                   custom_fields:
                                     photo:
                                       - justify-self: start
@@ -1182,6 +1218,8 @@ views:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
                                     - grid-template-rows: 1fr
+                                    - width: 100%
+                                    - justify-content: stretch
                                   custom_fields:
                                     photo:
                                       - justify-self: start
@@ -1229,6 +1267,8 @@ views:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
                                     - grid-template-rows: 1fr
+                                    - width: 100%
+                                    - justify-content: stretch
                                   custom_fields:
                                     photo:
                                       - justify-self: start
