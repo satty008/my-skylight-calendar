@@ -90,23 +90,41 @@ input_boolean:
 # 2. SCRIPTS (The Logic)
 script:
   # --- Filter Toggles ---
+  # Exclusive select: tapping a person isolates their calendar+chores
+  # (hides the other person); tapping the same person again while they're
+  # the only one shown resets back to showing both. Tapping the OTHER
+  # button always isolates to that other person, regardless of prior state.
   calendar1_calendar_visible_filter:
-    alias: Toggle calendar1 Calendar
+    alias: Toggle calendar1 Calendar (exclusive select)
     sequence:
+      - variables:
+          only_calendar1_shown: "{{ is_state('input_text.calendar1_calendar_filter', '.*') and is_state('input_text.calendar2_calendar_filter', '^$') }}"
       - action: input_text.set_value
         target:
           entity_id: input_text.calendar1_calendar_filter
         data:
-          value: "{% if is_state('input_text.calendar1_calendar_filter', '.*') %}^${% else %}.*{% endif %}"
-
-  calendar2_calendar_visible_filter:
-    alias: Toggle calendar2 Calendar
-    sequence:
+          value: ".*"
       - action: input_text.set_value
         target:
           entity_id: input_text.calendar2_calendar_filter
         data:
-          value: "{% if is_state('input_text.calendar2_calendar_filter', '.*') %}^${% else %}.*{% endif %}"
+          value: "{% if only_calendar1_shown %}.*{% else %}^${% endif %}"
+
+  calendar2_calendar_visible_filter:
+    alias: Toggle calendar2 Calendar (exclusive select)
+    sequence:
+      - variables:
+          only_calendar2_shown: "{{ is_state('input_text.calendar2_calendar_filter', '.*') and is_state('input_text.calendar1_calendar_filter', '^$') }}"
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.calendar2_calendar_filter
+        data:
+          value: ".*"
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.calendar1_calendar_filter
+        data:
+          value: "{% if only_calendar2_shown %}.*{% else %}^${% endif %}"
 
   calendar3_calendar_visible_filter:
     alias: Toggle calendar3 Calendar

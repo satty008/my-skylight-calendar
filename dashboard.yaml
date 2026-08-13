@@ -150,15 +150,16 @@ views:
       # (button.<person>_choreops_claim_chore_<chore> /
       #  button.<person>_choreops_disapprove_chore_<chore>).
       # This is the single "main" block (date/weather header + two chore
-      # columns) - no separate calendar block sits alongside it by default.
-      # Each person's column is a name heading + their chores stacked
-      # vertically, and is wrapped in a `conditional` card keyed off the
-      # SAME input_text.calendar1/2_calendar_filter helpers the Satty/Bhavi
-      # buttons above already toggle (".*" = shown, "^$" = hidden), so
-      # selecting a person filters both their calendar events AND their
-      # chore column together. The actual Google Calendar (week-planner-card)
-      # section further below is hidden by default and only appears when
-      # "Show Events" (input_boolean.family_calendar_show) is toggled on.
+      # columns) - no separate calendar block sits alongside it by default,
+      # and no avatar/name column header either - the Satty/Bhavi buttons in
+      # the controls row above are the only "profile card", and now act as an
+      # exclusive selector (see calendar1/2_calendar_visible_filter scripts in
+      # packages/family_calendar.yaml): tapping a person isolates their column,
+      # tapping them again (while isolated) resets to showing both. Below each
+      # person's today list is a dimmed "Tomorrow" preview - the same chore
+      # tiles again, individually hidden via a JS due_date-vs-tomorrow check on
+      # each button-card, non-interactive (tap_action: none), so the family can
+      # see what's coming without being able to complete it early.
       - type: grid
         cards:
           - type: vertical-stack
@@ -215,18 +216,6 @@ views:
                     card:
                       type: vertical-stack
                       cards:
-                        - type: markdown
-                          content: |
-                            <div>
-                              <img src="{{ state_attr('person.ram_sambamurthy','entity_picture') }}">
-                            </div>
-                          card_mod:
-                            style:
-                              ".": |
-                                ha-card { background: none !important; box-shadow: none !important; border: none !important; padding: 0 0 0.4em 0 !important; }
-                              ha-markdown$: |
-                                ha-markdown-element > div { display: flex !important; justify-content: center !important; }
-                                ha-markdown-element > div > img { width: 56px !important; height: 56px !important; border-radius: 50% !important; object-fit: cover !important; border: 2px solid var(--calendar1-default-primary-color) !important; }
                         - type: custom:button-card
                           entity: sensor.satty_choreops_chore_status_take_out_trash
                           name: Take out trash
@@ -432,6 +421,214 @@ views:
                                   [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
                               - opacity: |
                                   [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                        - type: markdown
+                          content: "**Tomorrow**"
+                          card_mod:
+                            style:
+                              ".": |
+                                ha-card { background: none !important; box-shadow: none !important; border: none !important; padding: 0.6em 0 0.3em 0.3em !important; }
+                              ha-markdown$: |
+                                ha-markdown-element strong { font-size: 0.8em !important; font-weight: 700 !important; color: #888 !important; text-transform: uppercase !important; letter-spacing: 0.06em !important; }
+                        - type: custom:button-card
+                          entity: sensor.satty_choreops_chore_status_take_out_trash
+                          name: Take out trash
+                          show_state: false
+                          show_icon: true
+                          icon: mdi:clock-outline
+                          tap_action:
+                            action: none
+                          styles:
+                            card:
+                              - background-color: rgba(20, 20, 26, 0.4)
+                              - border-left: 4px solid var(--calendar1-default-primary-color)
+                              - border-radius: 8px
+                              - padding: 5px 10px
+                              - margin-bottom: 6px
+                              - opacity: "0.6"
+                              - display: |
+                                  [[[
+                                    const due = states[entity.entity_id].attributes.due_date;
+                                    if (!due) return 'none';
+                                    const d = new Date(due);
+                                    const t = new Date();
+                                    t.setDate(t.getDate() + 1);
+                                    const same = d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate();
+                                    return same ? 'grid' : 'none';
+                                  ]]]
+                            grid:
+                              - grid-template-areas: '"i n"'
+                              - grid-template-columns: 28px 1fr
+                              - grid-template-rows: 1fr
+                            icon:
+                              - grid-area: i
+                              - justify-self: center
+                              - width: 16px
+                              - color: "#999"
+                            name:
+                              - grid-area: n
+                              - justify-self: start
+                              - padding-left: 8px
+                              - font-size: 0.85em
+                        - type: custom:button-card
+                          entity: sensor.satty_choreops_chore_status_test_daily_satty
+                          name: Daily
+                          show_state: false
+                          show_icon: true
+                          icon: mdi:clock-outline
+                          tap_action:
+                            action: none
+                          styles:
+                            card:
+                              - background-color: rgba(20, 20, 26, 0.4)
+                              - border-left: 4px solid var(--calendar1-default-primary-color)
+                              - border-radius: 8px
+                              - padding: 5px 10px
+                              - margin-bottom: 6px
+                              - opacity: "0.6"
+                              - display: |
+                                  [[[
+                                    const due = states[entity.entity_id].attributes.due_date;
+                                    if (!due) return 'none';
+                                    const d = new Date(due);
+                                    const t = new Date();
+                                    t.setDate(t.getDate() + 1);
+                                    const same = d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate();
+                                    return same ? 'grid' : 'none';
+                                  ]]]
+                            grid:
+                              - grid-template-areas: '"i n"'
+                              - grid-template-columns: 28px 1fr
+                              - grid-template-rows: 1fr
+                            icon:
+                              - grid-area: i
+                              - justify-self: center
+                              - width: 16px
+                              - color: "#999"
+                            name:
+                              - grid-area: n
+                              - justify-self: start
+                              - padding-left: 8px
+                              - font-size: 0.85em
+                        - type: custom:button-card
+                          entity: sensor.satty_choreops_chore_status_test_weekly_satty
+                          name: Weekly
+                          show_state: false
+                          show_icon: true
+                          icon: mdi:clock-outline
+                          tap_action:
+                            action: none
+                          styles:
+                            card:
+                              - background-color: rgba(20, 20, 26, 0.4)
+                              - border-left: 4px solid var(--calendar1-default-primary-color)
+                              - border-radius: 8px
+                              - padding: 5px 10px
+                              - margin-bottom: 6px
+                              - opacity: "0.6"
+                              - display: |
+                                  [[[
+                                    const due = states[entity.entity_id].attributes.due_date;
+                                    if (!due) return 'none';
+                                    const d = new Date(due);
+                                    const t = new Date();
+                                    t.setDate(t.getDate() + 1);
+                                    const same = d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate();
+                                    return same ? 'grid' : 'none';
+                                  ]]]
+                            grid:
+                              - grid-template-areas: '"i n"'
+                              - grid-template-columns: 28px 1fr
+                              - grid-template-rows: 1fr
+                            icon:
+                              - grid-area: i
+                              - justify-self: center
+                              - width: 16px
+                              - color: "#999"
+                            name:
+                              - grid-area: n
+                              - justify-self: start
+                              - padding-left: 8px
+                              - font-size: 0.85em
+                        - type: custom:button-card
+                          entity: sensor.satty_choreops_chore_status_test_monthly_satty
+                          name: Monthly
+                          show_state: false
+                          show_icon: true
+                          icon: mdi:clock-outline
+                          tap_action:
+                            action: none
+                          styles:
+                            card:
+                              - background-color: rgba(20, 20, 26, 0.4)
+                              - border-left: 4px solid var(--calendar1-default-primary-color)
+                              - border-radius: 8px
+                              - padding: 5px 10px
+                              - margin-bottom: 6px
+                              - opacity: "0.6"
+                              - display: |
+                                  [[[
+                                    const due = states[entity.entity_id].attributes.due_date;
+                                    if (!due) return 'none';
+                                    const d = new Date(due);
+                                    const t = new Date();
+                                    t.setDate(t.getDate() + 1);
+                                    const same = d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate();
+                                    return same ? 'grid' : 'none';
+                                  ]]]
+                            grid:
+                              - grid-template-areas: '"i n"'
+                              - grid-template-columns: 28px 1fr
+                              - grid-template-rows: 1fr
+                            icon:
+                              - grid-area: i
+                              - justify-self: center
+                              - width: 16px
+                              - color: "#999"
+                            name:
+                              - grid-area: n
+                              - justify-self: start
+                              - padding-left: 8px
+                              - font-size: 0.85em
+                        - type: custom:button-card
+                          entity: sensor.satty_choreops_chore_status_test_quarterly_satty
+                          name: Quarterly
+                          show_state: false
+                          show_icon: true
+                          icon: mdi:clock-outline
+                          tap_action:
+                            action: none
+                          styles:
+                            card:
+                              - background-color: rgba(20, 20, 26, 0.4)
+                              - border-left: 4px solid var(--calendar1-default-primary-color)
+                              - border-radius: 8px
+                              - padding: 5px 10px
+                              - margin-bottom: 6px
+                              - opacity: "0.6"
+                              - display: |
+                                  [[[
+                                    const due = states[entity.entity_id].attributes.due_date;
+                                    if (!due) return 'none';
+                                    const d = new Date(due);
+                                    const t = new Date();
+                                    t.setDate(t.getDate() + 1);
+                                    const same = d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate();
+                                    return same ? 'grid' : 'none';
+                                  ]]]
+                            grid:
+                              - grid-template-areas: '"i n"'
+                              - grid-template-columns: 28px 1fr
+                              - grid-template-rows: 1fr
+                            icon:
+                              - grid-area: i
+                              - justify-self: center
+                              - width: 16px
+                              - color: "#999"
+                            name:
+                              - grid-area: n
+                              - justify-self: start
+                              - padding-left: 8px
+                              - font-size: 0.85em
                   - type: conditional
                     conditions:
                       - condition: state
@@ -440,18 +637,6 @@ views:
                     card:
                       type: vertical-stack
                       cards:
-                        - type: markdown
-                          content: |
-                            <div>
-                              <img src="{{ state_attr('person.bhavi','entity_picture') }}">
-                            </div>
-                          card_mod:
-                            style:
-                              ".": |
-                                ha-card { background: none !important; box-shadow: none !important; border: none !important; padding: 0 0 0.4em 0 !important; }
-                              ha-markdown$: |
-                                ha-markdown-element > div { display: flex !important; justify-content: center !important; }
-                                ha-markdown-element > div > img { width: 56px !important; height: 56px !important; border-radius: 50% !important; object-fit: cover !important; border: 2px solid var(--calendar2-default-primary-color) !important; }
                         - type: custom:button-card
                           entity: sensor.bhavi_choreops_chore_status_vacuum_living_room
                           name: Vacuum living room
@@ -657,6 +842,214 @@ views:
                                   [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
                               - opacity: |
                                   [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                        - type: markdown
+                          content: "**Tomorrow**"
+                          card_mod:
+                            style:
+                              ".": |
+                                ha-card { background: none !important; box-shadow: none !important; border: none !important; padding: 0.6em 0 0.3em 0.3em !important; }
+                              ha-markdown$: |
+                                ha-markdown-element strong { font-size: 0.8em !important; font-weight: 700 !important; color: #888 !important; text-transform: uppercase !important; letter-spacing: 0.06em !important; }
+                        - type: custom:button-card
+                          entity: sensor.bhavi_choreops_chore_status_vacuum_living_room
+                          name: Vacuum living room
+                          show_state: false
+                          show_icon: true
+                          icon: mdi:clock-outline
+                          tap_action:
+                            action: none
+                          styles:
+                            card:
+                              - background-color: rgba(20, 20, 26, 0.4)
+                              - border-left: 4px solid var(--calendar2-default-primary-color)
+                              - border-radius: 8px
+                              - padding: 5px 10px
+                              - margin-bottom: 6px
+                              - opacity: "0.6"
+                              - display: |
+                                  [[[
+                                    const due = states[entity.entity_id].attributes.due_date;
+                                    if (!due) return 'none';
+                                    const d = new Date(due);
+                                    const t = new Date();
+                                    t.setDate(t.getDate() + 1);
+                                    const same = d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate();
+                                    return same ? 'grid' : 'none';
+                                  ]]]
+                            grid:
+                              - grid-template-areas: '"i n"'
+                              - grid-template-columns: 28px 1fr
+                              - grid-template-rows: 1fr
+                            icon:
+                              - grid-area: i
+                              - justify-self: center
+                              - width: 16px
+                              - color: "#999"
+                            name:
+                              - grid-area: n
+                              - justify-self: start
+                              - padding-left: 8px
+                              - font-size: 0.85em
+                        - type: custom:button-card
+                          entity: sensor.bhavi_choreops_chore_status_test_daily_bhavi
+                          name: Daily
+                          show_state: false
+                          show_icon: true
+                          icon: mdi:clock-outline
+                          tap_action:
+                            action: none
+                          styles:
+                            card:
+                              - background-color: rgba(20, 20, 26, 0.4)
+                              - border-left: 4px solid var(--calendar2-default-primary-color)
+                              - border-radius: 8px
+                              - padding: 5px 10px
+                              - margin-bottom: 6px
+                              - opacity: "0.6"
+                              - display: |
+                                  [[[
+                                    const due = states[entity.entity_id].attributes.due_date;
+                                    if (!due) return 'none';
+                                    const d = new Date(due);
+                                    const t = new Date();
+                                    t.setDate(t.getDate() + 1);
+                                    const same = d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate();
+                                    return same ? 'grid' : 'none';
+                                  ]]]
+                            grid:
+                              - grid-template-areas: '"i n"'
+                              - grid-template-columns: 28px 1fr
+                              - grid-template-rows: 1fr
+                            icon:
+                              - grid-area: i
+                              - justify-self: center
+                              - width: 16px
+                              - color: "#999"
+                            name:
+                              - grid-area: n
+                              - justify-self: start
+                              - padding-left: 8px
+                              - font-size: 0.85em
+                        - type: custom:button-card
+                          entity: sensor.bhavi_choreops_chore_status_test_weekly_bhavi
+                          name: Weekly
+                          show_state: false
+                          show_icon: true
+                          icon: mdi:clock-outline
+                          tap_action:
+                            action: none
+                          styles:
+                            card:
+                              - background-color: rgba(20, 20, 26, 0.4)
+                              - border-left: 4px solid var(--calendar2-default-primary-color)
+                              - border-radius: 8px
+                              - padding: 5px 10px
+                              - margin-bottom: 6px
+                              - opacity: "0.6"
+                              - display: |
+                                  [[[
+                                    const due = states[entity.entity_id].attributes.due_date;
+                                    if (!due) return 'none';
+                                    const d = new Date(due);
+                                    const t = new Date();
+                                    t.setDate(t.getDate() + 1);
+                                    const same = d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate();
+                                    return same ? 'grid' : 'none';
+                                  ]]]
+                            grid:
+                              - grid-template-areas: '"i n"'
+                              - grid-template-columns: 28px 1fr
+                              - grid-template-rows: 1fr
+                            icon:
+                              - grid-area: i
+                              - justify-self: center
+                              - width: 16px
+                              - color: "#999"
+                            name:
+                              - grid-area: n
+                              - justify-self: start
+                              - padding-left: 8px
+                              - font-size: 0.85em
+                        - type: custom:button-card
+                          entity: sensor.bhavi_choreops_chore_status_test_monthly_bhavi
+                          name: Monthly
+                          show_state: false
+                          show_icon: true
+                          icon: mdi:clock-outline
+                          tap_action:
+                            action: none
+                          styles:
+                            card:
+                              - background-color: rgba(20, 20, 26, 0.4)
+                              - border-left: 4px solid var(--calendar2-default-primary-color)
+                              - border-radius: 8px
+                              - padding: 5px 10px
+                              - margin-bottom: 6px
+                              - opacity: "0.6"
+                              - display: |
+                                  [[[
+                                    const due = states[entity.entity_id].attributes.due_date;
+                                    if (!due) return 'none';
+                                    const d = new Date(due);
+                                    const t = new Date();
+                                    t.setDate(t.getDate() + 1);
+                                    const same = d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate();
+                                    return same ? 'grid' : 'none';
+                                  ]]]
+                            grid:
+                              - grid-template-areas: '"i n"'
+                              - grid-template-columns: 28px 1fr
+                              - grid-template-rows: 1fr
+                            icon:
+                              - grid-area: i
+                              - justify-self: center
+                              - width: 16px
+                              - color: "#999"
+                            name:
+                              - grid-area: n
+                              - justify-self: start
+                              - padding-left: 8px
+                              - font-size: 0.85em
+                        - type: custom:button-card
+                          entity: sensor.bhavi_choreops_chore_status_test_quarterly_bhavi
+                          name: Quarterly
+                          show_state: false
+                          show_icon: true
+                          icon: mdi:clock-outline
+                          tap_action:
+                            action: none
+                          styles:
+                            card:
+                              - background-color: rgba(20, 20, 26, 0.4)
+                              - border-left: 4px solid var(--calendar2-default-primary-color)
+                              - border-radius: 8px
+                              - padding: 5px 10px
+                              - margin-bottom: 6px
+                              - opacity: "0.6"
+                              - display: |
+                                  [[[
+                                    const due = states[entity.entity_id].attributes.due_date;
+                                    if (!due) return 'none';
+                                    const d = new Date(due);
+                                    const t = new Date();
+                                    t.setDate(t.getDate() + 1);
+                                    const same = d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate();
+                                    return same ? 'grid' : 'none';
+                                  ]]]
+                            grid:
+                              - grid-template-areas: '"i n"'
+                              - grid-template-columns: 28px 1fr
+                              - grid-template-rows: 1fr
+                            icon:
+                              - grid-area: i
+                              - justify-self: center
+                              - width: 16px
+                              - color: "#999"
+                            name:
+                              - grid-area: n
+                              - justify-self: start
+                              - padding-left: 8px
+                              - font-size: 0.85em
             grid_options:
               columns: 120
               rows: auto
