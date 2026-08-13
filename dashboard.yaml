@@ -197,6 +197,7 @@ views:
                                     - padding: 6px 10px 6px 4px
                                     - margin-bottom: 6px
                                     - display: grid
+                                    - grid-template-columns: 1fr
                                   grid:
                                     # button-card auto-assigns each custom_fields entry's grid-area name
                                     # to match its KEY ("photo"), NOT a name set under styles.custom_fields
@@ -255,6 +256,7 @@ views:
                                     - padding: 6px 10px 6px 4px
                                     - margin-bottom: 6px
                                     - display: grid
+                                    - grid-template-columns: 1fr
                                   grid:
                                     # button-card auto-assigns each custom_fields entry's grid-area name
                                     # to match its KEY ("photo"), NOT a name set under styles.custom_fields
@@ -313,6 +315,7 @@ views:
                                     - padding: 6px 10px 6px 4px
                                     - margin-bottom: 6px
                                     - display: grid
+                                    - grid-template-columns: 1fr
                                   grid:
                                     # button-card auto-assigns each custom_fields entry's grid-area name
                                     # to match its KEY ("photo"), NOT a name set under styles.custom_fields
@@ -371,6 +374,7 @@ views:
                                     - padding: 6px 10px 6px 4px
                                     - margin-bottom: 6px
                                     - display: grid
+                                    - grid-template-columns: 1fr
                                   grid:
                                     # button-card auto-assigns each custom_fields entry's grid-area name
                                     # to match its KEY ("photo"), NOT a name set under styles.custom_fields
@@ -429,6 +433,7 @@ views:
                                     - padding: 6px 10px 6px 4px
                                     - margin-bottom: 6px
                                     - display: grid
+                                    - grid-template-columns: 1fr
                                   grid:
                                     # button-card auto-assigns each custom_fields entry's grid-area name
                                     # to match its KEY ("photo"), NOT a name set under styles.custom_fields
@@ -499,6 +504,7 @@ views:
                                           const tomorrowDay = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
                                           return dueDay === tomorrowDay ? 'grid' : 'none';
                                         ]]]
+                                    - grid-template-columns: 1fr
                                   grid:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
@@ -548,6 +554,7 @@ views:
                                           const tomorrowDay = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
                                           return dueDay === tomorrowDay ? 'grid' : 'none';
                                         ]]]
+                                    - grid-template-columns: 1fr
                                   grid:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
@@ -597,6 +604,7 @@ views:
                                           const tomorrowDay = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
                                           return dueDay === tomorrowDay ? 'grid' : 'none';
                                         ]]]
+                                    - grid-template-columns: 1fr
                                   grid:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
@@ -646,6 +654,7 @@ views:
                                           const tomorrowDay = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
                                           return dueDay === tomorrowDay ? 'grid' : 'none';
                                         ]]]
+                                    - grid-template-columns: 1fr
                                   grid:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
@@ -695,6 +704,7 @@ views:
                                           const tomorrowDay = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
                                           return dueDay === tomorrowDay ? 'grid' : 'none';
                                         ]]]
+                                    - grid-template-columns: 1fr
                                   grid:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
@@ -765,6 +775,7 @@ views:
                                     - padding: 6px 10px 6px 4px
                                     - margin-bottom: 6px
                                     - display: grid
+                                    - grid-template-columns: 1fr
                                   grid:
                                     # button-card auto-assigns each custom_fields entry's grid-area name
                                     # to match its KEY ("photo"), NOT a name set under styles.custom_fields
@@ -823,6 +834,7 @@ views:
                                     - padding: 6px 10px 6px 4px
                                     - margin-bottom: 6px
                                     - display: grid
+                                    - grid-template-columns: 1fr
                                   grid:
                                     # button-card auto-assigns each custom_fields entry's grid-area name
                                     # to match its KEY ("photo"), NOT a name set under styles.custom_fields
@@ -881,6 +893,7 @@ views:
                                     - padding: 6px 10px 6px 4px
                                     - margin-bottom: 6px
                                     - display: grid
+                                    - grid-template-columns: 1fr
                                   grid:
                                     # button-card auto-assigns each custom_fields entry's grid-area name
                                     # to match its KEY ("photo"), NOT a name set under styles.custom_fields
@@ -939,6 +952,7 @@ views:
                                     - padding: 6px 10px 6px 4px
                                     - margin-bottom: 6px
                                     - display: grid
+                                    - grid-template-columns: 1fr
                                   grid:
                                     # button-card auto-assigns each custom_fields entry's grid-area name
                                     # to match its KEY ("photo"), NOT a name set under styles.custom_fields
@@ -997,6 +1011,7 @@ views:
                                     - padding: 6px 10px 6px 4px
                                     - margin-bottom: 6px
                                     - display: grid
+                                    - grid-template-columns: 1fr
                                   grid:
                                     # button-card auto-assigns each custom_fields entry's grid-area name
                                     # to match its KEY ("photo"), NOT a name set under styles.custom_fields
@@ -1067,6 +1082,7 @@ views:
                                           const tomorrowDay = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
                                           return dueDay === tomorrowDay ? 'grid' : 'none';
                                         ]]]
+                                    - grid-template-columns: 1fr
                                   grid:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
@@ -1116,6 +1132,7 @@ views:
                                           const tomorrowDay = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
                                           return dueDay === tomorrowDay ? 'grid' : 'none';
                                         ]]]
+                                    - grid-template-columns: 1fr
                                   grid:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
@@ -1165,6 +1182,7 @@ views:
                                           const tomorrowDay = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
                                           return dueDay === tomorrowDay ? 'grid' : 'none';
                                         ]]]
+                                    - grid-template-columns: 1fr
                                   grid:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
@@ -1214,6 +1232,7 @@ views:
                                           const tomorrowDay = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
                                           return dueDay === tomorrowDay ? 'grid' : 'none';
                                         ]]]
+                                    - grid-template-columns: 1fr
                                   grid:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
@@ -1263,6 +1282,7 @@ views:
                                           const tomorrowDay = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
                                           return dueDay === tomorrowDay ? 'grid' : 'none';
                                         ]]]
+                                    - grid-template-columns: 1fr
                                   grid:
                                     - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
