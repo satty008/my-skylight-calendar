@@ -10,9 +10,11 @@ views:
       # Satty/Bhavi buttons both moved out (title is redundant with the
       # view's own header, already shown smaller at the top of the page;
       # Satty/Bhavi are now profile-photo buttons directly above their
-      # chore columns in the CHORES SECTION below). Select View + Show
-      # Events are stacked vertically and pushed to the right, both
-      # shrunk via zoom.
+      # chore columns in the CHORES SECTION below). Show Events + Select
+      # View sit side by side (Show Events on the left) rather than
+      # stacked - stacking cost an extra row of height that a 10" tablet
+      # viewport can't spare (see the CHORES SECTION comment below for
+      # the full space budget this dashboard is fit to).
       - type: grid
         cards:
           - type: horizontal-stack
@@ -23,44 +25,45 @@ views:
                   style: |
                     ha-card { background: none; box-shadow: none; border: none; }
                 grid_options:
-                  columns: 100
+                  columns: 75
                   rows: auto
-              - type: vertical-stack
-                cards:
-                  - type: custom:bubble-card
-                    card_type: select
-                    entity: input_select.calendar_view
-                    show_name: true
-                    show_state: true
-                    name: Select View
-                    show_last_changed: false
-                    show_attribute: false
-                    card_mod:
-                      style: |
-                        ha-card { zoom: 0.75 !important; max-width: 260px !important; margin-left: auto !important; margin-right: 0 !important; }
-                  - type: custom:bubble-card
-                    card_type: button
-                    button_type: state
-                    entity: input_boolean.family_calendar_show
-                    name: Show Events
-                    icon: mdi:calendar-eye
-                    show_icon: true
-                    show_name: true
-                    tap_action:
-                      action: perform-action
-                      perform_action: input_boolean.toggle
-                      target:
-                        entity_id: input_boolean.family_calendar_show
-                    styles: |
-                      .bubble-button-background {
-                        opacity: 1 !important;
-                        background-color: ${hass.states['input_boolean.family_calendar_show'].state === 'on' ? 'var(--calendar1-default-primary-color)' : 'light-grey'} !important;
-                      }
-                    card_mod:
-                      style: |
-                        ha-card { zoom: 0.75 !important; max-width: 260px !important; margin-left: auto !important; margin-right: 0 !important; }
+              - type: custom:bubble-card
+                card_type: button
+                button_type: state
+                entity: input_boolean.family_calendar_show
+                name: Show Events
+                icon: mdi:calendar-eye
+                show_icon: true
+                show_name: true
+                tap_action:
+                  action: perform-action
+                  perform_action: input_boolean.toggle
+                  target:
+                    entity_id: input_boolean.family_calendar_show
+                styles: |
+                  .bubble-button-background {
+                    opacity: 1 !important;
+                    background-color: ${hass.states['input_boolean.family_calendar_show'].state === 'on' ? 'var(--calendar1-default-primary-color)' : 'light-grey'} !important;
+                  }
+                card_mod:
+                  style: |
+                    ha-card { zoom: 0.7 !important; }
                 grid_options:
-                  columns: 20
+                  columns: 22
+                  rows: auto
+              - type: custom:bubble-card
+                card_type: select
+                entity: input_select.calendar_view
+                show_name: true
+                show_state: true
+                name: Select View
+                show_last_changed: false
+                show_attribute: false
+                card_mod:
+                  style: |
+                    ha-card { zoom: 0.7 !important; }
+                grid_options:
+                  columns: 23
                   rows: auto
             grid_options:
               columns: 120
@@ -172,7 +175,7 @@ views:
                 show_forecast: true
                 card_mod:
                   style: |
-                    ha-card { background: none !important; box-shadow: none !important; border: none !important; border-top: solid 1px rgba(255,255,255,0.12) !important; border-radius: 0 !important; padding: 0.4em 0 !important; margin-top: 0.4em !important; }
+                    ha-card { zoom: 0.55 !important; background: none !important; box-shadow: none !important; border: none !important; border-top: solid 1px rgba(255,255,255,0.12) !important; border-radius: 0 !important; padding: 0.2em 0 !important; margin: 0.2em 0 0 0 !important; }
               - type: weather-forecast
                 entity: weather.forecast_home
                 forecast_type: daily
@@ -180,7 +183,7 @@ views:
                 show_forecast: true
                 card_mod:
                   style: |
-                    ha-card { background: none !important; box-shadow: none !important; border: none !important; border-top: solid 1px rgba(255,255,255,0.12) !important; border-radius: 0 !important; padding: 0.4em 0 !important; margin-top: 0.2em !important; }
+                    ha-card { zoom: 0.55 !important; background: none !important; box-shadow: none !important; border: none !important; border-top: solid 1px rgba(255,255,255,0.12) !important; border-radius: 0 !important; padding: 0.2em 0 !important; margin: 0 !important; }
               - type: horizontal-stack
                 cards:
                   - type: vertical-stack
@@ -270,8 +273,8 @@ views:
                                     - border-left: |
                                         [[[ return '4px solid ' + states['input_text.satty_color'].state ]]]
                                     - border-radius: 8px
-                                    - padding: 6px 10px 6px 4px
-                                    - margin-bottom: 6px
+                                    - padding: 4px 10px 4px 4px
+                                    - margin-bottom: 4px
                                     - display: grid
                                     - grid-template-columns: 1fr
                                   grid:
@@ -335,8 +338,8 @@ views:
                                     - border-left: |
                                         [[[ return '4px solid ' + states['input_text.satty_color'].state ]]]
                                     - border-radius: 8px
-                                    - padding: 6px 10px 6px 4px
-                                    - margin-bottom: 6px
+                                    - padding: 4px 10px 4px 4px
+                                    - margin-bottom: 4px
                                     - display: grid
                                     - grid-template-columns: 1fr
                                   grid:
@@ -400,8 +403,8 @@ views:
                                     - border-left: |
                                         [[[ return '4px solid ' + states['input_text.satty_color'].state ]]]
                                     - border-radius: 8px
-                                    - padding: 6px 10px 6px 4px
-                                    - margin-bottom: 6px
+                                    - padding: 4px 10px 4px 4px
+                                    - margin-bottom: 4px
                                     - display: grid
                                     - grid-template-columns: 1fr
                                   grid:
@@ -465,8 +468,8 @@ views:
                                     - border-left: |
                                         [[[ return '4px solid ' + states['input_text.satty_color'].state ]]]
                                     - border-radius: 8px
-                                    - padding: 6px 10px 6px 4px
-                                    - margin-bottom: 6px
+                                    - padding: 4px 10px 4px 4px
+                                    - margin-bottom: 4px
                                     - display: grid
                                     - grid-template-columns: 1fr
                                   grid:
@@ -530,8 +533,8 @@ views:
                                     - border-left: |
                                         [[[ return '4px solid ' + states['input_text.satty_color'].state ]]]
                                     - border-radius: 8px
-                                    - padding: 6px 10px 6px 4px
-                                    - margin-bottom: 6px
+                                    - padding: 4px 10px 4px 4px
+                                    - margin-bottom: 4px
                                     - display: grid
                                     - grid-template-columns: 1fr
                                   grid:
@@ -565,7 +568,7 @@ views:
                                 card_mod:
                                   style:
                                     ".": |
-                                      ha-card { background: none !important; box-shadow: none !important; border: none !important; padding: 0.6em 0 0.3em 0.3em !important; }
+                                      ha-card { background: none !important; box-shadow: none !important; border: none !important; padding: 0.3em 0 0.15em 0.3em !important; }
                                     ha-markdown$: |
                                       ha-markdown-element strong { font-size: 0.8em !important; font-weight: 700 !important; color: #888 !important; text-transform: uppercase !important; letter-spacing: 0.06em !important; }
                               - type: custom:button-card
@@ -585,8 +588,8 @@ views:
                                     - border-left: |
                                         [[[ return '4px solid ' + states['input_text.satty_color'].state ]]]
                                     - border-radius: 8px
-                                    - padding: 5px 10px 5px 4px
-                                    - margin-bottom: 6px
+                                    - padding: 3px 10px 3px 4px
+                                    - margin-bottom: 3px
                                     - opacity: "0.6"
                                     - display: |
                                         [[[
@@ -636,8 +639,8 @@ views:
                                     - border-left: |
                                         [[[ return '4px solid ' + states['input_text.satty_color'].state ]]]
                                     - border-radius: 8px
-                                    - padding: 5px 10px 5px 4px
-                                    - margin-bottom: 6px
+                                    - padding: 3px 10px 3px 4px
+                                    - margin-bottom: 3px
                                     - opacity: "0.6"
                                     - display: |
                                         [[[
@@ -687,8 +690,8 @@ views:
                                     - border-left: |
                                         [[[ return '4px solid ' + states['input_text.satty_color'].state ]]]
                                     - border-radius: 8px
-                                    - padding: 5px 10px 5px 4px
-                                    - margin-bottom: 6px
+                                    - padding: 3px 10px 3px 4px
+                                    - margin-bottom: 3px
                                     - opacity: "0.6"
                                     - display: |
                                         [[[
@@ -738,8 +741,8 @@ views:
                                     - border-left: |
                                         [[[ return '4px solid ' + states['input_text.satty_color'].state ]]]
                                     - border-radius: 8px
-                                    - padding: 5px 10px 5px 4px
-                                    - margin-bottom: 6px
+                                    - padding: 3px 10px 3px 4px
+                                    - margin-bottom: 3px
                                     - opacity: "0.6"
                                     - display: |
                                         [[[
@@ -789,8 +792,8 @@ views:
                                     - border-left: |
                                         [[[ return '4px solid ' + states['input_text.satty_color'].state ]]]
                                     - border-radius: 8px
-                                    - padding: 5px 10px 5px 4px
-                                    - margin-bottom: 6px
+                                    - padding: 3px 10px 3px 4px
+                                    - margin-bottom: 3px
                                     - opacity: "0.6"
                                     - display: |
                                         [[[
@@ -910,8 +913,8 @@ views:
                                     - border-left: |
                                         [[[ return '4px solid ' + states['input_text.bhavi_color'].state ]]]
                                     - border-radius: 8px
-                                    - padding: 6px 10px 6px 4px
-                                    - margin-bottom: 6px
+                                    - padding: 4px 10px 4px 4px
+                                    - margin-bottom: 4px
                                     - display: grid
                                     - grid-template-columns: 1fr
                                   grid:
@@ -975,8 +978,8 @@ views:
                                     - border-left: |
                                         [[[ return '4px solid ' + states['input_text.bhavi_color'].state ]]]
                                     - border-radius: 8px
-                                    - padding: 6px 10px 6px 4px
-                                    - margin-bottom: 6px
+                                    - padding: 4px 10px 4px 4px
+                                    - margin-bottom: 4px
                                     - display: grid
                                     - grid-template-columns: 1fr
                                   grid:
@@ -1040,8 +1043,8 @@ views:
                                     - border-left: |
                                         [[[ return '4px solid ' + states['input_text.bhavi_color'].state ]]]
                                     - border-radius: 8px
-                                    - padding: 6px 10px 6px 4px
-                                    - margin-bottom: 6px
+                                    - padding: 4px 10px 4px 4px
+                                    - margin-bottom: 4px
                                     - display: grid
                                     - grid-template-columns: 1fr
                                   grid:
@@ -1105,8 +1108,8 @@ views:
                                     - border-left: |
                                         [[[ return '4px solid ' + states['input_text.bhavi_color'].state ]]]
                                     - border-radius: 8px
-                                    - padding: 6px 10px 6px 4px
-                                    - margin-bottom: 6px
+                                    - padding: 4px 10px 4px 4px
+                                    - margin-bottom: 4px
                                     - display: grid
                                     - grid-template-columns: 1fr
                                   grid:
@@ -1170,8 +1173,8 @@ views:
                                     - border-left: |
                                         [[[ return '4px solid ' + states['input_text.bhavi_color'].state ]]]
                                     - border-radius: 8px
-                                    - padding: 6px 10px 6px 4px
-                                    - margin-bottom: 6px
+                                    - padding: 4px 10px 4px 4px
+                                    - margin-bottom: 4px
                                     - display: grid
                                     - grid-template-columns: 1fr
                                   grid:
@@ -1205,7 +1208,7 @@ views:
                                 card_mod:
                                   style:
                                     ".": |
-                                      ha-card { background: none !important; box-shadow: none !important; border: none !important; padding: 0.6em 0 0.3em 0.3em !important; }
+                                      ha-card { background: none !important; box-shadow: none !important; border: none !important; padding: 0.3em 0 0.15em 0.3em !important; }
                                     ha-markdown$: |
                                       ha-markdown-element strong { font-size: 0.8em !important; font-weight: 700 !important; color: #888 !important; text-transform: uppercase !important; letter-spacing: 0.06em !important; }
                               - type: custom:button-card
@@ -1225,8 +1228,8 @@ views:
                                     - border-left: |
                                         [[[ return '4px solid ' + states['input_text.bhavi_color'].state ]]]
                                     - border-radius: 8px
-                                    - padding: 5px 10px 5px 4px
-                                    - margin-bottom: 6px
+                                    - padding: 3px 10px 3px 4px
+                                    - margin-bottom: 3px
                                     - opacity: "0.6"
                                     - display: |
                                         [[[
@@ -1276,8 +1279,8 @@ views:
                                     - border-left: |
                                         [[[ return '4px solid ' + states['input_text.bhavi_color'].state ]]]
                                     - border-radius: 8px
-                                    - padding: 5px 10px 5px 4px
-                                    - margin-bottom: 6px
+                                    - padding: 3px 10px 3px 4px
+                                    - margin-bottom: 3px
                                     - opacity: "0.6"
                                     - display: |
                                         [[[
@@ -1327,8 +1330,8 @@ views:
                                     - border-left: |
                                         [[[ return '4px solid ' + states['input_text.bhavi_color'].state ]]]
                                     - border-radius: 8px
-                                    - padding: 5px 10px 5px 4px
-                                    - margin-bottom: 6px
+                                    - padding: 3px 10px 3px 4px
+                                    - margin-bottom: 3px
                                     - opacity: "0.6"
                                     - display: |
                                         [[[
@@ -1378,8 +1381,8 @@ views:
                                     - border-left: |
                                         [[[ return '4px solid ' + states['input_text.bhavi_color'].state ]]]
                                     - border-radius: 8px
-                                    - padding: 5px 10px 5px 4px
-                                    - margin-bottom: 6px
+                                    - padding: 3px 10px 3px 4px
+                                    - margin-bottom: 3px
                                     - opacity: "0.6"
                                     - display: |
                                         [[[
@@ -1429,8 +1432,8 @@ views:
                                     - border-left: |
                                         [[[ return '4px solid ' + states['input_text.bhavi_color'].state ]]]
                                     - border-radius: 8px
-                                    - padding: 5px 10px 5px 4px
-                                    - margin-bottom: 6px
+                                    - padding: 3px 10px 3px 4px
+                                    - margin-bottom: 3px
                                     - opacity: "0.6"
                                     - display: |
                                         [[[
