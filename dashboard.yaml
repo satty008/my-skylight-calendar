@@ -160,19 +160,13 @@ views:
             cards:
               - type: custom:button-card
                 entity: sensor.satty_choreops_chore_status_take_out_trash
-                name: Take out trash (Satty)
+                name: Take out trash
                 show_state: false
                 show_icon: true
                 icon: |
                   [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
                 tap_action: |
                   [[[
-                    // ChoreOps has no per-chore "undo" service (only a global
-                    // reset-all-chores service) - disapprove_chore only works
-                    // on a pending approval, which auto-approved chores skip
-                    // entirely. So a completed chore stays completed until its
-                    // own schedule resets it; tapping it again is a no-op
-                    // instead of showing an error toast.
                     if (states[entity.entity_id].state === 'completed') {
                       return {action: 'none'};
                     }
@@ -182,23 +176,161 @@ views:
                   card:
                     - background-color: rgba(20, 20, 26, 0.75)
                     - border-left: 4px solid var(--calendar1-default-primary-color)
-                    - border-radius: 12px
-                    - padding: 16px
+                    - border-radius: 10px
+                    - padding: 10px
                   icon:
+                    - width: 30px
                     - color: |
                         [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar1-default-primary-color)' : 'white' ]]]
                   name:
-                    - font-size: 1.1em
+                    - font-size: 0.95em
                     - text-decoration: |
                         [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
                     - opacity: |
                         [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
                 grid_options:
-                  columns: 60
+                  columns: 20
                   rows: auto
               - type: custom:button-card
+                entity: sensor.satty_choreops_chore_status_test_daily_satty
+                name: Daily
+                show_state: false
+                show_icon: true
+                icon: |
+                  [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                tap_action: |
+                  [[[
+                    if (states[entity.entity_id].state === 'completed') {
+                      return {action: 'none'};
+                    }
+                    return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.satty_choreops_claim_chore_test_daily_satty'}};
+                  ]]]
+                styles:
+                  card:
+                    - background-color: rgba(20, 20, 26, 0.75)
+                    - border-left: 4px solid var(--calendar1-default-primary-color)
+                    - border-radius: 10px
+                    - padding: 10px
+                  icon:
+                    - width: 30px
+                    - color: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar1-default-primary-color)' : 'white' ]]]
+                  name:
+                    - font-size: 0.95em
+                    - text-decoration: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
+                    - opacity: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                grid_options:
+                  columns: 20
+                  rows: auto
+              - type: custom:button-card
+                entity: sensor.satty_choreops_chore_status_test_weekly_satty
+                name: Weekly
+                show_state: false
+                show_icon: true
+                icon: |
+                  [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                tap_action: |
+                  [[[
+                    if (states[entity.entity_id].state === 'completed') {
+                      return {action: 'none'};
+                    }
+                    return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.satty_choreops_claim_chore_test_weekly_satty'}};
+                  ]]]
+                styles:
+                  card:
+                    - background-color: rgba(20, 20, 26, 0.75)
+                    - border-left: 4px solid var(--calendar1-default-primary-color)
+                    - border-radius: 10px
+                    - padding: 10px
+                  icon:
+                    - width: 30px
+                    - color: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar1-default-primary-color)' : 'white' ]]]
+                  name:
+                    - font-size: 0.95em
+                    - text-decoration: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
+                    - opacity: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                grid_options:
+                  columns: 20
+                  rows: auto
+              - type: custom:button-card
+                entity: sensor.satty_choreops_chore_status_test_monthly_satty
+                name: Monthly
+                show_state: false
+                show_icon: true
+                icon: |
+                  [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                tap_action: |
+                  [[[
+                    if (states[entity.entity_id].state === 'completed') {
+                      return {action: 'none'};
+                    }
+                    return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.satty_choreops_claim_chore_test_monthly_satty'}};
+                  ]]]
+                styles:
+                  card:
+                    - background-color: rgba(20, 20, 26, 0.75)
+                    - border-left: 4px solid var(--calendar1-default-primary-color)
+                    - border-radius: 10px
+                    - padding: 10px
+                  icon:
+                    - width: 30px
+                    - color: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar1-default-primary-color)' : 'white' ]]]
+                  name:
+                    - font-size: 0.95em
+                    - text-decoration: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
+                    - opacity: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                grid_options:
+                  columns: 20
+                  rows: auto
+              - type: custom:button-card
+                entity: sensor.satty_choreops_chore_status_test_quarterly_satty
+                name: Quarterly
+                show_state: false
+                show_icon: true
+                icon: |
+                  [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                tap_action: |
+                  [[[
+                    if (states[entity.entity_id].state === 'completed') {
+                      return {action: 'none'};
+                    }
+                    return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.satty_choreops_claim_chore_test_quarterly_satty'}};
+                  ]]]
+                styles:
+                  card:
+                    - background-color: rgba(20, 20, 26, 0.75)
+                    - border-left: 4px solid var(--calendar1-default-primary-color)
+                    - border-radius: 10px
+                    - padding: 10px
+                  icon:
+                    - width: 30px
+                    - color: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar1-default-primary-color)' : 'white' ]]]
+                  name:
+                    - font-size: 0.95em
+                    - text-decoration: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
+                    - opacity: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                grid_options:
+                  columns: 20
+                  rows: auto
+            grid_options:
+              columns: 120
+              rows: auto
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
                 entity: sensor.bhavi_choreops_chore_status_vacuum_living_room
-                name: Vacuum living room (Bhavi)
+                name: Vacuum living room
                 show_state: false
                 show_icon: true
                 icon: |
@@ -214,19 +346,152 @@ views:
                   card:
                     - background-color: rgba(20, 20, 26, 0.75)
                     - border-left: 4px solid var(--calendar2-default-primary-color)
-                    - border-radius: 12px
-                    - padding: 16px
+                    - border-radius: 10px
+                    - padding: 10px
                   icon:
+                    - width: 30px
                     - color: |
                         [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar2-default-primary-color)' : 'white' ]]]
                   name:
-                    - font-size: 1.1em
+                    - font-size: 0.95em
                     - text-decoration: |
                         [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
                     - opacity: |
                         [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
                 grid_options:
-                  columns: 60
+                  columns: 20
+                  rows: auto
+              - type: custom:button-card
+                entity: sensor.bhavi_choreops_chore_status_test_daily_bhavi
+                name: Daily
+                show_state: false
+                show_icon: true
+                icon: |
+                  [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                tap_action: |
+                  [[[
+                    if (states[entity.entity_id].state === 'completed') {
+                      return {action: 'none'};
+                    }
+                    return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.bhavi_choreops_claim_chore_test_daily_bhavi'}};
+                  ]]]
+                styles:
+                  card:
+                    - background-color: rgba(20, 20, 26, 0.75)
+                    - border-left: 4px solid var(--calendar2-default-primary-color)
+                    - border-radius: 10px
+                    - padding: 10px
+                  icon:
+                    - width: 30px
+                    - color: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar2-default-primary-color)' : 'white' ]]]
+                  name:
+                    - font-size: 0.95em
+                    - text-decoration: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
+                    - opacity: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                grid_options:
+                  columns: 20
+                  rows: auto
+              - type: custom:button-card
+                entity: sensor.bhavi_choreops_chore_status_test_weekly_bhavi
+                name: Weekly
+                show_state: false
+                show_icon: true
+                icon: |
+                  [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                tap_action: |
+                  [[[
+                    if (states[entity.entity_id].state === 'completed') {
+                      return {action: 'none'};
+                    }
+                    return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.bhavi_choreops_claim_chore_test_weekly_bhavi'}};
+                  ]]]
+                styles:
+                  card:
+                    - background-color: rgba(20, 20, 26, 0.75)
+                    - border-left: 4px solid var(--calendar2-default-primary-color)
+                    - border-radius: 10px
+                    - padding: 10px
+                  icon:
+                    - width: 30px
+                    - color: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar2-default-primary-color)' : 'white' ]]]
+                  name:
+                    - font-size: 0.95em
+                    - text-decoration: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
+                    - opacity: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                grid_options:
+                  columns: 20
+                  rows: auto
+              - type: custom:button-card
+                entity: sensor.bhavi_choreops_chore_status_test_monthly_bhavi
+                name: Monthly
+                show_state: false
+                show_icon: true
+                icon: |
+                  [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                tap_action: |
+                  [[[
+                    if (states[entity.entity_id].state === 'completed') {
+                      return {action: 'none'};
+                    }
+                    return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.bhavi_choreops_claim_chore_test_monthly_bhavi'}};
+                  ]]]
+                styles:
+                  card:
+                    - background-color: rgba(20, 20, 26, 0.75)
+                    - border-left: 4px solid var(--calendar2-default-primary-color)
+                    - border-radius: 10px
+                    - padding: 10px
+                  icon:
+                    - width: 30px
+                    - color: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar2-default-primary-color)' : 'white' ]]]
+                  name:
+                    - font-size: 0.95em
+                    - text-decoration: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
+                    - opacity: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                grid_options:
+                  columns: 20
+                  rows: auto
+              - type: custom:button-card
+                entity: sensor.bhavi_choreops_chore_status_test_quarterly_bhavi
+                name: Quarterly
+                show_state: false
+                show_icon: true
+                icon: |
+                  [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                tap_action: |
+                  [[[
+                    if (states[entity.entity_id].state === 'completed') {
+                      return {action: 'none'};
+                    }
+                    return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.bhavi_choreops_claim_chore_test_quarterly_bhavi'}};
+                  ]]]
+                styles:
+                  card:
+                    - background-color: rgba(20, 20, 26, 0.75)
+                    - border-left: 4px solid var(--calendar2-default-primary-color)
+                    - border-radius: 10px
+                    - padding: 10px
+                  icon:
+                    - width: 30px
+                    - color: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar2-default-primary-color)' : 'white' ]]]
+                  name:
+                    - font-size: 0.95em
+                    - text-decoration: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
+                    - opacity: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                grid_options:
+                  columns: 20
                   rows: auto
             grid_options:
               columns: 120
