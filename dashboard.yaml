@@ -216,13 +216,17 @@ views:
                       type: vertical-stack
                       cards:
                         - type: markdown
-                          content: "### Satty"
+                          content: |
+                            <div>
+                              <img src="{{ state_attr('person.ram_sambamurthy','entity_picture') }}">
+                            </div>
                           card_mod:
                             style:
                               ".": |
-                                ha-card { background: none !important; box-shadow: none !important; border: none !important; padding: 0 0 0.2em 0.3em !important; }
+                                ha-card { background: none !important; box-shadow: none !important; border: none !important; padding: 0 0 0.4em 0 !important; }
                               ha-markdown$: |
-                                ha-markdown-element h3 { margin: 0 !important; font-size: 1.3em !important; font-weight: 700 !important; color: var(--calendar1-default-primary-color) !important; }
+                                ha-markdown-element > div { display: flex !important; justify-content: center !important; }
+                                ha-markdown-element > div > img { width: 56px !important; height: 56px !important; border-radius: 50% !important; object-fit: cover !important; border: 2px solid var(--calendar1-default-primary-color) !important; }
                         - type: custom:button-card
                           entity: sensor.satty_choreops_chore_status_take_out_trash
                           name: Take out trash
@@ -437,13 +441,17 @@ views:
                       type: vertical-stack
                       cards:
                         - type: markdown
-                          content: "### Bhavi"
+                          content: |
+                            <div>
+                              <img src="{{ state_attr('person.bhavi','entity_picture') }}">
+                            </div>
                           card_mod:
                             style:
                               ".": |
-                                ha-card { background: none !important; box-shadow: none !important; border: none !important; padding: 0 0 0.2em 0.3em !important; }
+                                ha-card { background: none !important; box-shadow: none !important; border: none !important; padding: 0 0 0.4em 0 !important; }
                               ha-markdown$: |
-                                ha-markdown-element h3 { margin: 0 !important; font-size: 1.3em !important; font-weight: 700 !important; color: var(--calendar2-default-primary-color) !important; }
+                                ha-markdown-element > div { display: flex !important; justify-content: center !important; }
+                                ha-markdown-element > div > img { width: 56px !important; height: 56px !important; border-radius: 50% !important; object-fit: cover !important; border: 2px solid var(--calendar2-default-primary-color) !important; }
                         - type: custom:button-card
                           entity: sensor.bhavi_choreops_chore_status_vacuum_living_room
                           name: Vacuum living room
