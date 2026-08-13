@@ -119,7 +119,9 @@ views:
                 # the "ha-markdown$:" key - a plain top-level `style: |` string lands
                 # one shadow boundary too shallow.
                 content: |
-                  {% set icons = {'sunny':'mdi:weather-sunny','clear-night':'mdi:weather-night','cloudy':'mdi:weather-cloudy','partlycloudy':'mdi:weather-partly-cloudy','rainy':'mdi:weather-rainy','pouring':'mdi:weather-pouring','snowy':'mdi:weather-snowy','snowy-rainy':'mdi:weather-snowy-rainy','fog':'mdi:weather-fog','windy':'mdi:weather-windy','windy-variant':'mdi:weather-windy','hail':'mdi:weather-hail','lightning':'mdi:weather-lightning','lightning-rainy':'mdi:weather-lightning-rainy','exceptional':'mdi:alert'} %}
+                  {% set known_conditions = ['sunny','clear-night','cloudy','partlycloudy','rainy','pouring','snowy','snowy-rainy','fog','windy','windy-variant','hail','lightning','lightning-rainy','exceptional'] %}
+                  {% set condition = states('weather.forecast_home') %}
+                  {% set icon_file = condition if condition in known_conditions else 'cloudy' %}
                   <div>
                     <div>
                       <div>
@@ -133,7 +135,7 @@ views:
                     </div>
                     <div>
                       <span>{{ state_attr('weather.forecast_home','temperature') }}{{ state_attr('weather.forecast_home','temperature_unit') }}</span>
-                      <ha-icon icon="{{ icons.get(states('weather.forecast_home'), 'mdi:weather-partly-cloudy') }}"></ha-icon>
+                      <img src="/local/weather-icons/{{ icon_file }}.svg">
                     </div>
                   </div>
                 card_mod:
@@ -148,23 +150,16 @@ views:
                       ha-markdown-element > div > div:first-child > div:first-child > span:last-child { font-size: 1.3em !important; font-weight: 600 !important; }
                       ha-markdown-element > div > div:first-child > div:last-child { display: flex !important; gap: 0.7em !important; font-size: 0.9em !important; opacity: 0.65 !important; margin-top: 2px !important; }
                       ha-markdown-element > div > div:last-child { display: flex !important; align-items: center !important; gap: 0.4em !important; font-size: 1.3em !important; white-space: nowrap !important; }
-                      ha-markdown-element > div > div:last-child > ha-icon { width: 38px !important; height: 38px !important; color: #e0e0e0 !important; }
-                      /* Condition-specific motion. ha-icon's icon="..." attribute
-                         survives DOMPurify (unlike class/style), so it's usable as a
-                         CSS attribute selector to vary the animation per condition
-                         without needing per-condition markup. */
-                      @keyframes wxspin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-                      @keyframes wxfloat { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-4px); } }
-                      @keyframes wxdrop { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(3px); } }
-                      @keyframes wxflash { 0%, 88%, 100% { opacity: 1; } 92%, 96% { opacity: 0.35; } }
-                      ha-markdown-element > div > div:last-child > ha-icon[icon="mdi:weather-sunny"] { animation: wxspin 14s linear infinite !important; }
-                      ha-markdown-element > div > div:last-child > ha-icon[icon="mdi:weather-night"] { animation: wxfloat 3.5s ease-in-out infinite !important; }
-                      ha-markdown-element > div > div:last-child > ha-icon[icon*="cloudy"] { animation: wxfloat 4s ease-in-out infinite !important; }
-                      ha-markdown-element > div > div:last-child > ha-icon[icon*="rain"] { animation: wxdrop 1.1s ease-in-out infinite !important; }
-                      ha-markdown-element > div > div:last-child > ha-icon[icon="mdi:weather-pouring"] { animation: wxdrop 0.7s ease-in-out infinite !important; }
-                      ha-markdown-element > div > div:last-child > ha-icon[icon*="snowy"] { animation: wxfloat 2.5s ease-in-out infinite !important; }
-                      ha-markdown-element > div > div:last-child > ha-icon[icon*="lightning"] { animation: wxflash 1.5s ease-in-out infinite !important; }
-                      ha-markdown-element > div > div:last-child > ha-icon[icon="mdi:weather-windy"] { animation: wxfloat 2s ease-in-out infinite !important; }
+                      /* Illustrated, self-animating (embedded SMIL) SVGs from the
+                         open-source Meteocons set (MIT, github.com/basmilius/weather-
+                         icons) - hosted locally under www/weather-icons/ (served at
+                         /local/weather-icons/) rather than relying on their CDN, since
+                         the animation is baked into each file and plays natively via
+                         <img src>, unaffected by ha-markdown-element's DOMPurify pass
+                         (which strips style/class but leaves src alone - same reason
+                         the profile-photo badges work). No per-condition CSS needed
+                         anymore, replacing the old mdi-icon + @keyframes approach. */
+                      ha-markdown-element > div > div:last-child > img { width: 46px !important; height: 46px !important; }
               - type: horizontal-stack
                 cards:
                   - type: vertical-stack
