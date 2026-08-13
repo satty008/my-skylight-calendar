@@ -255,9 +255,23 @@ views:
                     /* === GRID LAYOUT === */
                     .container {
                       display: grid !important;
-                      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) !important;
+                      grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
                       grid-auto-flow: row dense !important;
                       gap: 0 !important;
+                    }
+
+                    /* Today/Tomorrow views render only 1-2 .day cells, but the
+                       header/navigation row spans "1 / -1" across whatever column
+                       count is declared above, which stops auto-fit from collapsing
+                       the unused columns (they're not "empty" - the spanning header
+                       occupies them). So instead of relying on auto-fit, explicitly
+                       redeclare the column count based on how many .day cells the
+                       card actually rendered. */
+                    .container:not(:has(.day ~ .day)) {
+                      grid-template-columns: 1fr !important;
+                    }
+                    .container:has(.day ~ .day):not(:has(.day ~ .day ~ .day)) {
+                      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
                     }
 
                     .container .navigation,
