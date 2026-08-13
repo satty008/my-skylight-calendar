@@ -445,7 +445,7 @@ views:
                     }
             grid_options:
               columns: 120
-              rows: 1
+              rows: 16
               showDescription: false
         column_span: 10
       # --- End CALENDAR SECTION (Week Planner Card) ---
