@@ -81,16 +81,17 @@ views:
       # (button.<person>_choreops_claim_chore_<chore> /
       #  button.<person>_choreops_disapprove_chore_<chore>).
       # This is the single "main" block: date/weather header (big orange date
-      # badge, single line), then a Satty/Bhavi selector row (profile-photo
-      # bubble-card buttons, colored when that person is the one shown, grey
-      # when hidden - calls the SAME calendar1/2_calendar_visible_filter
-      # exclusive-select scripts as before), then each person's chore column.
-      # The selector buttons live OUTSIDE the `conditional` wrapping (always
-      # rendered) so tapping a hidden person's button still works to re-select
-      # them; only the actual chore list beneath is conditionally hidden.
+      # badge + day name, plus month and a live time line, weather top-right),
+      # then a Satty/Bhavi selector row (profile-photo bubble-card buttons,
+      # colored when that person is the one shown, grey when hidden - calls
+      # the SAME calendar1/2_calendar_visible_filter exclusive-select scripts
+      # as before), then each person's chore column. The selector buttons live
+      # OUTSIDE the `conditional` wrapping (always rendered) so tapping a
+      # hidden person's button still works to re-select them; only the actual
+      # chore list beneath is conditionally hidden.
       # Each chore tile carries a small circular profile-photo badge on the
-      # LEFT (button-card custom_fields, grid-area 'p' ahead of the checkbox
-      # icon) in addition to the existing color-coded left border.
+      # LEFT (button-card custom_fields "photo", ahead of the checkbox icon)
+      # in addition to the existing color-coded left border.
       - type: grid
         cards:
           - type: vertical-stack
@@ -117,8 +118,14 @@ views:
                   {% set icons = {'sunny':'mdi:weather-sunny','clear-night':'mdi:weather-night','cloudy':'mdi:weather-cloudy','partlycloudy':'mdi:weather-partly-cloudy','rainy':'mdi:weather-rainy','pouring':'mdi:weather-pouring','snowy':'mdi:weather-snowy','snowy-rainy':'mdi:weather-snowy-rainy','fog':'mdi:weather-fog','windy':'mdi:weather-windy','windy-variant':'mdi:weather-windy','hail':'mdi:weather-hail','lightning':'mdi:weather-lightning','lightning-rainy':'mdi:weather-lightning-rainy','exceptional':'mdi:alert'} %}
                   <div>
                     <div>
-                      <span>{{ now().day }}</span>
-                      <span>{{ now().strftime('%A') }}</span>
+                      <div>
+                        <span>{{ now().day }}</span>
+                        <span>{{ now().strftime('%A') }}</span>
+                      </div>
+                      <div>
+                        <span>{{ now().strftime('%B %Y') }}</span>
+                        <span>{{ now().strftime('%H:%M') }}</span>
+                      </div>
                     </div>
                     <div>
                       <span>{{ state_attr('weather.forecast_home','temperature') }}{{ state_attr('weather.forecast_home','temperature_unit') }}</span>
@@ -131,11 +138,13 @@ views:
                       ha-card { background: none !important; box-shadow: none !important; border: none !important; padding: 0.2em 0.2em 0.6em 0.2em !important; }
                     ha-markdown$: |
                       ha-markdown-element > div { display: flex !important; justify-content: space-between !important; align-items: center !important; }
-                      ha-markdown-element > div > div:first-child { display: flex !important; align-items: baseline !important; gap: 0.5em !important; }
-                      ha-markdown-element > div > div:first-child > span:first-child { font-size: 3em !important; font-weight: bold !important; line-height: 1 !important; background: orange !important; color: #1a1a1a !important; border-radius: 8px !important; padding: 0 0.2em !important; }
-                      ha-markdown-element > div > div:first-child > span:last-child { font-size: 1.3em !important; font-weight: 600 !important; }
+                      ha-markdown-element > div > div:first-child { display: flex !important; flex-direction: column !important; align-items: flex-start !important; }
+                      ha-markdown-element > div > div:first-child > div:first-child { display: flex !important; align-items: baseline !important; gap: 0.5em !important; }
+                      ha-markdown-element > div > div:first-child > div:first-child > span:first-child { font-size: 3em !important; font-weight: bold !important; line-height: 1 !important; background: orange !important; color: #1a1a1a !important; border-radius: 8px !important; padding: 0 0.2em !important; }
+                      ha-markdown-element > div > div:first-child > div:first-child > span:last-child { font-size: 1.3em !important; font-weight: 600 !important; }
+                      ha-markdown-element > div > div:first-child > div:last-child { display: flex !important; gap: 0.7em !important; font-size: 0.9em !important; opacity: 0.65 !important; margin-top: 2px !important; }
                       ha-markdown-element > div > div:last-child { display: flex !important; align-items: center !important; gap: 0.4em !important; font-size: 1.3em !important; white-space: nowrap !important; }
-                      ha-markdown-element > div > div:last-child > ha-icon { width: 32px !important; height: 32px !important; color: #f5c542 !important; }
+                      ha-markdown-element > div > div:last-child > ha-icon { width: 38px !important; height: 38px !important; color: #e0e0e0 !important; }
               - type: horizontal-stack
                 cards:
                   - type: vertical-stack
@@ -151,7 +160,6 @@ views:
                           action: perform-action
                           perform_action: script.calendar1_calendar_visible_filter
                         styles: |
-                          ha-card { width: fit-content !important; margin: 0 0 0.5em 0 !important; }
                           .bubble-button-background {
                             opacity: 1 !important;
                             background-color: ${hass.states['input_text.calendar1_calendar_filter'].state === '.*' ? 'var(--calendar1-default-primary-color)' : 'light-grey'} !important;
@@ -190,12 +198,19 @@ views:
                                     - margin-bottom: 6px
                                     - display: grid
                                   grid:
-                                    - grid-template-areas: '"p i n"'
+                                    # button-card auto-assigns each custom_fields entry's grid-area name
+                                    # to match its KEY ("photo"), NOT a name set under styles.custom_fields
+                                    # - an earlier version used a short "p" token here that never matched,
+                                    # so the photo fell out of the template into an unplaced implicit
+                                    # column (confirmed via computed style: the img's grid-area was
+                                    # "photo" while this template only defined "p", so it landed wherever
+                                    # the browser felt like putting an unplaced item - visually on the
+                                    # right). Using "photo" as the literal token fixes the placement.
+                                    - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 24px 28px 1fr
                                     - grid-template-rows: 1fr
                                   custom_fields:
                                     photo:
-                                      - grid-area: p
                                       - justify-self: center
                                       - align-self: center
                                   icon:
@@ -239,12 +254,19 @@ views:
                                     - margin-bottom: 6px
                                     - display: grid
                                   grid:
-                                    - grid-template-areas: '"p i n"'
+                                    # button-card auto-assigns each custom_fields entry's grid-area name
+                                    # to match its KEY ("photo"), NOT a name set under styles.custom_fields
+                                    # - an earlier version used a short "p" token here that never matched,
+                                    # so the photo fell out of the template into an unplaced implicit
+                                    # column (confirmed via computed style: the img's grid-area was
+                                    # "photo" while this template only defined "p", so it landed wherever
+                                    # the browser felt like putting an unplaced item - visually on the
+                                    # right). Using "photo" as the literal token fixes the placement.
+                                    - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 24px 28px 1fr
                                     - grid-template-rows: 1fr
                                   custom_fields:
                                     photo:
-                                      - grid-area: p
                                       - justify-self: center
                                       - align-self: center
                                   icon:
@@ -288,12 +310,19 @@ views:
                                     - margin-bottom: 6px
                                     - display: grid
                                   grid:
-                                    - grid-template-areas: '"p i n"'
+                                    # button-card auto-assigns each custom_fields entry's grid-area name
+                                    # to match its KEY ("photo"), NOT a name set under styles.custom_fields
+                                    # - an earlier version used a short "p" token here that never matched,
+                                    # so the photo fell out of the template into an unplaced implicit
+                                    # column (confirmed via computed style: the img's grid-area was
+                                    # "photo" while this template only defined "p", so it landed wherever
+                                    # the browser felt like putting an unplaced item - visually on the
+                                    # right). Using "photo" as the literal token fixes the placement.
+                                    - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 24px 28px 1fr
                                     - grid-template-rows: 1fr
                                   custom_fields:
                                     photo:
-                                      - grid-area: p
                                       - justify-self: center
                                       - align-self: center
                                   icon:
@@ -337,12 +366,19 @@ views:
                                     - margin-bottom: 6px
                                     - display: grid
                                   grid:
-                                    - grid-template-areas: '"p i n"'
+                                    # button-card auto-assigns each custom_fields entry's grid-area name
+                                    # to match its KEY ("photo"), NOT a name set under styles.custom_fields
+                                    # - an earlier version used a short "p" token here that never matched,
+                                    # so the photo fell out of the template into an unplaced implicit
+                                    # column (confirmed via computed style: the img's grid-area was
+                                    # "photo" while this template only defined "p", so it landed wherever
+                                    # the browser felt like putting an unplaced item - visually on the
+                                    # right). Using "photo" as the literal token fixes the placement.
+                                    - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 24px 28px 1fr
                                     - grid-template-rows: 1fr
                                   custom_fields:
                                     photo:
-                                      - grid-area: p
                                       - justify-self: center
                                       - align-self: center
                                   icon:
@@ -386,12 +422,19 @@ views:
                                     - margin-bottom: 6px
                                     - display: grid
                                   grid:
-                                    - grid-template-areas: '"p i n"'
+                                    # button-card auto-assigns each custom_fields entry's grid-area name
+                                    # to match its KEY ("photo"), NOT a name set under styles.custom_fields
+                                    # - an earlier version used a short "p" token here that never matched,
+                                    # so the photo fell out of the template into an unplaced implicit
+                                    # column (confirmed via computed style: the img's grid-area was
+                                    # "photo" while this template only defined "p", so it landed wherever
+                                    # the browser felt like putting an unplaced item - visually on the
+                                    # right). Using "photo" as the literal token fixes the placement.
+                                    - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 24px 28px 1fr
                                     - grid-template-rows: 1fr
                                   custom_fields:
                                     photo:
-                                      - grid-area: p
                                       - justify-self: center
                                       - align-self: center
                                   icon:
@@ -447,12 +490,11 @@ views:
                                           return dueDay === tomorrowDay ? 'grid' : 'none';
                                         ]]]
                                   grid:
-                                    - grid-template-areas: '"p i n"'
+                                    - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
                                     - grid-template-rows: 1fr
                                   custom_fields:
                                     photo:
-                                      - grid-area: p
                                       - justify-self: center
                                       - align-self: center
                                   icon:
@@ -495,12 +537,11 @@ views:
                                           return dueDay === tomorrowDay ? 'grid' : 'none';
                                         ]]]
                                   grid:
-                                    - grid-template-areas: '"p i n"'
+                                    - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
                                     - grid-template-rows: 1fr
                                   custom_fields:
                                     photo:
-                                      - grid-area: p
                                       - justify-self: center
                                       - align-self: center
                                   icon:
@@ -543,12 +584,11 @@ views:
                                           return dueDay === tomorrowDay ? 'grid' : 'none';
                                         ]]]
                                   grid:
-                                    - grid-template-areas: '"p i n"'
+                                    - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
                                     - grid-template-rows: 1fr
                                   custom_fields:
                                     photo:
-                                      - grid-area: p
                                       - justify-self: center
                                       - align-self: center
                                   icon:
@@ -591,12 +631,11 @@ views:
                                           return dueDay === tomorrowDay ? 'grid' : 'none';
                                         ]]]
                                   grid:
-                                    - grid-template-areas: '"p i n"'
+                                    - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
                                     - grid-template-rows: 1fr
                                   custom_fields:
                                     photo:
-                                      - grid-area: p
                                       - justify-self: center
                                       - align-self: center
                                   icon:
@@ -639,12 +678,11 @@ views:
                                           return dueDay === tomorrowDay ? 'grid' : 'none';
                                         ]]]
                                   grid:
-                                    - grid-template-areas: '"p i n"'
+                                    - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
                                     - grid-template-rows: 1fr
                                   custom_fields:
                                     photo:
-                                      - grid-area: p
                                       - justify-self: center
                                       - align-self: center
                                   icon:
@@ -670,7 +708,6 @@ views:
                           action: perform-action
                           perform_action: script.calendar2_calendar_visible_filter
                         styles: |
-                          ha-card { width: fit-content !important; margin: 0 0 0.5em 0 !important; }
                           .bubble-button-background {
                             opacity: 1 !important;
                             background-color: ${hass.states['input_text.calendar2_calendar_filter'].state === '.*' ? 'var(--calendar2-default-primary-color)' : 'light-grey'} !important;
@@ -709,12 +746,19 @@ views:
                                     - margin-bottom: 6px
                                     - display: grid
                                   grid:
-                                    - grid-template-areas: '"p i n"'
+                                    # button-card auto-assigns each custom_fields entry's grid-area name
+                                    # to match its KEY ("photo"), NOT a name set under styles.custom_fields
+                                    # - an earlier version used a short "p" token here that never matched,
+                                    # so the photo fell out of the template into an unplaced implicit
+                                    # column (confirmed via computed style: the img's grid-area was
+                                    # "photo" while this template only defined "p", so it landed wherever
+                                    # the browser felt like putting an unplaced item - visually on the
+                                    # right). Using "photo" as the literal token fixes the placement.
+                                    - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 24px 28px 1fr
                                     - grid-template-rows: 1fr
                                   custom_fields:
                                     photo:
-                                      - grid-area: p
                                       - justify-self: center
                                       - align-self: center
                                   icon:
@@ -758,12 +802,19 @@ views:
                                     - margin-bottom: 6px
                                     - display: grid
                                   grid:
-                                    - grid-template-areas: '"p i n"'
+                                    # button-card auto-assigns each custom_fields entry's grid-area name
+                                    # to match its KEY ("photo"), NOT a name set under styles.custom_fields
+                                    # - an earlier version used a short "p" token here that never matched,
+                                    # so the photo fell out of the template into an unplaced implicit
+                                    # column (confirmed via computed style: the img's grid-area was
+                                    # "photo" while this template only defined "p", so it landed wherever
+                                    # the browser felt like putting an unplaced item - visually on the
+                                    # right). Using "photo" as the literal token fixes the placement.
+                                    - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 24px 28px 1fr
                                     - grid-template-rows: 1fr
                                   custom_fields:
                                     photo:
-                                      - grid-area: p
                                       - justify-self: center
                                       - align-self: center
                                   icon:
@@ -807,12 +858,19 @@ views:
                                     - margin-bottom: 6px
                                     - display: grid
                                   grid:
-                                    - grid-template-areas: '"p i n"'
+                                    # button-card auto-assigns each custom_fields entry's grid-area name
+                                    # to match its KEY ("photo"), NOT a name set under styles.custom_fields
+                                    # - an earlier version used a short "p" token here that never matched,
+                                    # so the photo fell out of the template into an unplaced implicit
+                                    # column (confirmed via computed style: the img's grid-area was
+                                    # "photo" while this template only defined "p", so it landed wherever
+                                    # the browser felt like putting an unplaced item - visually on the
+                                    # right). Using "photo" as the literal token fixes the placement.
+                                    - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 24px 28px 1fr
                                     - grid-template-rows: 1fr
                                   custom_fields:
                                     photo:
-                                      - grid-area: p
                                       - justify-self: center
                                       - align-self: center
                                   icon:
@@ -856,12 +914,19 @@ views:
                                     - margin-bottom: 6px
                                     - display: grid
                                   grid:
-                                    - grid-template-areas: '"p i n"'
+                                    # button-card auto-assigns each custom_fields entry's grid-area name
+                                    # to match its KEY ("photo"), NOT a name set under styles.custom_fields
+                                    # - an earlier version used a short "p" token here that never matched,
+                                    # so the photo fell out of the template into an unplaced implicit
+                                    # column (confirmed via computed style: the img's grid-area was
+                                    # "photo" while this template only defined "p", so it landed wherever
+                                    # the browser felt like putting an unplaced item - visually on the
+                                    # right). Using "photo" as the literal token fixes the placement.
+                                    - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 24px 28px 1fr
                                     - grid-template-rows: 1fr
                                   custom_fields:
                                     photo:
-                                      - grid-area: p
                                       - justify-self: center
                                       - align-self: center
                                   icon:
@@ -905,12 +970,19 @@ views:
                                     - margin-bottom: 6px
                                     - display: grid
                                   grid:
-                                    - grid-template-areas: '"p i n"'
+                                    # button-card auto-assigns each custom_fields entry's grid-area name
+                                    # to match its KEY ("photo"), NOT a name set under styles.custom_fields
+                                    # - an earlier version used a short "p" token here that never matched,
+                                    # so the photo fell out of the template into an unplaced implicit
+                                    # column (confirmed via computed style: the img's grid-area was
+                                    # "photo" while this template only defined "p", so it landed wherever
+                                    # the browser felt like putting an unplaced item - visually on the
+                                    # right). Using "photo" as the literal token fixes the placement.
+                                    - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 24px 28px 1fr
                                     - grid-template-rows: 1fr
                                   custom_fields:
                                     photo:
-                                      - grid-area: p
                                       - justify-self: center
                                       - align-self: center
                                   icon:
@@ -966,12 +1038,11 @@ views:
                                           return dueDay === tomorrowDay ? 'grid' : 'none';
                                         ]]]
                                   grid:
-                                    - grid-template-areas: '"p i n"'
+                                    - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
                                     - grid-template-rows: 1fr
                                   custom_fields:
                                     photo:
-                                      - grid-area: p
                                       - justify-self: center
                                       - align-self: center
                                   icon:
@@ -1014,12 +1085,11 @@ views:
                                           return dueDay === tomorrowDay ? 'grid' : 'none';
                                         ]]]
                                   grid:
-                                    - grid-template-areas: '"p i n"'
+                                    - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
                                     - grid-template-rows: 1fr
                                   custom_fields:
                                     photo:
-                                      - grid-area: p
                                       - justify-self: center
                                       - align-self: center
                                   icon:
@@ -1062,12 +1132,11 @@ views:
                                           return dueDay === tomorrowDay ? 'grid' : 'none';
                                         ]]]
                                   grid:
-                                    - grid-template-areas: '"p i n"'
+                                    - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
                                     - grid-template-rows: 1fr
                                   custom_fields:
                                     photo:
-                                      - grid-area: p
                                       - justify-self: center
                                       - align-self: center
                                   icon:
@@ -1110,12 +1179,11 @@ views:
                                           return dueDay === tomorrowDay ? 'grid' : 'none';
                                         ]]]
                                   grid:
-                                    - grid-template-areas: '"p i n"'
+                                    - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
                                     - grid-template-rows: 1fr
                                   custom_fields:
                                     photo:
-                                      - grid-area: p
                                       - justify-self: center
                                       - align-self: center
                                   icon:
@@ -1158,12 +1226,11 @@ views:
                                           return dueDay === tomorrowDay ? 'grid' : 'none';
                                         ]]]
                                   grid:
-                                    - grid-template-areas: '"p i n"'
+                                    - grid-template-areas: '"photo i n"'
                                     - grid-template-columns: 22px 28px 1fr
                                     - grid-template-rows: 1fr
                                   custom_fields:
                                     photo:
-                                      - grid-area: p
                                       - justify-self: center
                                       - align-self: center
                                   icon:
