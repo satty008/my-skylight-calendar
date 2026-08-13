@@ -255,7 +255,7 @@ views:
                     /* === GRID LAYOUT === */
                     .container {
                       display: grid !important;
-                      grid-template-columns: repeat(auto-fit, minmax(0, 1fr)) !important;
+                      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) !important;
                       grid-auto-flow: row dense !important;
                       gap: 0 !important;
                     }
