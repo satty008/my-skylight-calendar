@@ -169,21 +169,30 @@ views:
                 }
             cards:
               - type: markdown
+                # ha-markdown-element strips inline style="..." attributes via
+                # DOMPurify (class/ha-icon survive) - so the header is styled
+                # entirely through the card_mod classes below instead.
                 content: |
                   {% set icons = {'sunny':'mdi:weather-sunny','clear-night':'mdi:weather-night','cloudy':'mdi:weather-cloudy','partlycloudy':'mdi:weather-partly-cloudy','rainy':'mdi:weather-rainy','pouring':'mdi:weather-pouring','snowy':'mdi:weather-snowy','snowy-rainy':'mdi:weather-snowy-rainy','fog':'mdi:weather-fog','windy':'mdi:weather-windy','windy-variant':'mdi:weather-windy','hail':'mdi:weather-hail','lightning':'mdi:weather-lightning','lightning-rainy':'mdi:weather-lightning-rainy','exceptional':'mdi:alert'} %}
-                  <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div style="display:flex; align-items:baseline; gap:0.5em;">
-                      <span style="font-size:3em; font-weight:bold; line-height:1; background:orange; color:#1a1a1a; border-radius:8px; padding:0 0.2em;">{{ now().day }}</span>
-                      <span style="font-size:1.3em; font-weight:600;">{{ now().strftime('%A') }}</span>
+                  <div class="chores-head">
+                    <div class="chores-datewrap">
+                      <span class="chores-daynum">{{ now().day }}</span>
+                      <span class="chores-dayname">{{ now().strftime('%A') }}</span>
                     </div>
-                    <div style="display:flex; align-items:center; gap:0.4em; font-size:1.3em; white-space:nowrap;">
-                      <span>{{ state_attr('weather.forecast_home','temperature') }}{{ state_attr('weather.forecast_home','temperature_unit') }}</span>
-                      <ha-icon icon="{{ icons.get(states('weather.forecast_home'), 'mdi:weather-partly-cloudy') }}" style="width:32px; height:32px; color:#f5c542;"></ha-icon>
+                    <div class="chores-weather">
+                      <span class="chores-temp">{{ state_attr('weather.forecast_home','temperature') }}{{ state_attr('weather.forecast_home','temperature_unit') }}</span>
+                      <ha-icon icon="{{ icons.get(states('weather.forecast_home'), 'mdi:weather-partly-cloudy') }}"></ha-icon>
                     </div>
                   </div>
                 card_mod:
                   style: |
                     ha-card { background: none; box-shadow: none; border: none; padding: 0.2em 0.2em 0.6em 0.2em; }
+                    .chores-head { display: flex !important; justify-content: space-between !important; align-items: center !important; }
+                    .chores-datewrap { display: flex !important; align-items: baseline !important; gap: 0.5em !important; }
+                    .chores-daynum { font-size: 3em !important; font-weight: bold !important; line-height: 1 !important; background: orange !important; color: #1a1a1a !important; border-radius: 8px !important; padding: 0 0.2em !important; }
+                    .chores-dayname { font-size: 1.3em !important; font-weight: 600 !important; }
+                    .chores-weather { display: flex !important; align-items: center !important; gap: 0.4em !important; font-size: 1.3em !important; white-space: nowrap !important; }
+                    .chores-weather ha-icon { width: 32px !important; height: 32px !important; color: #f5c542 !important; }
               - type: conditional
                 conditions:
                   - condition: state
