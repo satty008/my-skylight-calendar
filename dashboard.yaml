@@ -80,18 +80,22 @@ views:
       # entry below pointing at its claim/disapprove button entities
       # (button.<person>_choreops_claim_chore_<chore> /
       #  button.<person>_choreops_disapprove_chore_<chore>).
-      # This is the single "main" block: date/weather header (big orange date
-      # badge + day name, plus month and a live time line, weather top-right),
-      # then a Satty/Bhavi selector row (profile-photo bubble-card buttons,
-      # colored when that person is the one shown, grey when hidden - calls
-      # the SAME calendar1/2_calendar_visible_filter exclusive-select scripts
-      # as before), then each person's chore column. The selector buttons live
-      # OUTSIDE the `conditional` wrapping (always rendered) so tapping a
-      # hidden person's button still works to re-select them; only the actual
-      # chore list beneath is conditionally hidden.
-      # Each chore tile carries a small circular profile-photo badge on the
-      # LEFT (button-card custom_fields "photo", ahead of the checkbox icon)
-      # in addition to the existing color-coded left border.
+      #
+      # Status is shown as a GitHub-style pill badge on the right of each
+      # tile (Done/green, Due-today/amber, Overdue/red, Open/grey - computed
+      # from the sensor's state + due_date attribute) instead of a checkbox
+      # icon. Tapping a tile calls script.chore_complete_celebrate (claims +
+      # shows a center-screen browser_mod popup) or, if already done,
+      # script.chore_undo_funny (attempts to disapprove + shows a different
+      # popup) - see packages/family_calendar.yaml for both scripts.
+      #
+      # Each person's border-left/photo-ring color reads from
+      # input_text.satty_color / input_text.bhavi_color instead of the
+      # static calendar1/2-default-primary-color theme vars, so the small
+      # recycle-icon button next to their name (calls script.cycle_satty_color
+      # / cycle_bhavi_color) can retint their name pill AND every one of
+      # their chore tiles at once by advancing that helper through a shared
+      # 8-color palette.
       - type: grid
         cards:
           - type: vertical-stack
@@ -165,21 +169,45 @@ views:
                 cards:
                   - type: vertical-stack
                     cards:
-                      - type: custom:bubble-card
-                        card_type: button
-                        button_type: state
-                        entity: person.ram_sambamurthy
-                        name: Satty
-                        show_icon: true
-                        show_name: true
-                        tap_action:
-                          action: perform-action
-                          perform_action: script.calendar1_calendar_visible_filter
-                        styles: |
-                          .bubble-button-background {
-                            opacity: 1 !important;
-                            background-color: ${hass.states['input_text.calendar1_calendar_filter'].state === '.*' ? 'var(--calendar1-default-primary-color)' : 'light-grey'} !important;
-                          }
+                      - type: horizontal-stack
+                        cards:
+                          - type: custom:bubble-card
+                            card_type: button
+                            button_type: state
+                            entity: person.ram_sambamurthy
+                            name: Satty
+                            show_icon: true
+                            show_name: true
+                            tap_action:
+                              action: perform-action
+                              perform_action: script.calendar1_calendar_visible_filter
+                            styles: |
+                              .bubble-button-background {
+                                opacity: 1 !important;
+                                background-color: ${hass.states['input_text.calendar1_calendar_filter'].state === '.*' ? hass.states['input_text.satty_color'].state : 'light-grey'} !important;
+                              }
+                          - type: custom:button-card
+                            icon: mdi:recycle
+                            show_name: false
+                            show_icon: true
+                            show_state: false
+                            tap_action:
+                              action: perform-action
+                              perform_action: script.cycle_satty_color
+                            styles:
+                              card:
+                                - background: none
+                                - box-shadow: none
+                                - border: none
+                                - flex: "0 0 44px"
+                                - width: 44px
+                                - height: 44px
+                                - padding: 0
+                                - margin: 0 0 0.5em 0
+                              icon:
+                                - width: 22px
+                                - color: |
+                                    [[[ return states['input_text.satty_color'].state ]]]
                       - type: conditional
                         conditions:
                           - condition: state
@@ -192,23 +220,36 @@ views:
                                 entity: sensor.satty_choreops_chore_status_take_out_trash
                                 name: Take out trash
                                 show_state: false
-                                show_icon: true
-                                icon: |
-                                  [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                                show_icon: false
                                 tap_action: |
                                   [[[
-                                    if (states[entity.entity_id].state === 'completed') {
-                                      return {action: 'none'};
+                                    const st = states[entity.entity_id];
+                                    if (st.state === 'completed') {
+                                      return {action: 'call-service', service: 'script.chore_undo_funny', service_data: {disapprove_entity_id: 'button.satty_choreops_disapprove_chore_take_out_trash', chore_name: 'Take out trash', person_name: 'Satty'}};
                                     }
-                                    return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.satty_choreops_claim_chore_take_out_trash'}};
+                                    return {action: 'call-service', service: 'script.chore_complete_celebrate', service_data: {claim_entity_id: 'button.satty_choreops_claim_chore_take_out_trash', chore_name: 'Take out trash', person_name: 'Satty'}};
                                   ]]]
                                 custom_fields:
                                   photo: |
                                     [[[ return `<img src="${states['person.ram_sambamurthy'].attributes.entity_picture}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;display:block;">` ]]]
+                                  badge: |
+                                        [[[
+                                          const st = states[entity.entity_id];
+                                          const due = st.attributes.due_date;
+                                          const t = new Date();
+                                          const todayStr = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+                                          let label, bg;
+                                          if (st.state === 'completed') { label = 'Done'; bg = '#238636'; }
+                                          else if (due && due.slice(0, 10) < todayStr) { label = 'Overdue'; bg = '#da3633'; }
+                                          else if (due && due.slice(0, 10) === todayStr) { label = 'Due'; bg = '#9a6700'; }
+                                          else { label = 'Open'; bg = '#57606a'; }
+                                          return `<span style="display:inline-block;padding:2px 10px;border-radius:999px;background:${bg};color:#fff;font-size:0.72em;font-weight:700;white-space:nowrap;">${label}</span>`;
+                                        ]]]
                                 styles:
                                   card:
                                     - background-color: rgba(20, 20, 26, 0.75)
-                                    - border-left: 4px solid var(--calendar1-default-primary-color)
+                                    - border-left: |
+                                        [[[ return '4px solid ' + states['input_text.satty_color'].state ]]]
                                     - border-radius: 8px
                                     - padding: 6px 10px 6px 4px
                                     - margin-bottom: 6px
@@ -216,28 +257,21 @@ views:
                                     - grid-template-columns: 1fr
                                   grid:
                                     # button-card auto-assigns each custom_fields entry's grid-area name
-                                    # to match its KEY ("photo"), NOT a name set under styles.custom_fields
-                                    # - an earlier version used a short "p" token here that never matched,
-                                    # so the photo fell out of the template into an unplaced implicit
-                                    # column (confirmed via computed style: the img's grid-area was
-                                    # "photo" while this template only defined "p", so it landed wherever
-                                    # the browser felt like putting an unplaced item - visually on the
-                                    # right). Using "photo" as the literal token fixes the placement.
-                                    - grid-template-areas: '"photo i n"'
-                                    - grid-template-columns: 24px 28px 1fr
+                                    # to match its KEY, not a name set under styles.custom_fields.
+                                    - grid-template-areas: '"photo n badge"'
+                                    - grid-template-columns: 24px 1fr auto
                                     - grid-template-rows: 1fr
                                     - width: 100%
                                     - justify-content: stretch
+                                    - align-items: center
                                   custom_fields:
                                     photo:
                                       - justify-self: start
                                       - align-self: center
-                                  icon:
-                                    - grid-area: i
-                                    - justify-self: center
-                                    - width: 22px
-                                    - color: |
-                                        [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar1-default-primary-color)' : 'white' ]]]
+                                    badge:
+                                      - grid-area: badge
+                                      - justify-self: end
+                                      - align-self: center
                                   name:
                                     - grid-area: n
                                     - justify-self: start
@@ -246,28 +280,41 @@ views:
                                     - text-decoration: |
                                         [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
                                     - opacity: |
-                                        [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                                        [[[ return states[entity.entity_id].state === 'completed' ? '0.6' : '1' ]]]
                               - type: custom:button-card
                                 entity: sensor.satty_choreops_chore_status_test_daily_satty
                                 name: Daily
                                 show_state: false
-                                show_icon: true
-                                icon: |
-                                  [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                                show_icon: false
                                 tap_action: |
                                   [[[
-                                    if (states[entity.entity_id].state === 'completed') {
-                                      return {action: 'none'};
+                                    const st = states[entity.entity_id];
+                                    if (st.state === 'completed') {
+                                      return {action: 'call-service', service: 'script.chore_undo_funny', service_data: {disapprove_entity_id: 'button.satty_choreops_disapprove_chore_test_daily_satty', chore_name: 'Daily', person_name: 'Satty'}};
                                     }
-                                    return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.satty_choreops_claim_chore_test_daily_satty'}};
+                                    return {action: 'call-service', service: 'script.chore_complete_celebrate', service_data: {claim_entity_id: 'button.satty_choreops_claim_chore_test_daily_satty', chore_name: 'Daily', person_name: 'Satty'}};
                                   ]]]
                                 custom_fields:
                                   photo: |
                                     [[[ return `<img src="${states['person.ram_sambamurthy'].attributes.entity_picture}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;display:block;">` ]]]
+                                  badge: |
+                                        [[[
+                                          const st = states[entity.entity_id];
+                                          const due = st.attributes.due_date;
+                                          const t = new Date();
+                                          const todayStr = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+                                          let label, bg;
+                                          if (st.state === 'completed') { label = 'Done'; bg = '#238636'; }
+                                          else if (due && due.slice(0, 10) < todayStr) { label = 'Overdue'; bg = '#da3633'; }
+                                          else if (due && due.slice(0, 10) === todayStr) { label = 'Due'; bg = '#9a6700'; }
+                                          else { label = 'Open'; bg = '#57606a'; }
+                                          return `<span style="display:inline-block;padding:2px 10px;border-radius:999px;background:${bg};color:#fff;font-size:0.72em;font-weight:700;white-space:nowrap;">${label}</span>`;
+                                        ]]]
                                 styles:
                                   card:
                                     - background-color: rgba(20, 20, 26, 0.75)
-                                    - border-left: 4px solid var(--calendar1-default-primary-color)
+                                    - border-left: |
+                                        [[[ return '4px solid ' + states['input_text.satty_color'].state ]]]
                                     - border-radius: 8px
                                     - padding: 6px 10px 6px 4px
                                     - margin-bottom: 6px
@@ -275,28 +322,21 @@ views:
                                     - grid-template-columns: 1fr
                                   grid:
                                     # button-card auto-assigns each custom_fields entry's grid-area name
-                                    # to match its KEY ("photo"), NOT a name set under styles.custom_fields
-                                    # - an earlier version used a short "p" token here that never matched,
-                                    # so the photo fell out of the template into an unplaced implicit
-                                    # column (confirmed via computed style: the img's grid-area was
-                                    # "photo" while this template only defined "p", so it landed wherever
-                                    # the browser felt like putting an unplaced item - visually on the
-                                    # right). Using "photo" as the literal token fixes the placement.
-                                    - grid-template-areas: '"photo i n"'
-                                    - grid-template-columns: 24px 28px 1fr
+                                    # to match its KEY, not a name set under styles.custom_fields.
+                                    - grid-template-areas: '"photo n badge"'
+                                    - grid-template-columns: 24px 1fr auto
                                     - grid-template-rows: 1fr
                                     - width: 100%
                                     - justify-content: stretch
+                                    - align-items: center
                                   custom_fields:
                                     photo:
                                       - justify-self: start
                                       - align-self: center
-                                  icon:
-                                    - grid-area: i
-                                    - justify-self: center
-                                    - width: 22px
-                                    - color: |
-                                        [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar1-default-primary-color)' : 'white' ]]]
+                                    badge:
+                                      - grid-area: badge
+                                      - justify-self: end
+                                      - align-self: center
                                   name:
                                     - grid-area: n
                                     - justify-self: start
@@ -305,28 +345,41 @@ views:
                                     - text-decoration: |
                                         [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
                                     - opacity: |
-                                        [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                                        [[[ return states[entity.entity_id].state === 'completed' ? '0.6' : '1' ]]]
                               - type: custom:button-card
                                 entity: sensor.satty_choreops_chore_status_test_weekly_satty
                                 name: Weekly
                                 show_state: false
-                                show_icon: true
-                                icon: |
-                                  [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                                show_icon: false
                                 tap_action: |
                                   [[[
-                                    if (states[entity.entity_id].state === 'completed') {
-                                      return {action: 'none'};
+                                    const st = states[entity.entity_id];
+                                    if (st.state === 'completed') {
+                                      return {action: 'call-service', service: 'script.chore_undo_funny', service_data: {disapprove_entity_id: 'button.satty_choreops_disapprove_chore_test_weekly_satty', chore_name: 'Weekly', person_name: 'Satty'}};
                                     }
-                                    return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.satty_choreops_claim_chore_test_weekly_satty'}};
+                                    return {action: 'call-service', service: 'script.chore_complete_celebrate', service_data: {claim_entity_id: 'button.satty_choreops_claim_chore_test_weekly_satty', chore_name: 'Weekly', person_name: 'Satty'}};
                                   ]]]
                                 custom_fields:
                                   photo: |
                                     [[[ return `<img src="${states['person.ram_sambamurthy'].attributes.entity_picture}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;display:block;">` ]]]
+                                  badge: |
+                                        [[[
+                                          const st = states[entity.entity_id];
+                                          const due = st.attributes.due_date;
+                                          const t = new Date();
+                                          const todayStr = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+                                          let label, bg;
+                                          if (st.state === 'completed') { label = 'Done'; bg = '#238636'; }
+                                          else if (due && due.slice(0, 10) < todayStr) { label = 'Overdue'; bg = '#da3633'; }
+                                          else if (due && due.slice(0, 10) === todayStr) { label = 'Due'; bg = '#9a6700'; }
+                                          else { label = 'Open'; bg = '#57606a'; }
+                                          return `<span style="display:inline-block;padding:2px 10px;border-radius:999px;background:${bg};color:#fff;font-size:0.72em;font-weight:700;white-space:nowrap;">${label}</span>`;
+                                        ]]]
                                 styles:
                                   card:
                                     - background-color: rgba(20, 20, 26, 0.75)
-                                    - border-left: 4px solid var(--calendar1-default-primary-color)
+                                    - border-left: |
+                                        [[[ return '4px solid ' + states['input_text.satty_color'].state ]]]
                                     - border-radius: 8px
                                     - padding: 6px 10px 6px 4px
                                     - margin-bottom: 6px
@@ -334,28 +387,21 @@ views:
                                     - grid-template-columns: 1fr
                                   grid:
                                     # button-card auto-assigns each custom_fields entry's grid-area name
-                                    # to match its KEY ("photo"), NOT a name set under styles.custom_fields
-                                    # - an earlier version used a short "p" token here that never matched,
-                                    # so the photo fell out of the template into an unplaced implicit
-                                    # column (confirmed via computed style: the img's grid-area was
-                                    # "photo" while this template only defined "p", so it landed wherever
-                                    # the browser felt like putting an unplaced item - visually on the
-                                    # right). Using "photo" as the literal token fixes the placement.
-                                    - grid-template-areas: '"photo i n"'
-                                    - grid-template-columns: 24px 28px 1fr
+                                    # to match its KEY, not a name set under styles.custom_fields.
+                                    - grid-template-areas: '"photo n badge"'
+                                    - grid-template-columns: 24px 1fr auto
                                     - grid-template-rows: 1fr
                                     - width: 100%
                                     - justify-content: stretch
+                                    - align-items: center
                                   custom_fields:
                                     photo:
                                       - justify-self: start
                                       - align-self: center
-                                  icon:
-                                    - grid-area: i
-                                    - justify-self: center
-                                    - width: 22px
-                                    - color: |
-                                        [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar1-default-primary-color)' : 'white' ]]]
+                                    badge:
+                                      - grid-area: badge
+                                      - justify-self: end
+                                      - align-self: center
                                   name:
                                     - grid-area: n
                                     - justify-self: start
@@ -364,28 +410,41 @@ views:
                                     - text-decoration: |
                                         [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
                                     - opacity: |
-                                        [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                                        [[[ return states[entity.entity_id].state === 'completed' ? '0.6' : '1' ]]]
                               - type: custom:button-card
                                 entity: sensor.satty_choreops_chore_status_test_monthly_satty
                                 name: Monthly
                                 show_state: false
-                                show_icon: true
-                                icon: |
-                                  [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                                show_icon: false
                                 tap_action: |
                                   [[[
-                                    if (states[entity.entity_id].state === 'completed') {
-                                      return {action: 'none'};
+                                    const st = states[entity.entity_id];
+                                    if (st.state === 'completed') {
+                                      return {action: 'call-service', service: 'script.chore_undo_funny', service_data: {disapprove_entity_id: 'button.satty_choreops_disapprove_chore_test_monthly_satty', chore_name: 'Monthly', person_name: 'Satty'}};
                                     }
-                                    return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.satty_choreops_claim_chore_test_monthly_satty'}};
+                                    return {action: 'call-service', service: 'script.chore_complete_celebrate', service_data: {claim_entity_id: 'button.satty_choreops_claim_chore_test_monthly_satty', chore_name: 'Monthly', person_name: 'Satty'}};
                                   ]]]
                                 custom_fields:
                                   photo: |
                                     [[[ return `<img src="${states['person.ram_sambamurthy'].attributes.entity_picture}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;display:block;">` ]]]
+                                  badge: |
+                                        [[[
+                                          const st = states[entity.entity_id];
+                                          const due = st.attributes.due_date;
+                                          const t = new Date();
+                                          const todayStr = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+                                          let label, bg;
+                                          if (st.state === 'completed') { label = 'Done'; bg = '#238636'; }
+                                          else if (due && due.slice(0, 10) < todayStr) { label = 'Overdue'; bg = '#da3633'; }
+                                          else if (due && due.slice(0, 10) === todayStr) { label = 'Due'; bg = '#9a6700'; }
+                                          else { label = 'Open'; bg = '#57606a'; }
+                                          return `<span style="display:inline-block;padding:2px 10px;border-radius:999px;background:${bg};color:#fff;font-size:0.72em;font-weight:700;white-space:nowrap;">${label}</span>`;
+                                        ]]]
                                 styles:
                                   card:
                                     - background-color: rgba(20, 20, 26, 0.75)
-                                    - border-left: 4px solid var(--calendar1-default-primary-color)
+                                    - border-left: |
+                                        [[[ return '4px solid ' + states['input_text.satty_color'].state ]]]
                                     - border-radius: 8px
                                     - padding: 6px 10px 6px 4px
                                     - margin-bottom: 6px
@@ -393,28 +452,21 @@ views:
                                     - grid-template-columns: 1fr
                                   grid:
                                     # button-card auto-assigns each custom_fields entry's grid-area name
-                                    # to match its KEY ("photo"), NOT a name set under styles.custom_fields
-                                    # - an earlier version used a short "p" token here that never matched,
-                                    # so the photo fell out of the template into an unplaced implicit
-                                    # column (confirmed via computed style: the img's grid-area was
-                                    # "photo" while this template only defined "p", so it landed wherever
-                                    # the browser felt like putting an unplaced item - visually on the
-                                    # right). Using "photo" as the literal token fixes the placement.
-                                    - grid-template-areas: '"photo i n"'
-                                    - grid-template-columns: 24px 28px 1fr
+                                    # to match its KEY, not a name set under styles.custom_fields.
+                                    - grid-template-areas: '"photo n badge"'
+                                    - grid-template-columns: 24px 1fr auto
                                     - grid-template-rows: 1fr
                                     - width: 100%
                                     - justify-content: stretch
+                                    - align-items: center
                                   custom_fields:
                                     photo:
                                       - justify-self: start
                                       - align-self: center
-                                  icon:
-                                    - grid-area: i
-                                    - justify-self: center
-                                    - width: 22px
-                                    - color: |
-                                        [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar1-default-primary-color)' : 'white' ]]]
+                                    badge:
+                                      - grid-area: badge
+                                      - justify-self: end
+                                      - align-self: center
                                   name:
                                     - grid-area: n
                                     - justify-self: start
@@ -423,28 +475,41 @@ views:
                                     - text-decoration: |
                                         [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
                                     - opacity: |
-                                        [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                                        [[[ return states[entity.entity_id].state === 'completed' ? '0.6' : '1' ]]]
                               - type: custom:button-card
                                 entity: sensor.satty_choreops_chore_status_test_quarterly_satty
                                 name: Quarterly
                                 show_state: false
-                                show_icon: true
-                                icon: |
-                                  [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                                show_icon: false
                                 tap_action: |
                                   [[[
-                                    if (states[entity.entity_id].state === 'completed') {
-                                      return {action: 'none'};
+                                    const st = states[entity.entity_id];
+                                    if (st.state === 'completed') {
+                                      return {action: 'call-service', service: 'script.chore_undo_funny', service_data: {disapprove_entity_id: 'button.satty_choreops_disapprove_chore_test_quarterly_satty', chore_name: 'Quarterly', person_name: 'Satty'}};
                                     }
-                                    return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.satty_choreops_claim_chore_test_quarterly_satty'}};
+                                    return {action: 'call-service', service: 'script.chore_complete_celebrate', service_data: {claim_entity_id: 'button.satty_choreops_claim_chore_test_quarterly_satty', chore_name: 'Quarterly', person_name: 'Satty'}};
                                   ]]]
                                 custom_fields:
                                   photo: |
                                     [[[ return `<img src="${states['person.ram_sambamurthy'].attributes.entity_picture}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;display:block;">` ]]]
+                                  badge: |
+                                        [[[
+                                          const st = states[entity.entity_id];
+                                          const due = st.attributes.due_date;
+                                          const t = new Date();
+                                          const todayStr = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+                                          let label, bg;
+                                          if (st.state === 'completed') { label = 'Done'; bg = '#238636'; }
+                                          else if (due && due.slice(0, 10) < todayStr) { label = 'Overdue'; bg = '#da3633'; }
+                                          else if (due && due.slice(0, 10) === todayStr) { label = 'Due'; bg = '#9a6700'; }
+                                          else { label = 'Open'; bg = '#57606a'; }
+                                          return `<span style="display:inline-block;padding:2px 10px;border-radius:999px;background:${bg};color:#fff;font-size:0.72em;font-weight:700;white-space:nowrap;">${label}</span>`;
+                                        ]]]
                                 styles:
                                   card:
                                     - background-color: rgba(20, 20, 26, 0.75)
-                                    - border-left: 4px solid var(--calendar1-default-primary-color)
+                                    - border-left: |
+                                        [[[ return '4px solid ' + states['input_text.satty_color'].state ]]]
                                     - border-radius: 8px
                                     - padding: 6px 10px 6px 4px
                                     - margin-bottom: 6px
@@ -452,28 +517,21 @@ views:
                                     - grid-template-columns: 1fr
                                   grid:
                                     # button-card auto-assigns each custom_fields entry's grid-area name
-                                    # to match its KEY ("photo"), NOT a name set under styles.custom_fields
-                                    # - an earlier version used a short "p" token here that never matched,
-                                    # so the photo fell out of the template into an unplaced implicit
-                                    # column (confirmed via computed style: the img's grid-area was
-                                    # "photo" while this template only defined "p", so it landed wherever
-                                    # the browser felt like putting an unplaced item - visually on the
-                                    # right). Using "photo" as the literal token fixes the placement.
-                                    - grid-template-areas: '"photo i n"'
-                                    - grid-template-columns: 24px 28px 1fr
+                                    # to match its KEY, not a name set under styles.custom_fields.
+                                    - grid-template-areas: '"photo n badge"'
+                                    - grid-template-columns: 24px 1fr auto
                                     - grid-template-rows: 1fr
                                     - width: 100%
                                     - justify-content: stretch
+                                    - align-items: center
                                   custom_fields:
                                     photo:
                                       - justify-self: start
                                       - align-self: center
-                                  icon:
-                                    - grid-area: i
-                                    - justify-self: center
-                                    - width: 22px
-                                    - color: |
-                                        [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar1-default-primary-color)' : 'white' ]]]
+                                    badge:
+                                      - grid-area: badge
+                                      - justify-self: end
+                                      - align-self: center
                                   name:
                                     - grid-area: n
                                     - justify-self: start
@@ -482,7 +540,7 @@ views:
                                     - text-decoration: |
                                         [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
                                     - opacity: |
-                                        [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                                        [[[ return states[entity.entity_id].state === 'completed' ? '0.6' : '1' ]]]
                               - type: markdown
                                 content: "**Tomorrow**"
                                 card_mod:
@@ -505,7 +563,8 @@ views:
                                 styles:
                                   card:
                                     - background-color: rgba(20, 20, 26, 0.4)
-                                    - border-left: 4px solid var(--calendar1-default-primary-color)
+                                    - border-left: |
+                                        [[[ return '4px solid ' + states['input_text.satty_color'].state ]]]
                                     - border-radius: 8px
                                     - padding: 5px 10px 5px 4px
                                     - margin-bottom: 6px
@@ -555,7 +614,8 @@ views:
                                 styles:
                                   card:
                                     - background-color: rgba(20, 20, 26, 0.4)
-                                    - border-left: 4px solid var(--calendar1-default-primary-color)
+                                    - border-left: |
+                                        [[[ return '4px solid ' + states['input_text.satty_color'].state ]]]
                                     - border-radius: 8px
                                     - padding: 5px 10px 5px 4px
                                     - margin-bottom: 6px
@@ -605,7 +665,8 @@ views:
                                 styles:
                                   card:
                                     - background-color: rgba(20, 20, 26, 0.4)
-                                    - border-left: 4px solid var(--calendar1-default-primary-color)
+                                    - border-left: |
+                                        [[[ return '4px solid ' + states['input_text.satty_color'].state ]]]
                                     - border-radius: 8px
                                     - padding: 5px 10px 5px 4px
                                     - margin-bottom: 6px
@@ -655,7 +716,8 @@ views:
                                 styles:
                                   card:
                                     - background-color: rgba(20, 20, 26, 0.4)
-                                    - border-left: 4px solid var(--calendar1-default-primary-color)
+                                    - border-left: |
+                                        [[[ return '4px solid ' + states['input_text.satty_color'].state ]]]
                                     - border-radius: 8px
                                     - padding: 5px 10px 5px 4px
                                     - margin-bottom: 6px
@@ -705,7 +767,8 @@ views:
                                 styles:
                                   card:
                                     - background-color: rgba(20, 20, 26, 0.4)
-                                    - border-left: 4px solid var(--calendar1-default-primary-color)
+                                    - border-left: |
+                                        [[[ return '4px solid ' + states['input_text.satty_color'].state ]]]
                                     - border-radius: 8px
                                     - padding: 5px 10px 5px 4px
                                     - margin-bottom: 6px
@@ -743,21 +806,45 @@ views:
                                     - font-size: 0.85em
                   - type: vertical-stack
                     cards:
-                      - type: custom:bubble-card
-                        card_type: button
-                        button_type: state
-                        entity: person.bhavi
-                        name: Bhavi
-                        show_icon: true
-                        show_name: true
-                        tap_action:
-                          action: perform-action
-                          perform_action: script.calendar2_calendar_visible_filter
-                        styles: |
-                          .bubble-button-background {
-                            opacity: 1 !important;
-                            background-color: ${hass.states['input_text.calendar2_calendar_filter'].state === '.*' ? 'var(--calendar2-default-primary-color)' : 'light-grey'} !important;
-                          }
+                      - type: horizontal-stack
+                        cards:
+                          - type: custom:bubble-card
+                            card_type: button
+                            button_type: state
+                            entity: person.bhavi
+                            name: Bhavi
+                            show_icon: true
+                            show_name: true
+                            tap_action:
+                              action: perform-action
+                              perform_action: script.calendar2_calendar_visible_filter
+                            styles: |
+                              .bubble-button-background {
+                                opacity: 1 !important;
+                                background-color: ${hass.states['input_text.calendar2_calendar_filter'].state === '.*' ? hass.states['input_text.bhavi_color'].state : 'light-grey'} !important;
+                              }
+                          - type: custom:button-card
+                            icon: mdi:recycle
+                            show_name: false
+                            show_icon: true
+                            show_state: false
+                            tap_action:
+                              action: perform-action
+                              perform_action: script.cycle_bhavi_color
+                            styles:
+                              card:
+                                - background: none
+                                - box-shadow: none
+                                - border: none
+                                - flex: "0 0 44px"
+                                - width: 44px
+                                - height: 44px
+                                - padding: 0
+                                - margin: 0 0 0.5em 0
+                              icon:
+                                - width: 22px
+                                - color: |
+                                    [[[ return states['input_text.bhavi_color'].state ]]]
                       - type: conditional
                         conditions:
                           - condition: state
@@ -770,23 +857,36 @@ views:
                                 entity: sensor.bhavi_choreops_chore_status_vacuum_living_room
                                 name: Vacuum living room
                                 show_state: false
-                                show_icon: true
-                                icon: |
-                                  [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                                show_icon: false
                                 tap_action: |
                                   [[[
-                                    if (states[entity.entity_id].state === 'completed') {
-                                      return {action: 'none'};
+                                    const st = states[entity.entity_id];
+                                    if (st.state === 'completed') {
+                                      return {action: 'call-service', service: 'script.chore_undo_funny', service_data: {disapprove_entity_id: 'button.bhavi_choreops_disapprove_chore_vacuum_living_room', chore_name: 'Vacuum living room', person_name: 'Bhavi'}};
                                     }
-                                    return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.bhavi_choreops_claim_chore_vacuum_living_room'}};
+                                    return {action: 'call-service', service: 'script.chore_complete_celebrate', service_data: {claim_entity_id: 'button.bhavi_choreops_claim_chore_vacuum_living_room', chore_name: 'Vacuum living room', person_name: 'Bhavi'}};
                                   ]]]
                                 custom_fields:
                                   photo: |
                                     [[[ return `<img src="${states['person.bhavi'].attributes.entity_picture}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;display:block;">` ]]]
+                                  badge: |
+                                        [[[
+                                          const st = states[entity.entity_id];
+                                          const due = st.attributes.due_date;
+                                          const t = new Date();
+                                          const todayStr = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+                                          let label, bg;
+                                          if (st.state === 'completed') { label = 'Done'; bg = '#238636'; }
+                                          else if (due && due.slice(0, 10) < todayStr) { label = 'Overdue'; bg = '#da3633'; }
+                                          else if (due && due.slice(0, 10) === todayStr) { label = 'Due'; bg = '#9a6700'; }
+                                          else { label = 'Open'; bg = '#57606a'; }
+                                          return `<span style="display:inline-block;padding:2px 10px;border-radius:999px;background:${bg};color:#fff;font-size:0.72em;font-weight:700;white-space:nowrap;">${label}</span>`;
+                                        ]]]
                                 styles:
                                   card:
                                     - background-color: rgba(20, 20, 26, 0.75)
-                                    - border-left: 4px solid var(--calendar2-default-primary-color)
+                                    - border-left: |
+                                        [[[ return '4px solid ' + states['input_text.bhavi_color'].state ]]]
                                     - border-radius: 8px
                                     - padding: 6px 10px 6px 4px
                                     - margin-bottom: 6px
@@ -794,28 +894,21 @@ views:
                                     - grid-template-columns: 1fr
                                   grid:
                                     # button-card auto-assigns each custom_fields entry's grid-area name
-                                    # to match its KEY ("photo"), NOT a name set under styles.custom_fields
-                                    # - an earlier version used a short "p" token here that never matched,
-                                    # so the photo fell out of the template into an unplaced implicit
-                                    # column (confirmed via computed style: the img's grid-area was
-                                    # "photo" while this template only defined "p", so it landed wherever
-                                    # the browser felt like putting an unplaced item - visually on the
-                                    # right). Using "photo" as the literal token fixes the placement.
-                                    - grid-template-areas: '"photo i n"'
-                                    - grid-template-columns: 24px 28px 1fr
+                                    # to match its KEY, not a name set under styles.custom_fields.
+                                    - grid-template-areas: '"photo n badge"'
+                                    - grid-template-columns: 24px 1fr auto
                                     - grid-template-rows: 1fr
                                     - width: 100%
                                     - justify-content: stretch
+                                    - align-items: center
                                   custom_fields:
                                     photo:
                                       - justify-self: start
                                       - align-self: center
-                                  icon:
-                                    - grid-area: i
-                                    - justify-self: center
-                                    - width: 22px
-                                    - color: |
-                                        [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar2-default-primary-color)' : 'white' ]]]
+                                    badge:
+                                      - grid-area: badge
+                                      - justify-self: end
+                                      - align-self: center
                                   name:
                                     - grid-area: n
                                     - justify-self: start
@@ -824,28 +917,41 @@ views:
                                     - text-decoration: |
                                         [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
                                     - opacity: |
-                                        [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                                        [[[ return states[entity.entity_id].state === 'completed' ? '0.6' : '1' ]]]
                               - type: custom:button-card
                                 entity: sensor.bhavi_choreops_chore_status_test_daily_bhavi
                                 name: Daily
                                 show_state: false
-                                show_icon: true
-                                icon: |
-                                  [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                                show_icon: false
                                 tap_action: |
                                   [[[
-                                    if (states[entity.entity_id].state === 'completed') {
-                                      return {action: 'none'};
+                                    const st = states[entity.entity_id];
+                                    if (st.state === 'completed') {
+                                      return {action: 'call-service', service: 'script.chore_undo_funny', service_data: {disapprove_entity_id: 'button.bhavi_choreops_disapprove_chore_test_daily_bhavi', chore_name: 'Daily', person_name: 'Bhavi'}};
                                     }
-                                    return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.bhavi_choreops_claim_chore_test_daily_bhavi'}};
+                                    return {action: 'call-service', service: 'script.chore_complete_celebrate', service_data: {claim_entity_id: 'button.bhavi_choreops_claim_chore_test_daily_bhavi', chore_name: 'Daily', person_name: 'Bhavi'}};
                                   ]]]
                                 custom_fields:
                                   photo: |
                                     [[[ return `<img src="${states['person.bhavi'].attributes.entity_picture}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;display:block;">` ]]]
+                                  badge: |
+                                        [[[
+                                          const st = states[entity.entity_id];
+                                          const due = st.attributes.due_date;
+                                          const t = new Date();
+                                          const todayStr = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+                                          let label, bg;
+                                          if (st.state === 'completed') { label = 'Done'; bg = '#238636'; }
+                                          else if (due && due.slice(0, 10) < todayStr) { label = 'Overdue'; bg = '#da3633'; }
+                                          else if (due && due.slice(0, 10) === todayStr) { label = 'Due'; bg = '#9a6700'; }
+                                          else { label = 'Open'; bg = '#57606a'; }
+                                          return `<span style="display:inline-block;padding:2px 10px;border-radius:999px;background:${bg};color:#fff;font-size:0.72em;font-weight:700;white-space:nowrap;">${label}</span>`;
+                                        ]]]
                                 styles:
                                   card:
                                     - background-color: rgba(20, 20, 26, 0.75)
-                                    - border-left: 4px solid var(--calendar2-default-primary-color)
+                                    - border-left: |
+                                        [[[ return '4px solid ' + states['input_text.bhavi_color'].state ]]]
                                     - border-radius: 8px
                                     - padding: 6px 10px 6px 4px
                                     - margin-bottom: 6px
@@ -853,28 +959,21 @@ views:
                                     - grid-template-columns: 1fr
                                   grid:
                                     # button-card auto-assigns each custom_fields entry's grid-area name
-                                    # to match its KEY ("photo"), NOT a name set under styles.custom_fields
-                                    # - an earlier version used a short "p" token here that never matched,
-                                    # so the photo fell out of the template into an unplaced implicit
-                                    # column (confirmed via computed style: the img's grid-area was
-                                    # "photo" while this template only defined "p", so it landed wherever
-                                    # the browser felt like putting an unplaced item - visually on the
-                                    # right). Using "photo" as the literal token fixes the placement.
-                                    - grid-template-areas: '"photo i n"'
-                                    - grid-template-columns: 24px 28px 1fr
+                                    # to match its KEY, not a name set under styles.custom_fields.
+                                    - grid-template-areas: '"photo n badge"'
+                                    - grid-template-columns: 24px 1fr auto
                                     - grid-template-rows: 1fr
                                     - width: 100%
                                     - justify-content: stretch
+                                    - align-items: center
                                   custom_fields:
                                     photo:
                                       - justify-self: start
                                       - align-self: center
-                                  icon:
-                                    - grid-area: i
-                                    - justify-self: center
-                                    - width: 22px
-                                    - color: |
-                                        [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar2-default-primary-color)' : 'white' ]]]
+                                    badge:
+                                      - grid-area: badge
+                                      - justify-self: end
+                                      - align-self: center
                                   name:
                                     - grid-area: n
                                     - justify-self: start
@@ -883,28 +982,41 @@ views:
                                     - text-decoration: |
                                         [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
                                     - opacity: |
-                                        [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                                        [[[ return states[entity.entity_id].state === 'completed' ? '0.6' : '1' ]]]
                               - type: custom:button-card
                                 entity: sensor.bhavi_choreops_chore_status_test_weekly_bhavi
                                 name: Weekly
                                 show_state: false
-                                show_icon: true
-                                icon: |
-                                  [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                                show_icon: false
                                 tap_action: |
                                   [[[
-                                    if (states[entity.entity_id].state === 'completed') {
-                                      return {action: 'none'};
+                                    const st = states[entity.entity_id];
+                                    if (st.state === 'completed') {
+                                      return {action: 'call-service', service: 'script.chore_undo_funny', service_data: {disapprove_entity_id: 'button.bhavi_choreops_disapprove_chore_test_weekly_bhavi', chore_name: 'Weekly', person_name: 'Bhavi'}};
                                     }
-                                    return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.bhavi_choreops_claim_chore_test_weekly_bhavi'}};
+                                    return {action: 'call-service', service: 'script.chore_complete_celebrate', service_data: {claim_entity_id: 'button.bhavi_choreops_claim_chore_test_weekly_bhavi', chore_name: 'Weekly', person_name: 'Bhavi'}};
                                   ]]]
                                 custom_fields:
                                   photo: |
                                     [[[ return `<img src="${states['person.bhavi'].attributes.entity_picture}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;display:block;">` ]]]
+                                  badge: |
+                                        [[[
+                                          const st = states[entity.entity_id];
+                                          const due = st.attributes.due_date;
+                                          const t = new Date();
+                                          const todayStr = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+                                          let label, bg;
+                                          if (st.state === 'completed') { label = 'Done'; bg = '#238636'; }
+                                          else if (due && due.slice(0, 10) < todayStr) { label = 'Overdue'; bg = '#da3633'; }
+                                          else if (due && due.slice(0, 10) === todayStr) { label = 'Due'; bg = '#9a6700'; }
+                                          else { label = 'Open'; bg = '#57606a'; }
+                                          return `<span style="display:inline-block;padding:2px 10px;border-radius:999px;background:${bg};color:#fff;font-size:0.72em;font-weight:700;white-space:nowrap;">${label}</span>`;
+                                        ]]]
                                 styles:
                                   card:
                                     - background-color: rgba(20, 20, 26, 0.75)
-                                    - border-left: 4px solid var(--calendar2-default-primary-color)
+                                    - border-left: |
+                                        [[[ return '4px solid ' + states['input_text.bhavi_color'].state ]]]
                                     - border-radius: 8px
                                     - padding: 6px 10px 6px 4px
                                     - margin-bottom: 6px
@@ -912,28 +1024,21 @@ views:
                                     - grid-template-columns: 1fr
                                   grid:
                                     # button-card auto-assigns each custom_fields entry's grid-area name
-                                    # to match its KEY ("photo"), NOT a name set under styles.custom_fields
-                                    # - an earlier version used a short "p" token here that never matched,
-                                    # so the photo fell out of the template into an unplaced implicit
-                                    # column (confirmed via computed style: the img's grid-area was
-                                    # "photo" while this template only defined "p", so it landed wherever
-                                    # the browser felt like putting an unplaced item - visually on the
-                                    # right). Using "photo" as the literal token fixes the placement.
-                                    - grid-template-areas: '"photo i n"'
-                                    - grid-template-columns: 24px 28px 1fr
+                                    # to match its KEY, not a name set under styles.custom_fields.
+                                    - grid-template-areas: '"photo n badge"'
+                                    - grid-template-columns: 24px 1fr auto
                                     - grid-template-rows: 1fr
                                     - width: 100%
                                     - justify-content: stretch
+                                    - align-items: center
                                   custom_fields:
                                     photo:
                                       - justify-self: start
                                       - align-self: center
-                                  icon:
-                                    - grid-area: i
-                                    - justify-self: center
-                                    - width: 22px
-                                    - color: |
-                                        [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar2-default-primary-color)' : 'white' ]]]
+                                    badge:
+                                      - grid-area: badge
+                                      - justify-self: end
+                                      - align-self: center
                                   name:
                                     - grid-area: n
                                     - justify-self: start
@@ -942,28 +1047,41 @@ views:
                                     - text-decoration: |
                                         [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
                                     - opacity: |
-                                        [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                                        [[[ return states[entity.entity_id].state === 'completed' ? '0.6' : '1' ]]]
                               - type: custom:button-card
                                 entity: sensor.bhavi_choreops_chore_status_test_monthly_bhavi
                                 name: Monthly
                                 show_state: false
-                                show_icon: true
-                                icon: |
-                                  [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                                show_icon: false
                                 tap_action: |
                                   [[[
-                                    if (states[entity.entity_id].state === 'completed') {
-                                      return {action: 'none'};
+                                    const st = states[entity.entity_id];
+                                    if (st.state === 'completed') {
+                                      return {action: 'call-service', service: 'script.chore_undo_funny', service_data: {disapprove_entity_id: 'button.bhavi_choreops_disapprove_chore_test_monthly_bhavi', chore_name: 'Monthly', person_name: 'Bhavi'}};
                                     }
-                                    return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.bhavi_choreops_claim_chore_test_monthly_bhavi'}};
+                                    return {action: 'call-service', service: 'script.chore_complete_celebrate', service_data: {claim_entity_id: 'button.bhavi_choreops_claim_chore_test_monthly_bhavi', chore_name: 'Monthly', person_name: 'Bhavi'}};
                                   ]]]
                                 custom_fields:
                                   photo: |
                                     [[[ return `<img src="${states['person.bhavi'].attributes.entity_picture}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;display:block;">` ]]]
+                                  badge: |
+                                        [[[
+                                          const st = states[entity.entity_id];
+                                          const due = st.attributes.due_date;
+                                          const t = new Date();
+                                          const todayStr = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+                                          let label, bg;
+                                          if (st.state === 'completed') { label = 'Done'; bg = '#238636'; }
+                                          else if (due && due.slice(0, 10) < todayStr) { label = 'Overdue'; bg = '#da3633'; }
+                                          else if (due && due.slice(0, 10) === todayStr) { label = 'Due'; bg = '#9a6700'; }
+                                          else { label = 'Open'; bg = '#57606a'; }
+                                          return `<span style="display:inline-block;padding:2px 10px;border-radius:999px;background:${bg};color:#fff;font-size:0.72em;font-weight:700;white-space:nowrap;">${label}</span>`;
+                                        ]]]
                                 styles:
                                   card:
                                     - background-color: rgba(20, 20, 26, 0.75)
-                                    - border-left: 4px solid var(--calendar2-default-primary-color)
+                                    - border-left: |
+                                        [[[ return '4px solid ' + states['input_text.bhavi_color'].state ]]]
                                     - border-radius: 8px
                                     - padding: 6px 10px 6px 4px
                                     - margin-bottom: 6px
@@ -971,28 +1089,21 @@ views:
                                     - grid-template-columns: 1fr
                                   grid:
                                     # button-card auto-assigns each custom_fields entry's grid-area name
-                                    # to match its KEY ("photo"), NOT a name set under styles.custom_fields
-                                    # - an earlier version used a short "p" token here that never matched,
-                                    # so the photo fell out of the template into an unplaced implicit
-                                    # column (confirmed via computed style: the img's grid-area was
-                                    # "photo" while this template only defined "p", so it landed wherever
-                                    # the browser felt like putting an unplaced item - visually on the
-                                    # right). Using "photo" as the literal token fixes the placement.
-                                    - grid-template-areas: '"photo i n"'
-                                    - grid-template-columns: 24px 28px 1fr
+                                    # to match its KEY, not a name set under styles.custom_fields.
+                                    - grid-template-areas: '"photo n badge"'
+                                    - grid-template-columns: 24px 1fr auto
                                     - grid-template-rows: 1fr
                                     - width: 100%
                                     - justify-content: stretch
+                                    - align-items: center
                                   custom_fields:
                                     photo:
                                       - justify-self: start
                                       - align-self: center
-                                  icon:
-                                    - grid-area: i
-                                    - justify-self: center
-                                    - width: 22px
-                                    - color: |
-                                        [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar2-default-primary-color)' : 'white' ]]]
+                                    badge:
+                                      - grid-area: badge
+                                      - justify-self: end
+                                      - align-self: center
                                   name:
                                     - grid-area: n
                                     - justify-self: start
@@ -1001,28 +1112,41 @@ views:
                                     - text-decoration: |
                                         [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
                                     - opacity: |
-                                        [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                                        [[[ return states[entity.entity_id].state === 'completed' ? '0.6' : '1' ]]]
                               - type: custom:button-card
                                 entity: sensor.bhavi_choreops_chore_status_test_quarterly_bhavi
                                 name: Quarterly
                                 show_state: false
-                                show_icon: true
-                                icon: |
-                                  [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                                show_icon: false
                                 tap_action: |
                                   [[[
-                                    if (states[entity.entity_id].state === 'completed') {
-                                      return {action: 'none'};
+                                    const st = states[entity.entity_id];
+                                    if (st.state === 'completed') {
+                                      return {action: 'call-service', service: 'script.chore_undo_funny', service_data: {disapprove_entity_id: 'button.bhavi_choreops_disapprove_chore_test_quarterly_bhavi', chore_name: 'Quarterly', person_name: 'Bhavi'}};
                                     }
-                                    return {action: 'call-service', service: 'button.press', service_data: {entity_id: 'button.bhavi_choreops_claim_chore_test_quarterly_bhavi'}};
+                                    return {action: 'call-service', service: 'script.chore_complete_celebrate', service_data: {claim_entity_id: 'button.bhavi_choreops_claim_chore_test_quarterly_bhavi', chore_name: 'Quarterly', person_name: 'Bhavi'}};
                                   ]]]
                                 custom_fields:
                                   photo: |
                                     [[[ return `<img src="${states['person.bhavi'].attributes.entity_picture}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;display:block;">` ]]]
+                                  badge: |
+                                        [[[
+                                          const st = states[entity.entity_id];
+                                          const due = st.attributes.due_date;
+                                          const t = new Date();
+                                          const todayStr = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+                                          let label, bg;
+                                          if (st.state === 'completed') { label = 'Done'; bg = '#238636'; }
+                                          else if (due && due.slice(0, 10) < todayStr) { label = 'Overdue'; bg = '#da3633'; }
+                                          else if (due && due.slice(0, 10) === todayStr) { label = 'Due'; bg = '#9a6700'; }
+                                          else { label = 'Open'; bg = '#57606a'; }
+                                          return `<span style="display:inline-block;padding:2px 10px;border-radius:999px;background:${bg};color:#fff;font-size:0.72em;font-weight:700;white-space:nowrap;">${label}</span>`;
+                                        ]]]
                                 styles:
                                   card:
                                     - background-color: rgba(20, 20, 26, 0.75)
-                                    - border-left: 4px solid var(--calendar2-default-primary-color)
+                                    - border-left: |
+                                        [[[ return '4px solid ' + states['input_text.bhavi_color'].state ]]]
                                     - border-radius: 8px
                                     - padding: 6px 10px 6px 4px
                                     - margin-bottom: 6px
@@ -1030,28 +1154,21 @@ views:
                                     - grid-template-columns: 1fr
                                   grid:
                                     # button-card auto-assigns each custom_fields entry's grid-area name
-                                    # to match its KEY ("photo"), NOT a name set under styles.custom_fields
-                                    # - an earlier version used a short "p" token here that never matched,
-                                    # so the photo fell out of the template into an unplaced implicit
-                                    # column (confirmed via computed style: the img's grid-area was
-                                    # "photo" while this template only defined "p", so it landed wherever
-                                    # the browser felt like putting an unplaced item - visually on the
-                                    # right). Using "photo" as the literal token fixes the placement.
-                                    - grid-template-areas: '"photo i n"'
-                                    - grid-template-columns: 24px 28px 1fr
+                                    # to match its KEY, not a name set under styles.custom_fields.
+                                    - grid-template-areas: '"photo n badge"'
+                                    - grid-template-columns: 24px 1fr auto
                                     - grid-template-rows: 1fr
                                     - width: 100%
                                     - justify-content: stretch
+                                    - align-items: center
                                   custom_fields:
                                     photo:
                                       - justify-self: start
                                       - align-self: center
-                                  icon:
-                                    - grid-area: i
-                                    - justify-self: center
-                                    - width: 22px
-                                    - color: |
-                                        [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar2-default-primary-color)' : 'white' ]]]
+                                    badge:
+                                      - grid-area: badge
+                                      - justify-self: end
+                                      - align-self: center
                                   name:
                                     - grid-area: n
                                     - justify-self: start
@@ -1060,7 +1177,7 @@ views:
                                     - text-decoration: |
                                         [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
                                     - opacity: |
-                                        [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                                        [[[ return states[entity.entity_id].state === 'completed' ? '0.6' : '1' ]]]
                               - type: markdown
                                 content: "**Tomorrow**"
                                 card_mod:
@@ -1083,7 +1200,8 @@ views:
                                 styles:
                                   card:
                                     - background-color: rgba(20, 20, 26, 0.4)
-                                    - border-left: 4px solid var(--calendar2-default-primary-color)
+                                    - border-left: |
+                                        [[[ return '4px solid ' + states['input_text.bhavi_color'].state ]]]
                                     - border-radius: 8px
                                     - padding: 5px 10px 5px 4px
                                     - margin-bottom: 6px
@@ -1133,7 +1251,8 @@ views:
                                 styles:
                                   card:
                                     - background-color: rgba(20, 20, 26, 0.4)
-                                    - border-left: 4px solid var(--calendar2-default-primary-color)
+                                    - border-left: |
+                                        [[[ return '4px solid ' + states['input_text.bhavi_color'].state ]]]
                                     - border-radius: 8px
                                     - padding: 5px 10px 5px 4px
                                     - margin-bottom: 6px
@@ -1183,7 +1302,8 @@ views:
                                 styles:
                                   card:
                                     - background-color: rgba(20, 20, 26, 0.4)
-                                    - border-left: 4px solid var(--calendar2-default-primary-color)
+                                    - border-left: |
+                                        [[[ return '4px solid ' + states['input_text.bhavi_color'].state ]]]
                                     - border-radius: 8px
                                     - padding: 5px 10px 5px 4px
                                     - margin-bottom: 6px
@@ -1233,7 +1353,8 @@ views:
                                 styles:
                                   card:
                                     - background-color: rgba(20, 20, 26, 0.4)
-                                    - border-left: 4px solid var(--calendar2-default-primary-color)
+                                    - border-left: |
+                                        [[[ return '4px solid ' + states['input_text.bhavi_color'].state ]]]
                                     - border-radius: 8px
                                     - padding: 5px 10px 5px 4px
                                     - margin-bottom: 6px
@@ -1283,7 +1404,8 @@ views:
                                 styles:
                                   card:
                                     - background-color: rgba(20, 20, 26, 0.4)
-                                    - border-left: 4px solid var(--calendar2-default-primary-color)
+                                    - border-left: |
+                                        [[[ return '4px solid ' + states['input_text.bhavi_color'].state ]]]
                                     - border-radius: 8px
                                     - padding: 5px 10px 5px 4px
                                     - margin-bottom: 6px

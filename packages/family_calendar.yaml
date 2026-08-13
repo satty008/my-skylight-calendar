@@ -42,6 +42,19 @@ input_text:
     name: Event Description
     icon: mdi:text
 
+  # Per-person accent color (hex), cycled by the "recycle" button next to
+  # each name on the Family Calendar dashboard. Drives the color of that
+  # person's name pill and every one of their chore tiles (border +
+  # profile-photo ring) - see cycle_satty_color/cycle_bhavi_color below.
+  # Initial values match the calendar1/2-default-primary-color theme vars
+  # (themes/skylight.yaml) so the starting look is unchanged.
+  satty_color:
+    name: Satty Color
+    initial: "#fb8072"
+  bhavi_color:
+    name: Bhavi Color
+    initial: "#fdbf6f"
+
 input_select:
   # The dropdown list for "Who is this event for?"
   calendar_select:
@@ -125,6 +138,105 @@ script:
           entity_id: input_text.calendar1_calendar_filter
         data:
           value: "{% if only_calendar2_shown %}.*{% else %}^${% endif %}"
+
+  # --- Per-person color cycling ---
+  # Both share the same 8-color palette; each person's helper just tracks
+  # its own current index into it, wrapping around at the end.
+  cycle_satty_color:
+    alias: Cycle Satty's chore/name color
+    sequence:
+      - variables:
+          palette: ["#fb8072", "#fdbf6f", "#80b1d3", "#b3de69", "#bc80bd", "#8dd3c7", "#fccde5", "#bebada"]
+          current: "{{ states('input_text.satty_color') }}"
+          idx: "{{ palette.index(current) if current in palette else 0 }}"
+          next_color: "{{ palette[(idx + 1) % (palette | length)] }}"
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.satty_color
+        data:
+          value: "{{ next_color }}"
+
+  cycle_bhavi_color:
+    alias: Cycle Bhavi's chore/name color
+    sequence:
+      - variables:
+          palette: ["#fb8072", "#fdbf6f", "#80b1d3", "#b3de69", "#bc80bd", "#8dd3c7", "#fccde5", "#bebada"]
+          current: "{{ states('input_text.bhavi_color') }}"
+          idx: "{{ palette.index(current) if current in palette else 0 }}"
+          next_color: "{{ palette[(idx + 1) % (palette | length)] }}"
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.bhavi_color
+        data:
+          value: "{{ next_color }}"
+
+  # --- Chore completion feedback popups (browser_mod) ---
+  # Called from each chore tile's tap_action instead of calling
+  # button.press directly, so completing/undoing also shows a center-
+  # screen popup. browser_mod.popup targets whichever browser the tap
+  # actually came from automatically when invoked via a card's own
+  # tap_action (confirmed live - a raw service call from outside that
+  # context does not reliably reach a specific browser).
+  chore_complete_celebrate:
+    alias: Complete a chore and celebrate
+    fields:
+      claim_entity_id:
+        example: button.satty_choreops_claim_chore_take_out_trash
+      chore_name:
+        example: Take out trash
+      person_name:
+        example: Satty
+    sequence:
+      - action: button.press
+        target:
+          entity_id: "{{ claim_entity_id }}"
+      - action: browser_mod.popup
+        data:
+          title: ""
+          dismissable: true
+          autoclose: true
+          timeout: 2200
+          timeout_action: close
+          style: |
+            .content { text-align: center; }
+            ha-dialog { --dialog-content-padding: 32px; }
+          content:
+            type: markdown
+            content: >-
+              <div style="font-size:3.5em; line-height:1;">🎉🥳🎊</div>
+              <div style="font-size:1.6em; font-weight:800; margin-top:0.2em;">Nice one, {{ person_name }}!</div>
+              <div style="font-size:1.1em; opacity:0.8; margin-top:0.2em;">{{ chore_name }} - done</div>
+
+  chore_undo_funny:
+    alias: Undo a chore with a funny popup
+    fields:
+      disapprove_entity_id:
+        example: button.satty_choreops_disapprove_chore_take_out_trash
+      chore_name:
+        example: Take out trash
+      person_name:
+        example: Satty
+    sequence:
+      - action: button.press
+        continue_on_error: true
+        target:
+          entity_id: "{{ disapprove_entity_id }}"
+      - action: browser_mod.popup
+        data:
+          title: ""
+          dismissable: true
+          autoclose: true
+          timeout: 1800
+          timeout_action: close
+          style: |
+            .content { text-align: center; }
+            ha-dialog { --dialog-content-padding: 32px; }
+          content:
+            type: markdown
+            content: >-
+              <div style="font-size:3.5em; line-height:1;">😅🙈</div>
+              <div style="font-size:1.4em; font-weight:800; margin-top:0.2em;">Whoops, {{ person_name }}!</div>
+              <div style="font-size:1em; opacity:0.8; margin-top:0.2em;">{{ chore_name }} is back on the list</div>
 
   calendar3_calendar_visible_filter:
     alias: Toggle calendar3 Calendar
