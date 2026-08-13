@@ -196,9 +196,17 @@ views:
                             name: Satty
                             show_icon: true
                             show_name: true
-                            tap_action:
-                              action: perform-action
-                              perform_action: script.calendar1_calendar_visible_filter
+                            # bubble-card's top-level tap_action is specifically the
+                            # ICON's click action (defaults to more-info if unset) -
+                            # button_action.tap_action is the one for the rest of the
+                            # card (name/background). Confirmed live: with tap_action
+                            # set here directly, clicking the profile photo triggered
+                            # the chore-select script instead of more-info - backwards
+                            # from what was wanted.
+                            button_action:
+                              tap_action:
+                                action: perform-action
+                                perform_action: script.calendar1_calendar_visible_filter
                             styles: |
                               .bubble-button-background {
                                 opacity: 1 !important;
@@ -836,9 +844,10 @@ views:
                             name: Bhavi
                             show_icon: true
                             show_name: true
-                            tap_action:
-                              action: perform-action
-                              perform_action: script.calendar2_calendar_visible_filter
+                            button_action:
+                              tap_action:
+                                action: perform-action
+                                perform_action: script.calendar2_calendar_visible_filter
                             styles: |
                               .bubble-button-background {
                                 opacity: 1 !important;
