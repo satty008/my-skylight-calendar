@@ -5,16 +5,57 @@ views:
     path: family-calendar
     theme: Skylight
     sections:
+      # --- START FORECAST SECTION (Hourly + Daily predictions) ---
+      # Sits between the page's own "Family Calendar" title (in the HA
+      # toolbar, not a card) and the controls row below - moved here
+      # (was previously nested inside the CHORES SECTION, directly under
+      # the weather/date header) so it reads as the first thing under
+      # the page title rather than buried under the temperature/time
+      # block. Same compact (zoom: 0.55) weather-forecast cards as
+      # before, just relocated.
+      - type: grid
+        cards:
+          - type: vertical-stack
+            card_mod:
+              style: |
+                ha-card {
+                  background: rgba(20, 20, 26, 0.75) !important;
+                  border: solid 1px rgba(255, 255, 255, 0.15) !important;
+                  border-radius: 24px !important;
+                  box-shadow: none !important;
+                  padding: 0.3em 0.8em !important;
+                }
+            cards:
+              - type: weather-forecast
+                entity: weather.forecast_home
+                forecast_type: hourly
+                show_current: false
+                show_forecast: true
+                card_mod:
+                  style: |
+                    ha-card { zoom: 0.55 !important; background: none !important; box-shadow: none !important; border: none !important; border-radius: 0 !important; padding: 0.2em 0 !important; margin: 0 !important; }
+              - type: weather-forecast
+                entity: weather.forecast_home
+                forecast_type: daily
+                show_current: false
+                show_forecast: true
+                card_mod:
+                  style: |
+                    ha-card { zoom: 0.55 !important; background: none !important; box-shadow: none !important; border: none !important; border-top: solid 1px rgba(255,255,255,0.12) !important; border-radius: 0 !important; padding: 0.2em 0 !important; margin: 0 !important; }
+            grid_options:
+              columns: 120
+              rows: auto
+        column_span: 10
+      # --- End FORECAST SECTION ---
       # --- START CONTROLS SECTION (Buttons) ---
       # Slimmed down: the big "Family Calendar" title text and the
       # Satty/Bhavi buttons both moved out (title is redundant with the
       # view's own header, already shown smaller at the top of the page;
       # Satty/Bhavi are now profile-photo buttons directly above their
-      # chore columns in the CHORES SECTION below). Show Events + Select
-      # View sit side by side (Show Events on the left) rather than
-      # stacked - stacking cost an extra row of height that a 10" tablet
-      # viewport can't spare (see the CHORES SECTION comment below for
-      # the full space budget this dashboard is fit to).
+      # chore columns in the CHORES SECTION below). Select View + Show
+      # Events are stacked (Select View on top) rather than side by side -
+      # frees up horizontal space in the row now that the FORECAST
+      # SECTION above needs the full width for its own row.
       - type: grid
         cards:
           - type: horizontal-stack
@@ -25,45 +66,44 @@ views:
                   style: |
                     ha-card { background: none; box-shadow: none; border: none; }
                 grid_options:
-                  columns: 75
+                  columns: 100
                   rows: auto
-              - type: custom:bubble-card
-                card_type: button
-                button_type: state
-                entity: input_boolean.family_calendar_show
-                name: Show Events
-                icon: mdi:calendar-eye
-                show_icon: true
-                show_name: true
-                tap_action:
-                  action: perform-action
-                  perform_action: input_boolean.toggle
-                  target:
-                    entity_id: input_boolean.family_calendar_show
-                styles: |
-                  .bubble-button-background {
-                    opacity: 1 !important;
-                    background-color: ${hass.states['input_boolean.family_calendar_show'].state === 'on' ? 'var(--calendar1-default-primary-color)' : 'light-grey'} !important;
-                  }
-                card_mod:
-                  style: |
-                    ha-card { zoom: 0.7 !important; }
+              - type: vertical-stack
+                cards:
+                  - type: custom:bubble-card
+                    card_type: select
+                    entity: input_select.calendar_view
+                    show_name: true
+                    show_state: true
+                    name: Select View
+                    show_last_changed: false
+                    show_attribute: false
+                    card_mod:
+                      style: |
+                        ha-card { zoom: 0.75 !important; max-width: 260px !important; margin-left: auto !important; margin-right: 0 !important; }
+                  - type: custom:bubble-card
+                    card_type: button
+                    button_type: state
+                    entity: input_boolean.family_calendar_show
+                    name: Show Events
+                    icon: mdi:calendar-eye
+                    show_icon: true
+                    show_name: true
+                    tap_action:
+                      action: perform-action
+                      perform_action: input_boolean.toggle
+                      target:
+                        entity_id: input_boolean.family_calendar_show
+                    styles: |
+                      .bubble-button-background {
+                        opacity: 1 !important;
+                        background-color: ${hass.states['input_boolean.family_calendar_show'].state === 'on' ? 'var(--calendar1-default-primary-color)' : 'light-grey'} !important;
+                      }
+                    card_mod:
+                      style: |
+                        ha-card { zoom: 0.75 !important; max-width: 260px !important; margin-left: auto !important; margin-right: 0 !important; }
                 grid_options:
-                  columns: 22
-                  rows: auto
-              - type: custom:bubble-card
-                card_type: select
-                entity: input_select.calendar_view
-                show_name: true
-                show_state: true
-                name: Select View
-                show_last_changed: false
-                show_attribute: false
-                card_mod:
-                  style: |
-                    ha-card { zoom: 0.7 !important; }
-                grid_options:
-                  columns: 23
+                  columns: 20
                   rows: auto
             grid_options:
               columns: 120
@@ -168,22 +208,6 @@ views:
                       ha-markdown-element > div:nth-child(2) > span:first-child { font-size: 2.3em !important; font-weight: bold !important; line-height: 1 !important; background: orange !important; color: #1a1a1a !important; border-radius: 8px !important; padding: 0 0.2em !important; }
                       ha-markdown-element > div:nth-child(2) > span:last-child { font-size: 1.2em !important; font-weight: 600 !important; }
                       ha-markdown-element > div:nth-child(3) { font-size: 0.9em !important; opacity: 0.65 !important; margin-top: 0.15em !important; }
-              - type: weather-forecast
-                entity: weather.forecast_home
-                forecast_type: hourly
-                show_current: false
-                show_forecast: true
-                card_mod:
-                  style: |
-                    ha-card { zoom: 0.55 !important; background: none !important; box-shadow: none !important; border: none !important; border-top: solid 1px rgba(255,255,255,0.12) !important; border-radius: 0 !important; padding: 0.2em 0 !important; margin: 0.2em 0 0 0 !important; }
-              - type: weather-forecast
-                entity: weather.forecast_home
-                forecast_type: daily
-                show_current: false
-                show_forecast: true
-                card_mod:
-                  style: |
-                    ha-card { zoom: 0.55 !important; background: none !important; box-shadow: none !important; border: none !important; border-top: solid 1px rgba(255,255,255,0.12) !important; border-radius: 0 !important; padding: 0.2em 0 !important; margin: 0 !important; }
               - type: horizontal-stack
                 cards:
                   - type: vertical-stack
