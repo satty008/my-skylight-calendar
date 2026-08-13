@@ -89,6 +89,12 @@ input_datetime:
   calendar_day_event_end:
     has_date: true
     has_time: false
+  # Custom-date picker for the chore postpone menu (see chore_postpone_apply
+  # script below) - set via the "Custom date..." row in the postpone popup.
+  chore_postpone_custom_date:
+    name: Postpone To
+    has_date: true
+    has_time: false
 
 input_boolean:
   # UI Toggles
@@ -237,6 +243,47 @@ script:
               <div style="font-size:3.5em; line-height:1;">😅🙈</div>
               <div style="font-size:1.4em; font-weight:800; margin-top:0.2em;">Whoops, {{ person_name }}!</div>
               <div style="font-size:1em; opacity:0.8; margin-top:0.2em;">{{ chore_name }} is back on the list</div>
+
+  # --- Chore postpone (long-press a chore tile) ---
+  # Called from the "Tomorrow" / "Same day next week" / "Next month" /
+  # "Custom date..." rows of the postpone popup (built inline in each chore
+  # tile's hold_action in dashboard.yaml - see button-card JS templates
+  # there). offset is one of tomorrow|next_week|next_month|custom; for
+  # custom the target date comes from input_datetime.chore_postpone_custom_date
+  # (set via that popup's date row) instead of being computed here.
+  chore_postpone_apply:
+    alias: Postpone a chore's due date
+    fields:
+      chore_name:
+        example: Take out trash
+      user_name:
+        example: Satty
+      offset:
+        example: tomorrow
+    sequence:
+      - variables:
+          due_date: >-
+            {% set base = now() %}
+            {% if offset == 'tomorrow' %}
+              {{ (base + timedelta(days=1)).strftime('%Y-%m-%dT23:59:00') }}
+            {% elif offset == 'next_week' %}
+              {{ (base + timedelta(days=7)).strftime('%Y-%m-%dT23:59:00') }}
+            {% elif offset == 'next_month' %}
+              {% set target_month = base.month + 1 if base.month < 12 else 1 %}
+              {% set target_year = base.year if base.month < 12 else base.year + 1 %}
+              {% set days_in_target = 29 if (target_month == 2 and target_year % 4 == 0 and (target_year % 100 != 0 or target_year % 400 == 0)) else (28 if target_month == 2 else (30 if target_month in [4, 6, 9, 11] else 31)) %}
+              {% set safe_day = [base.day, days_in_target] | min %}
+              {{ base.replace(year=target_year, month=target_month, day=safe_day).strftime('%Y-%m-%dT23:59:00') }}
+            {% else %}
+              {{ states('input_datetime.chore_postpone_custom_date') }}T23:59:00
+            {% endif %}
+      - action: choreops.set_chore_due_date
+        data:
+          chore_name: "{{ chore_name }}"
+          user_name: "{{ user_name }}"
+          due_date: "{{ due_date }}"
+      - action: browser_mod.close_popup
+        data: {}
 
   calendar3_calendar_visible_filter:
     alias: Toggle calendar3 Calendar

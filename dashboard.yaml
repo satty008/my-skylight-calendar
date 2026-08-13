@@ -263,6 +263,62 @@ views:
                                     }
                                     return {action: 'call-service', service: 'script.chore_complete_celebrate', service_data: {claim_entity_id: 'button.satty_choreops_claim_chore_take_out_trash', chore_name: 'Take out trash', person_name: 'Satty'}};
                                   ]]]
+                                hold_action: |
+                                  [[[
+                                    const st = states[entity.entity_id];
+                                    const choreName = st.attributes.chore_name;
+                                    const userName = st.attributes.user_name;
+                                    const mkBtn = (name, offset) => ({
+                                      type: 'button',
+                                      name: name,
+                                      show_icon: false,
+                                      tap_action: {
+                                        action: 'call-service',
+                                        service: 'script.chore_postpone_apply',
+                                        service_data: {chore_name: choreName, user_name: userName, offset: offset}
+                                      }
+                                    });
+                                    return {
+                                      action: 'fire-dom-event',
+                                      browser_mod: {
+                                        command: 'popup',
+                                        title: 'Postpone ' + choreName + '?',
+                                        content: {
+                                          type: 'vertical-stack',
+                                          cards: [
+                                            mkBtn('Tomorrow', 'tomorrow'),
+                                            mkBtn('Same day next week', 'next_week'),
+                                            mkBtn('Next month', 'next_month'),
+                                            {
+                                              type: 'button',
+                                              name: 'Custom date...',
+                                              show_icon: false,
+                                              tap_action: {
+                                                action: 'fire-dom-event',
+                                                browser_mod: {
+                                                  command: 'popup',
+                                                  title: 'Pick a new due date',
+                                                  content: {
+                                                    type: 'entities',
+                                                    entities: [
+                                                      {entity: 'input_datetime.chore_postpone_custom_date', name: 'New due date'},
+                                                      {type: 'call-service', name: 'Confirm', icon: 'mdi:check', service: 'script.chore_postpone_apply', service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}}
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            {
+                                              type: 'button',
+                                              name: 'Cancel',
+                                              show_icon: false,
+                                              tap_action: {action: 'fire-dom-event', browser_mod: {command: 'close'}}
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    };
+                                  ]]]
                                 custom_fields:
                                   photo: |
                                     [[[ return `<img src="${states['person.ram_sambamurthy'].attributes.entity_picture}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;display:block;">` ]]]
@@ -327,6 +383,62 @@ views:
                                       return {action: 'call-service', service: 'script.chore_undo_funny', service_data: {disapprove_entity_id: 'button.satty_choreops_disapprove_chore_test_daily_satty', chore_name: 'Daily', person_name: 'Satty'}};
                                     }
                                     return {action: 'call-service', service: 'script.chore_complete_celebrate', service_data: {claim_entity_id: 'button.satty_choreops_claim_chore_test_daily_satty', chore_name: 'Daily', person_name: 'Satty'}};
+                                  ]]]
+                                hold_action: |
+                                  [[[
+                                    const st = states[entity.entity_id];
+                                    const choreName = st.attributes.chore_name;
+                                    const userName = st.attributes.user_name;
+                                    const mkBtn = (name, offset) => ({
+                                      type: 'button',
+                                      name: name,
+                                      show_icon: false,
+                                      tap_action: {
+                                        action: 'call-service',
+                                        service: 'script.chore_postpone_apply',
+                                        service_data: {chore_name: choreName, user_name: userName, offset: offset}
+                                      }
+                                    });
+                                    return {
+                                      action: 'fire-dom-event',
+                                      browser_mod: {
+                                        command: 'popup',
+                                        title: 'Postpone ' + choreName + '?',
+                                        content: {
+                                          type: 'vertical-stack',
+                                          cards: [
+                                            mkBtn('Tomorrow', 'tomorrow'),
+                                            mkBtn('Same day next week', 'next_week'),
+                                            mkBtn('Next month', 'next_month'),
+                                            {
+                                              type: 'button',
+                                              name: 'Custom date...',
+                                              show_icon: false,
+                                              tap_action: {
+                                                action: 'fire-dom-event',
+                                                browser_mod: {
+                                                  command: 'popup',
+                                                  title: 'Pick a new due date',
+                                                  content: {
+                                                    type: 'entities',
+                                                    entities: [
+                                                      {entity: 'input_datetime.chore_postpone_custom_date', name: 'New due date'},
+                                                      {type: 'call-service', name: 'Confirm', icon: 'mdi:check', service: 'script.chore_postpone_apply', service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}}
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            {
+                                              type: 'button',
+                                              name: 'Cancel',
+                                              show_icon: false,
+                                              tap_action: {action: 'fire-dom-event', browser_mod: {command: 'close'}}
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    };
                                   ]]]
                                 custom_fields:
                                   photo: |
@@ -393,6 +505,62 @@ views:
                                     }
                                     return {action: 'call-service', service: 'script.chore_complete_celebrate', service_data: {claim_entity_id: 'button.satty_choreops_claim_chore_test_weekly_satty', chore_name: 'Weekly', person_name: 'Satty'}};
                                   ]]]
+                                hold_action: |
+                                  [[[
+                                    const st = states[entity.entity_id];
+                                    const choreName = st.attributes.chore_name;
+                                    const userName = st.attributes.user_name;
+                                    const mkBtn = (name, offset) => ({
+                                      type: 'button',
+                                      name: name,
+                                      show_icon: false,
+                                      tap_action: {
+                                        action: 'call-service',
+                                        service: 'script.chore_postpone_apply',
+                                        service_data: {chore_name: choreName, user_name: userName, offset: offset}
+                                      }
+                                    });
+                                    return {
+                                      action: 'fire-dom-event',
+                                      browser_mod: {
+                                        command: 'popup',
+                                        title: 'Postpone ' + choreName + '?',
+                                        content: {
+                                          type: 'vertical-stack',
+                                          cards: [
+                                            mkBtn('Tomorrow', 'tomorrow'),
+                                            mkBtn('Same day next week', 'next_week'),
+                                            mkBtn('Next month', 'next_month'),
+                                            {
+                                              type: 'button',
+                                              name: 'Custom date...',
+                                              show_icon: false,
+                                              tap_action: {
+                                                action: 'fire-dom-event',
+                                                browser_mod: {
+                                                  command: 'popup',
+                                                  title: 'Pick a new due date',
+                                                  content: {
+                                                    type: 'entities',
+                                                    entities: [
+                                                      {entity: 'input_datetime.chore_postpone_custom_date', name: 'New due date'},
+                                                      {type: 'call-service', name: 'Confirm', icon: 'mdi:check', service: 'script.chore_postpone_apply', service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}}
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            {
+                                              type: 'button',
+                                              name: 'Cancel',
+                                              show_icon: false,
+                                              tap_action: {action: 'fire-dom-event', browser_mod: {command: 'close'}}
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    };
+                                  ]]]
                                 custom_fields:
                                   photo: |
                                     [[[ return `<img src="${states['person.ram_sambamurthy'].attributes.entity_picture}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;display:block;">` ]]]
@@ -458,6 +626,62 @@ views:
                                     }
                                     return {action: 'call-service', service: 'script.chore_complete_celebrate', service_data: {claim_entity_id: 'button.satty_choreops_claim_chore_test_monthly_satty', chore_name: 'Monthly', person_name: 'Satty'}};
                                   ]]]
+                                hold_action: |
+                                  [[[
+                                    const st = states[entity.entity_id];
+                                    const choreName = st.attributes.chore_name;
+                                    const userName = st.attributes.user_name;
+                                    const mkBtn = (name, offset) => ({
+                                      type: 'button',
+                                      name: name,
+                                      show_icon: false,
+                                      tap_action: {
+                                        action: 'call-service',
+                                        service: 'script.chore_postpone_apply',
+                                        service_data: {chore_name: choreName, user_name: userName, offset: offset}
+                                      }
+                                    });
+                                    return {
+                                      action: 'fire-dom-event',
+                                      browser_mod: {
+                                        command: 'popup',
+                                        title: 'Postpone ' + choreName + '?',
+                                        content: {
+                                          type: 'vertical-stack',
+                                          cards: [
+                                            mkBtn('Tomorrow', 'tomorrow'),
+                                            mkBtn('Same day next week', 'next_week'),
+                                            mkBtn('Next month', 'next_month'),
+                                            {
+                                              type: 'button',
+                                              name: 'Custom date...',
+                                              show_icon: false,
+                                              tap_action: {
+                                                action: 'fire-dom-event',
+                                                browser_mod: {
+                                                  command: 'popup',
+                                                  title: 'Pick a new due date',
+                                                  content: {
+                                                    type: 'entities',
+                                                    entities: [
+                                                      {entity: 'input_datetime.chore_postpone_custom_date', name: 'New due date'},
+                                                      {type: 'call-service', name: 'Confirm', icon: 'mdi:check', service: 'script.chore_postpone_apply', service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}}
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            {
+                                              type: 'button',
+                                              name: 'Cancel',
+                                              show_icon: false,
+                                              tap_action: {action: 'fire-dom-event', browser_mod: {command: 'close'}}
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    };
+                                  ]]]
                                 custom_fields:
                                   photo: |
                                     [[[ return `<img src="${states['person.ram_sambamurthy'].attributes.entity_picture}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;display:block;">` ]]]
@@ -522,6 +746,62 @@ views:
                                       return {action: 'call-service', service: 'script.chore_undo_funny', service_data: {disapprove_entity_id: 'button.satty_choreops_disapprove_chore_test_quarterly_satty', chore_name: 'Quarterly', person_name: 'Satty'}};
                                     }
                                     return {action: 'call-service', service: 'script.chore_complete_celebrate', service_data: {claim_entity_id: 'button.satty_choreops_claim_chore_test_quarterly_satty', chore_name: 'Quarterly', person_name: 'Satty'}};
+                                  ]]]
+                                hold_action: |
+                                  [[[
+                                    const st = states[entity.entity_id];
+                                    const choreName = st.attributes.chore_name;
+                                    const userName = st.attributes.user_name;
+                                    const mkBtn = (name, offset) => ({
+                                      type: 'button',
+                                      name: name,
+                                      show_icon: false,
+                                      tap_action: {
+                                        action: 'call-service',
+                                        service: 'script.chore_postpone_apply',
+                                        service_data: {chore_name: choreName, user_name: userName, offset: offset}
+                                      }
+                                    });
+                                    return {
+                                      action: 'fire-dom-event',
+                                      browser_mod: {
+                                        command: 'popup',
+                                        title: 'Postpone ' + choreName + '?',
+                                        content: {
+                                          type: 'vertical-stack',
+                                          cards: [
+                                            mkBtn('Tomorrow', 'tomorrow'),
+                                            mkBtn('Same day next week', 'next_week'),
+                                            mkBtn('Next month', 'next_month'),
+                                            {
+                                              type: 'button',
+                                              name: 'Custom date...',
+                                              show_icon: false,
+                                              tap_action: {
+                                                action: 'fire-dom-event',
+                                                browser_mod: {
+                                                  command: 'popup',
+                                                  title: 'Pick a new due date',
+                                                  content: {
+                                                    type: 'entities',
+                                                    entities: [
+                                                      {entity: 'input_datetime.chore_postpone_custom_date', name: 'New due date'},
+                                                      {type: 'call-service', name: 'Confirm', icon: 'mdi:check', service: 'script.chore_postpone_apply', service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}}
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            {
+                                              type: 'button',
+                                              name: 'Cancel',
+                                              show_icon: false,
+                                              tap_action: {action: 'fire-dom-event', browser_mod: {command: 'close'}}
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    };
                                   ]]]
                                 custom_fields:
                                   photo: |
@@ -905,6 +1185,62 @@ views:
                                     }
                                     return {action: 'call-service', service: 'script.chore_complete_celebrate', service_data: {claim_entity_id: 'button.bhavi_choreops_claim_chore_vacuum_living_room', chore_name: 'Vacuum living room', person_name: 'Bhavi'}};
                                   ]]]
+                                hold_action: |
+                                  [[[
+                                    const st = states[entity.entity_id];
+                                    const choreName = st.attributes.chore_name;
+                                    const userName = st.attributes.user_name;
+                                    const mkBtn = (name, offset) => ({
+                                      type: 'button',
+                                      name: name,
+                                      show_icon: false,
+                                      tap_action: {
+                                        action: 'call-service',
+                                        service: 'script.chore_postpone_apply',
+                                        service_data: {chore_name: choreName, user_name: userName, offset: offset}
+                                      }
+                                    });
+                                    return {
+                                      action: 'fire-dom-event',
+                                      browser_mod: {
+                                        command: 'popup',
+                                        title: 'Postpone ' + choreName + '?',
+                                        content: {
+                                          type: 'vertical-stack',
+                                          cards: [
+                                            mkBtn('Tomorrow', 'tomorrow'),
+                                            mkBtn('Same day next week', 'next_week'),
+                                            mkBtn('Next month', 'next_month'),
+                                            {
+                                              type: 'button',
+                                              name: 'Custom date...',
+                                              show_icon: false,
+                                              tap_action: {
+                                                action: 'fire-dom-event',
+                                                browser_mod: {
+                                                  command: 'popup',
+                                                  title: 'Pick a new due date',
+                                                  content: {
+                                                    type: 'entities',
+                                                    entities: [
+                                                      {entity: 'input_datetime.chore_postpone_custom_date', name: 'New due date'},
+                                                      {type: 'call-service', name: 'Confirm', icon: 'mdi:check', service: 'script.chore_postpone_apply', service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}}
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            {
+                                              type: 'button',
+                                              name: 'Cancel',
+                                              show_icon: false,
+                                              tap_action: {action: 'fire-dom-event', browser_mod: {command: 'close'}}
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    };
+                                  ]]]
                                 custom_fields:
                                   photo: |
                                     [[[ return `<img src="${states['person.bhavi'].attributes.entity_picture}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;display:block;">` ]]]
@@ -969,6 +1305,62 @@ views:
                                       return {action: 'call-service', service: 'script.chore_undo_funny', service_data: {disapprove_entity_id: 'button.bhavi_choreops_disapprove_chore_test_daily_bhavi', chore_name: 'Daily', person_name: 'Bhavi'}};
                                     }
                                     return {action: 'call-service', service: 'script.chore_complete_celebrate', service_data: {claim_entity_id: 'button.bhavi_choreops_claim_chore_test_daily_bhavi', chore_name: 'Daily', person_name: 'Bhavi'}};
+                                  ]]]
+                                hold_action: |
+                                  [[[
+                                    const st = states[entity.entity_id];
+                                    const choreName = st.attributes.chore_name;
+                                    const userName = st.attributes.user_name;
+                                    const mkBtn = (name, offset) => ({
+                                      type: 'button',
+                                      name: name,
+                                      show_icon: false,
+                                      tap_action: {
+                                        action: 'call-service',
+                                        service: 'script.chore_postpone_apply',
+                                        service_data: {chore_name: choreName, user_name: userName, offset: offset}
+                                      }
+                                    });
+                                    return {
+                                      action: 'fire-dom-event',
+                                      browser_mod: {
+                                        command: 'popup',
+                                        title: 'Postpone ' + choreName + '?',
+                                        content: {
+                                          type: 'vertical-stack',
+                                          cards: [
+                                            mkBtn('Tomorrow', 'tomorrow'),
+                                            mkBtn('Same day next week', 'next_week'),
+                                            mkBtn('Next month', 'next_month'),
+                                            {
+                                              type: 'button',
+                                              name: 'Custom date...',
+                                              show_icon: false,
+                                              tap_action: {
+                                                action: 'fire-dom-event',
+                                                browser_mod: {
+                                                  command: 'popup',
+                                                  title: 'Pick a new due date',
+                                                  content: {
+                                                    type: 'entities',
+                                                    entities: [
+                                                      {entity: 'input_datetime.chore_postpone_custom_date', name: 'New due date'},
+                                                      {type: 'call-service', name: 'Confirm', icon: 'mdi:check', service: 'script.chore_postpone_apply', service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}}
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            {
+                                              type: 'button',
+                                              name: 'Cancel',
+                                              show_icon: false,
+                                              tap_action: {action: 'fire-dom-event', browser_mod: {command: 'close'}}
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    };
                                   ]]]
                                 custom_fields:
                                   photo: |
@@ -1035,6 +1427,62 @@ views:
                                     }
                                     return {action: 'call-service', service: 'script.chore_complete_celebrate', service_data: {claim_entity_id: 'button.bhavi_choreops_claim_chore_test_weekly_bhavi', chore_name: 'Weekly', person_name: 'Bhavi'}};
                                   ]]]
+                                hold_action: |
+                                  [[[
+                                    const st = states[entity.entity_id];
+                                    const choreName = st.attributes.chore_name;
+                                    const userName = st.attributes.user_name;
+                                    const mkBtn = (name, offset) => ({
+                                      type: 'button',
+                                      name: name,
+                                      show_icon: false,
+                                      tap_action: {
+                                        action: 'call-service',
+                                        service: 'script.chore_postpone_apply',
+                                        service_data: {chore_name: choreName, user_name: userName, offset: offset}
+                                      }
+                                    });
+                                    return {
+                                      action: 'fire-dom-event',
+                                      browser_mod: {
+                                        command: 'popup',
+                                        title: 'Postpone ' + choreName + '?',
+                                        content: {
+                                          type: 'vertical-stack',
+                                          cards: [
+                                            mkBtn('Tomorrow', 'tomorrow'),
+                                            mkBtn('Same day next week', 'next_week'),
+                                            mkBtn('Next month', 'next_month'),
+                                            {
+                                              type: 'button',
+                                              name: 'Custom date...',
+                                              show_icon: false,
+                                              tap_action: {
+                                                action: 'fire-dom-event',
+                                                browser_mod: {
+                                                  command: 'popup',
+                                                  title: 'Pick a new due date',
+                                                  content: {
+                                                    type: 'entities',
+                                                    entities: [
+                                                      {entity: 'input_datetime.chore_postpone_custom_date', name: 'New due date'},
+                                                      {type: 'call-service', name: 'Confirm', icon: 'mdi:check', service: 'script.chore_postpone_apply', service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}}
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            {
+                                              type: 'button',
+                                              name: 'Cancel',
+                                              show_icon: false,
+                                              tap_action: {action: 'fire-dom-event', browser_mod: {command: 'close'}}
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    };
+                                  ]]]
                                 custom_fields:
                                   photo: |
                                     [[[ return `<img src="${states['person.bhavi'].attributes.entity_picture}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;display:block;">` ]]]
@@ -1100,6 +1548,62 @@ views:
                                     }
                                     return {action: 'call-service', service: 'script.chore_complete_celebrate', service_data: {claim_entity_id: 'button.bhavi_choreops_claim_chore_test_monthly_bhavi', chore_name: 'Monthly', person_name: 'Bhavi'}};
                                   ]]]
+                                hold_action: |
+                                  [[[
+                                    const st = states[entity.entity_id];
+                                    const choreName = st.attributes.chore_name;
+                                    const userName = st.attributes.user_name;
+                                    const mkBtn = (name, offset) => ({
+                                      type: 'button',
+                                      name: name,
+                                      show_icon: false,
+                                      tap_action: {
+                                        action: 'call-service',
+                                        service: 'script.chore_postpone_apply',
+                                        service_data: {chore_name: choreName, user_name: userName, offset: offset}
+                                      }
+                                    });
+                                    return {
+                                      action: 'fire-dom-event',
+                                      browser_mod: {
+                                        command: 'popup',
+                                        title: 'Postpone ' + choreName + '?',
+                                        content: {
+                                          type: 'vertical-stack',
+                                          cards: [
+                                            mkBtn('Tomorrow', 'tomorrow'),
+                                            mkBtn('Same day next week', 'next_week'),
+                                            mkBtn('Next month', 'next_month'),
+                                            {
+                                              type: 'button',
+                                              name: 'Custom date...',
+                                              show_icon: false,
+                                              tap_action: {
+                                                action: 'fire-dom-event',
+                                                browser_mod: {
+                                                  command: 'popup',
+                                                  title: 'Pick a new due date',
+                                                  content: {
+                                                    type: 'entities',
+                                                    entities: [
+                                                      {entity: 'input_datetime.chore_postpone_custom_date', name: 'New due date'},
+                                                      {type: 'call-service', name: 'Confirm', icon: 'mdi:check', service: 'script.chore_postpone_apply', service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}}
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            {
+                                              type: 'button',
+                                              name: 'Cancel',
+                                              show_icon: false,
+                                              tap_action: {action: 'fire-dom-event', browser_mod: {command: 'close'}}
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    };
+                                  ]]]
                                 custom_fields:
                                   photo: |
                                     [[[ return `<img src="${states['person.bhavi'].attributes.entity_picture}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;display:block;">` ]]]
@@ -1164,6 +1668,62 @@ views:
                                       return {action: 'call-service', service: 'script.chore_undo_funny', service_data: {disapprove_entity_id: 'button.bhavi_choreops_disapprove_chore_test_quarterly_bhavi', chore_name: 'Quarterly', person_name: 'Bhavi'}};
                                     }
                                     return {action: 'call-service', service: 'script.chore_complete_celebrate', service_data: {claim_entity_id: 'button.bhavi_choreops_claim_chore_test_quarterly_bhavi', chore_name: 'Quarterly', person_name: 'Bhavi'}};
+                                  ]]]
+                                hold_action: |
+                                  [[[
+                                    const st = states[entity.entity_id];
+                                    const choreName = st.attributes.chore_name;
+                                    const userName = st.attributes.user_name;
+                                    const mkBtn = (name, offset) => ({
+                                      type: 'button',
+                                      name: name,
+                                      show_icon: false,
+                                      tap_action: {
+                                        action: 'call-service',
+                                        service: 'script.chore_postpone_apply',
+                                        service_data: {chore_name: choreName, user_name: userName, offset: offset}
+                                      }
+                                    });
+                                    return {
+                                      action: 'fire-dom-event',
+                                      browser_mod: {
+                                        command: 'popup',
+                                        title: 'Postpone ' + choreName + '?',
+                                        content: {
+                                          type: 'vertical-stack',
+                                          cards: [
+                                            mkBtn('Tomorrow', 'tomorrow'),
+                                            mkBtn('Same day next week', 'next_week'),
+                                            mkBtn('Next month', 'next_month'),
+                                            {
+                                              type: 'button',
+                                              name: 'Custom date...',
+                                              show_icon: false,
+                                              tap_action: {
+                                                action: 'fire-dom-event',
+                                                browser_mod: {
+                                                  command: 'popup',
+                                                  title: 'Pick a new due date',
+                                                  content: {
+                                                    type: 'entities',
+                                                    entities: [
+                                                      {entity: 'input_datetime.chore_postpone_custom_date', name: 'New due date'},
+                                                      {type: 'call-service', name: 'Confirm', icon: 'mdi:check', service: 'script.chore_postpone_apply', service_data: {chore_name: choreName, user_name: userName, offset: 'custom'}}
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            {
+                                              type: 'button',
+                                              name: 'Cancel',
+                                              show_icon: false,
+                                              tap_action: {action: 'fire-dom-event', browser_mod: {command: 'close'}}
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    };
                                   ]]]
                                 custom_fields:
                                   photo: |
