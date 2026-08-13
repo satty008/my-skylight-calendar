@@ -163,7 +163,7 @@ views:
                 }
             grid_options:
               columns: 120
-              rows: 1
+              rows: auto
         column_span: 10
       # --- End CHORES SECTION ---
       # --- START CALENDAR SECTION (Week Planner Card) ---
