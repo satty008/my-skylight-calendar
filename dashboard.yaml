@@ -594,3 +594,80 @@ views:
     cards: []
     icon: mdi:calendar-blank-multiple
     # No background image - plain dark theme background (primary-background-color in themes/skylight.yaml)
+  # ==============================================================================
+  #  SCREENSAVER VIEW
+  #  Not shown as a nav tab (subview: true) - reachable only by direct URL.
+  #  Point Fully Kiosk Browser's "Screensaver URL" setting at this view's URL
+  #  (Settings -> Screen -> Screensaver), and it'll show after your configured
+  #  idle timeout and return to the Family Calendar view on touch.
+  # ==============================================================================
+  - type: sections
+    max_columns: 10
+    title: Screensaver
+    path: screensaver
+    subview: true
+    theme: Skylight
+    sections:
+      - type: grid
+        cards:
+          - type: custom:better-moment-card
+            parentStyle: |
+              line-height:normal;
+            moment:
+              - parentStyle: |
+                  font-size:1.8em; text-align:center; margin-top:10px;
+                templateRaw: |
+                  {{moment format=cccc}}
+              - parentStyle: |
+                  font-size:2.4em; text-align:center; margin-top:5px;
+                templateRaw: |
+                  {{moment format=LLLL dd, yyyy}}
+              - parentStyle: |
+                  font-size:8em; text-align:center; font-weight:300; margin-top:10px;
+                templateRaw: |
+                  {{moment format=HH:mm}}
+            grid_options:
+              columns: 120
+            card_mod:
+              style: |
+                ha-card {
+                  background: transparent !important;
+                  box-shadow: none !important;
+                  border: none !important;
+                }
+          - type: custom:weather-card
+            entity: weather.forecast_home
+            current: true
+            details: true
+            forecast: false
+            grid_options:
+              columns: 60
+              rows: 5
+            card_mod:
+              style: |
+                ha-card {
+                  background: rgba(20, 20, 26, 0.75) !important;
+                  border-radius: 24px !important;
+                  box-shadow: none !important;
+                }
+                :host { --paper-font-common-base_-_font-size: 1.3em; }
+          - type: weather-forecast
+            show_current: false
+            show_forecast: true
+            entity: weather.forecast_home
+            forecast_type: daily
+            name: Weather Forecast
+            grid_options:
+              columns: 60
+              rows: 5
+            card_mod:
+              style: |
+                ha-card {
+                  background: rgba(20, 20, 26, 0.75) !important;
+                  border-radius: 24px !important;
+                  box-shadow: none !important;
+                }
+        column_span: 10
+    cards: []
+    icon: mdi:weather-partly-cloudy
+    # No background image - plain dark theme background, matches Family Calendar view
