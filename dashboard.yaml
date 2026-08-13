@@ -133,34 +133,97 @@ views:
             show_attribute: false
         column_span: 10
       # --- End CONTROLS SECTION (Buttons) ---
-      # --- START CHORES SECTION (Tap to complete) ---
+      # --- START CHORES SECTION (ChoreOps - tap to complete) ---
+      # Uses ChoreOps entities directly via button.press, NOT the ChoreOps
+      # "Add/Edit Chore" config-flow UI - that UI crashes the frontend on
+      # every submit in v1.5.1-beta.3 (confirmed: every attempt threw an
+      # uncaught exception and silently discarded the input). Chores were
+      # created instead via the choreops.create_chore service (Developer
+      # Tools > Actions), which works fine and requires a due_date whenever
+      # a recurring frequency is set (used as the recurrence anchor date).
+      # To add a new recurring chore: call choreops.create_chore with
+      # frequency + due_date + assigned_user_names, then add a button-card
+      # entry below pointing at its claim/disapprove button entities
+      # (button.<person>_choreops_claim_chore_<chore> /
+      #  button.<person>_choreops_disapprove_chore_<chore>).
       - type: grid
         cards:
-          - type: custom:calendar-tasks-card
-            title: Chores
-            show_title: true
-            todos:
-              - todo.satty_chores
-              - todo.bhavi_chores
-            entity_colors:
-              todo.satty_chores: "#fb8072"
-              todo.bhavi_chores: "#fdbf6f"
-            allow_complete: true
-            show_completed: true
-            completed_days: 3
-            show_overdue: true
-            show_relative_time: true
-            show_refresh: false
-            show_add_event: true
-            compact_mode: false
-            language: en
+          - type: markdown
+            content: "## Chores"
             card_mod:
               style: |
-                ha-card {
-                  background: rgba(20, 20, 26, 0.75) !important;
-                  border-radius: 24px !important;
-                  box-shadow: none !important;
-                }
+                ha-card { background: none; box-shadow: none; border: none; }
+            grid_options:
+              columns: 120
+              rows: auto
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                entity: sensor.satty_choreops_chore_status_take_out_trash
+                name: Take out trash (Satty)
+                show_state: false
+                show_icon: true
+                icon: |
+                  [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                tap_action: |
+                  [[[
+                    const done = states[entity.entity_id].state === 'completed';
+                    const target = done
+                      ? 'button.satty_choreops_disapprove_chore_take_out_trash'
+                      : 'button.satty_choreops_claim_chore_take_out_trash';
+                    return {action: 'call-service', service: 'button.press', service_data: {entity_id: target}};
+                  ]]]
+                styles:
+                  card:
+                    - background-color: rgba(20, 20, 26, 0.75)
+                    - border-left: 4px solid var(--calendar1-default-primary-color)
+                    - border-radius: 12px
+                    - padding: 16px
+                  icon:
+                    - color: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar1-default-primary-color)' : 'white' ]]]
+                  name:
+                    - font-size: 1.1em
+                    - text-decoration: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
+                    - opacity: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                grid_options:
+                  columns: 60
+                  rows: auto
+              - type: custom:button-card
+                entity: sensor.bhavi_choreops_chore_status_vacuum_living_room
+                name: Vacuum living room (Bhavi)
+                show_state: false
+                show_icon: true
+                icon: |
+                  [[[ return states[entity.entity_id].state === 'completed' ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline' ]]]
+                tap_action: |
+                  [[[
+                    const done = states[entity.entity_id].state === 'completed';
+                    const target = done
+                      ? 'button.bhavi_choreops_disapprove_chore_vacuum_living_room'
+                      : 'button.bhavi_choreops_claim_chore_vacuum_living_room';
+                    return {action: 'call-service', service: 'button.press', service_data: {entity_id: target}};
+                  ]]]
+                styles:
+                  card:
+                    - background-color: rgba(20, 20, 26, 0.75)
+                    - border-left: 4px solid var(--calendar2-default-primary-color)
+                    - border-radius: 12px
+                    - padding: 16px
+                  icon:
+                    - color: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? 'var(--calendar2-default-primary-color)' : 'white' ]]]
+                  name:
+                    - font-size: 1.1em
+                    - text-decoration: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? 'line-through' : 'none' ]]]
+                    - opacity: |
+                        [[[ return states[entity.entity_id].state === 'completed' ? '0.5' : '1' ]]]
+                grid_options:
+                  columns: 60
+                  rows: auto
             grid_options:
               columns: 120
               rows: auto
