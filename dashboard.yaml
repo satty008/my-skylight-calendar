@@ -169,30 +169,36 @@ views:
                 }
             cards:
               - type: markdown
-                # ha-markdown-element strips inline style="..." attributes via
-                # DOMPurify (class/ha-icon survive) - so the header is styled
-                # entirely through the card_mod classes below instead.
+                # ha-markdown-element strips BOTH style="..." and class="..."
+                # attributes via DOMPurify (confirmed via getComputedStyle -
+                # class ended up "" on every rendered node even though the
+                # source markdown had class="..."). ha-icon's icon="..."
+                # attribute does survive. Since neither style nor class can
+                # be attached to the rendered HTML, this header is styled
+                # entirely with structural/positional selectors below
+                # (ha-markdown-element's DOM shape is fixed: div > div >
+                # span,span  and  div > span,ha-icon) instead of classes.
                 content: |
                   {% set icons = {'sunny':'mdi:weather-sunny','clear-night':'mdi:weather-night','cloudy':'mdi:weather-cloudy','partlycloudy':'mdi:weather-partly-cloudy','rainy':'mdi:weather-rainy','pouring':'mdi:weather-pouring','snowy':'mdi:weather-snowy','snowy-rainy':'mdi:weather-snowy-rainy','fog':'mdi:weather-fog','windy':'mdi:weather-windy','windy-variant':'mdi:weather-windy','hail':'mdi:weather-hail','lightning':'mdi:weather-lightning','lightning-rainy':'mdi:weather-lightning-rainy','exceptional':'mdi:alert'} %}
-                  <div class="chores-head">
-                    <div class="chores-datewrap">
-                      <span class="chores-daynum">{{ now().day }}</span>
-                      <span class="chores-dayname">{{ now().strftime('%A') }}</span>
+                  <div>
+                    <div>
+                      <span>{{ now().day }}</span>
+                      <span>{{ now().strftime('%A') }}</span>
                     </div>
-                    <div class="chores-weather">
-                      <span class="chores-temp">{{ state_attr('weather.forecast_home','temperature') }}{{ state_attr('weather.forecast_home','temperature_unit') }}</span>
+                    <div>
+                      <span>{{ state_attr('weather.forecast_home','temperature') }}{{ state_attr('weather.forecast_home','temperature_unit') }}</span>
                       <ha-icon icon="{{ icons.get(states('weather.forecast_home'), 'mdi:weather-partly-cloudy') }}"></ha-icon>
                     </div>
                   </div>
                 card_mod:
                   style: |
                     ha-card { background: none; box-shadow: none; border: none; padding: 0.2em 0.2em 0.6em 0.2em; }
-                    .chores-head { display: flex !important; justify-content: space-between !important; align-items: center !important; }
-                    .chores-datewrap { display: flex !important; align-items: baseline !important; gap: 0.5em !important; }
-                    .chores-daynum { font-size: 3em !important; font-weight: bold !important; line-height: 1 !important; background: orange !important; color: #1a1a1a !important; border-radius: 8px !important; padding: 0 0.2em !important; }
-                    .chores-dayname { font-size: 1.3em !important; font-weight: 600 !important; }
-                    .chores-weather { display: flex !important; align-items: center !important; gap: 0.4em !important; font-size: 1.3em !important; white-space: nowrap !important; }
-                    .chores-weather ha-icon { width: 32px !important; height: 32px !important; color: #f5c542 !important; }
+                    ha-markdown-element > div { display: flex !important; justify-content: space-between !important; align-items: center !important; }
+                    ha-markdown-element > div > div:first-child { display: flex !important; align-items: baseline !important; gap: 0.5em !important; }
+                    ha-markdown-element > div > div:first-child > span:first-child { font-size: 3em !important; font-weight: bold !important; line-height: 1 !important; background: orange !important; color: #1a1a1a !important; border-radius: 8px !important; padding: 0 0.2em !important; }
+                    ha-markdown-element > div > div:first-child > span:last-child { font-size: 1.3em !important; font-weight: 600 !important; }
+                    ha-markdown-element > div > div:last-child { display: flex !important; align-items: center !important; gap: 0.4em !important; font-size: 1.3em !important; white-space: nowrap !important; }
+                    ha-markdown-element > div > div:last-child > ha-icon { width: 32px !important; height: 32px !important; color: #f5c542 !important; }
               - type: conditional
                 conditions:
                   - condition: state
