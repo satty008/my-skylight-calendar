@@ -146,7 +146,18 @@ button_card_templates:
           const personPrefix = entity.entity_id.split('.')[1].split('_choreops_')[0];
           const colorEntity = personPrefix === 'satty' ? 'input_text.satty_color' : 'input_text.bhavi_color';
           const color = states[colorEntity].state;
-          return `<div style="width:40px;height:40px;border-radius:12px;background:${color}33;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          const isDone = ['claimed', 'approved', 'claimed_in_part', 'approved_in_part', 'completed', 'completed_in_part', 'completed_by_other'].includes(st.state);
+          // A gentle breathe+wiggle on the icon badge for anything still
+          // pending, so the board reads as "alive" rather than a static
+          // list - done chores settle (no animation) to visually read as
+          // resolved. Delay is derived from the chore name so identical
+          // chores in different columns don't all pulse in lockstep.
+          let hash = 0;
+          for (const ch of (st.attributes.chore_name || '')) hash = (hash * 31 + ch.charCodeAt(0)) % 1000;
+          const delay = (hash / 1000 * 2.6).toFixed(2);
+          const anim = isDone ? 'none' : `choreBreathe 3.4s ease-in-out ${delay}s infinite`;
+          return `<style>@keyframes choreBreathe { 0%, 100% { transform: scale(1) rotate(0deg); } 25% { transform: scale(1.05) rotate(-4deg); } 50% { transform: scale(1.1) rotate(0deg); box-shadow: 0 0 10px 1px ${color}66; } 75% { transform: scale(1.05) rotate(4deg); } }</style>
+          <div style="width:40px;height:40px;border-radius:12px;background:${color}33;display:flex;align-items:center;justify-content:center;flex-shrink:0;animation:${anim};">
             <ha-icon icon="${mdi}" style="width:22px;height:22px;color:${color};"></ha-icon>
           </div>`;
         ]]]
@@ -327,6 +338,22 @@ views:
                     @media (max-width: 700px) {
                       ha-card { zoom: 0.65 !important; max-width: 40vw !important; }
                     }
+                    /* .forecast-image-icon wraps each hour's condition SVG -
+                       a real, stable selector confirmed live (weather-forecast
+                       is a leaf card, card_mod reliably injects into its shadow
+                       root, unlike stack cards elsewhere in this file). Each
+                       icon gets its own float phase via nth-child so the row
+                       bobs like a little wave instead of moving in lockstep. */
+                    .forecast-image-icon { animation: forecastFloat 3.2s ease-in-out infinite; }
+                    .forecast-image-icon:nth-of-type(5n+1) { animation-delay: 0s; }
+                    .forecast-image-icon:nth-of-type(5n+2) { animation-delay: 0.25s; }
+                    .forecast-image-icon:nth-of-type(5n+3) { animation-delay: 0.5s; }
+                    .forecast-image-icon:nth-of-type(5n+4) { animation-delay: 0.75s; }
+                    .forecast-image-icon:nth-of-type(5n+5) { animation-delay: 1s; }
+                    @keyframes forecastFloat {
+                      0%, 100% { transform: translateY(0) scale(1); }
+                      50% { transform: translateY(-4px) scale(1.1); filter: drop-shadow(0 2px 3px rgba(255,200,80,0.5)); }
+                    }
               - type: weather-forecast
                 entity: weather.forecast_home
                 forecast_type: daily
@@ -337,6 +364,16 @@ views:
                     ha-card { zoom: 0.55 !important; max-width: 280px !important; background: rgba(20, 20, 26, 0.75) !important; border: solid 1px rgba(255, 255, 255, 0.15) !important; border-left: solid 1px rgba(255,255,255,0.25) !important; border-radius: 0 24px 24px 0 !important; box-shadow: none !important; padding: 0.25em 0.5em !important; box-sizing: border-box !important; }
                     @media (max-width: 700px) {
                       ha-card { zoom: 0.65 !important; max-width: 40vw !important; }
+                    }
+                    .forecast-image-icon { animation: forecastFloatDaily 3.2s ease-in-out infinite; }
+                    .forecast-image-icon:nth-of-type(5n+1) { animation-delay: 0s; }
+                    .forecast-image-icon:nth-of-type(5n+2) { animation-delay: 0.25s; }
+                    .forecast-image-icon:nth-of-type(5n+3) { animation-delay: 0.5s; }
+                    .forecast-image-icon:nth-of-type(5n+4) { animation-delay: 0.75s; }
+                    .forecast-image-icon:nth-of-type(5n+5) { animation-delay: 1s; }
+                    @keyframes forecastFloatDaily {
+                      0%, 100% { transform: translateY(0) scale(1); }
+                      50% { transform: translateY(-4px) scale(1.1); filter: drop-shadow(0 2px 3px rgba(255,200,80,0.5)); }
                     }
         column_span: 1
       - type: grid
@@ -392,12 +429,27 @@ views:
                   ha-markdown-element { display: flex !important; flex-direction: column !important; align-items: center !important; }
                   ha-markdown-element > div:nth-child(1) { display: flex !important; align-items: center !important; justify-content: center !important; gap: 1.1em !important; }
                   ha-markdown-element > div:nth-child(1) > div:first-child { display: flex !important; align-items: center !important; gap: 0.4em !important; }
-                  ha-markdown-element > div:nth-child(1) > div:first-child > img { width: 46px !important; height: 46px !important; }
+                  ha-markdown-element > div:nth-child(1) > div:first-child > img { width: 46px !important; height: 46px !important; animation: bigIconFloat 4s ease-in-out infinite !important; transform-origin: center bottom !important; }
+                  @keyframes bigIconFloat {
+                    0%, 100% { transform: translateY(0) rotate(0deg); }
+                    30% { transform: translateY(-5px) rotate(-4deg); }
+                    60% { transform: translateY(-2px) rotate(3deg); }
+                  }
                   ha-markdown-element > div:nth-child(1) > div:first-child > span { font-size: 1.3em !important; }
                   ha-markdown-element > div:nth-child(1) > div:last-child > span { font-size: 2.1em !important; font-weight: 700 !important; display: inline-block !important; animation: headertimepulse 2.4s ease-in-out infinite !important; }
                   @keyframes headertimepulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
                   ha-markdown-element > div:nth-child(2) { display: flex !important; align-items: baseline !important; justify-content: center !important; gap: 0.5em !important; margin-top: 0.25em !important; }
-                  ha-markdown-element > div:nth-child(2) > span:first-child { font-size: 2.3em !important; font-weight: bold !important; line-height: 1 !important; background: orange !important; color: #1a1a1a !important; border-radius: 8px !important; padding: 0 0.2em !important; }
+                  ha-markdown-element > div:nth-child(2) > span:first-child {
+                    font-size: 2.3em !important; font-weight: bold !important; line-height: 1 !important;
+                    background: linear-gradient(110deg, orange 30%, #ffd873 45%, orange 60%) !important;
+                    background-size: 220% 100% !important;
+                    animation: tempShimmer 3.6s ease-in-out infinite !important;
+                    color: #1a1a1a !important; border-radius: 8px !important; padding: 0 0.2em !important;
+                  }
+                  @keyframes tempShimmer {
+                    0% { background-position: 200% 0; }
+                    100% { background-position: -20% 0; }
+                  }
                   ha-markdown-element > div:nth-child(2) > span:last-child { font-size: 1.2em !important; font-weight: 600 !important; }
                   ha-markdown-element > div:nth-child(3) { font-size: 0.9em !important; opacity: 0.65 !important; margin-top: 0.15em !important; text-align: center !important; }
         column_span: 1
