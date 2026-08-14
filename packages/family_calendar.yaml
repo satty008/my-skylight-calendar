@@ -11,6 +11,20 @@
 
 # 1. HELPERS (The Variables)
 input_text:
+  # Tracks how many times each "2x/wk"/"2x/mo" chore has been completed
+  # within its CURRENT period. ChoreOps itself has no such counter (its
+  # chore_completed_count etc are all-time totals, and completing a
+  # custom-interval chore just pushes due_date forward by the interval -
+  # there's no native "1 of 2 this week" concept). JSON blob keyed by
+  # chore sensor entity_id: {"<entity_id>": {"count": N, "period": "<key>"}}.
+  # "period" is an ISO week ("2026-W33") or year-month ("2026-08") string -
+  # a stored entry for a past period is treated as count 0 by both the
+  # reader (chore_tile's JS) and writer (chore_progress_track script)
+  # rather than needing a scheduled reset automation.
+  chore_period_progress:
+    name: Chore Period Progress
+    initial: "{}"
+    max: 5000
   # Filter Toggles (RegEx: .* = Show, ^$ = Hide)
   calendar1_calendar_filter:
     name: calendar1 Filter
@@ -229,10 +243,26 @@ script:
         example: Take out trash
       person_name:
         example: Satty
+      is_multi:
+        description: True for a 2x/week or 2x/month chore - also increments its per-period progress counter.
+        example: false
+      chore_entity_id:
+        example: sensor.priya_choreops_chore_status_laundry_wash_fold
+      period_type:
+        example: week
     sequence:
       - action: button.press
         target:
           entity_id: "{{ claim_entity_id }}"
+      - if:
+          - condition: template
+            value_template: "{{ is_multi | default(false) }}"
+        then:
+          - action: script.chore_progress_track
+            data:
+              chore_entity_id: "{{ chore_entity_id }}"
+              period_type: "{{ period_type }}"
+              delta: 1
       - action: browser_mod.popup
         data:
           title: ""
@@ -259,11 +289,32 @@ script:
         example: Take out trash
       person_name:
         example: Satty
+      is_multi:
+        description: >-
+          True for a 2x/week or 2x/month chore - decrements its per-period
+          progress counter instead of disapproving, since ChoreOps has
+          already auto-rescheduled the chore's own claim/approval by the
+          time this fires (there's nothing pending left for it to disapprove).
+        example: false
+      chore_entity_id:
+        example: sensor.priya_choreops_chore_status_laundry_wash_fold
+      period_type:
+        example: week
     sequence:
-      - action: button.press
-        continue_on_error: true
-        target:
-          entity_id: "{{ disapprove_entity_id }}"
+      - if:
+          - condition: template
+            value_template: "{{ is_multi | default(false) }}"
+        then:
+          - action: script.chore_progress_track
+            data:
+              chore_entity_id: "{{ chore_entity_id }}"
+              period_type: "{{ period_type }}"
+              delta: -1
+        else:
+          - action: button.press
+            continue_on_error: true
+            target:
+              entity_id: "{{ disapprove_entity_id }}"
       - action: browser_mod.popup
         data:
           title: ""
@@ -322,6 +373,42 @@ script:
           chore_name: "{{ chore_name }}"
           user_name: "{{ user_name }}"
           due_date: "{{ due_date }}"
+
+  chore_progress_track:
+    alias: Track a 2x/period chore's completions this period
+    fields:
+      chore_entity_id:
+        example: sensor.priya_choreops_chore_status_laundry_wash_fold
+      period_type:
+        example: week
+      delta:
+        example: 1
+    sequence:
+      - variables:
+          current: >-
+            {% set raw = states('input_text.chore_period_progress') %}
+            {{ (raw | from_json) if raw not in ['', 'unknown', 'unavailable'] else {} }}
+          period_key: >-
+            {% if period_type == 'week' %}
+              {{ now().strftime('%G-W%V') }}
+            {% else %}
+              {{ now().strftime('%Y-%m') }}
+            {% endif %}
+      - variables:
+          existing: "{{ current.get(chore_entity_id, {}) }}"
+      - variables:
+          existing_count: "{{ (existing.get('count', 0) | int) if existing.get('period') == period_key else 0 }}"
+      - variables:
+          new_count: >-
+            {% set raw = existing_count + (delta | int) %}
+            {% set low = [raw, 0] | max %}
+            {{ [low, 2] | min }}
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.chore_period_progress
+        data:
+          value: >-
+            {{ (current | combine({chore_entity_id: {'count': new_count, 'period': period_key}})) | tojson }}
 
   chore_reorder:
     alias: Move a chore up/down within its due-date group
