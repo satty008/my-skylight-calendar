@@ -60,9 +60,10 @@ button_card_templates:
               const colorEntity = personPrefix === 'satty' ? 'input_text.satty_color' : 'input_text.bhavi_color';
               return '4px solid ' + states[colorEntity].state;
             ]]]
-        - border-radius: 8px
-        - padding: 4px 10px 4px 4px
+        - border-radius: 8px 0 0 8px
+        - padding: 4px 6px 4px 4px
         - margin-bottom: 4px
+        - margin-right: 0px
         - display: |
             [[[
               const st = states[entity.entity_id];
@@ -171,13 +172,15 @@ button_card_templates:
       ]]]
     styles:
       card:
-        - background: none
+        - background-color: rgba(20, 20, 26, 0.75)
         - box-shadow: none
         - border: none
+        - border-radius: 0 8px 8px 0
         - flex: "0 0 28px"
         - width: 28px
         - padding: 0
         - margin-bottom: 4px
+        - margin-left: 0px
         - display: |
             [[[
               const st = states[entity.entity_id];
