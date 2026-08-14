@@ -117,31 +117,55 @@ button_card_templates:
         };
       ]]]
     custom_fields:
-      photo: |
+      icon: |
         [[[
+          const st = states[entity.entity_id];
+          const n = (st.attributes.chore_name || '').toLowerCase();
+          let mdi;
+          if (n.includes('dishwasher')) mdi = 'mdi:dishwasher';
+          else if (n.includes('laundry') || n.includes('washer') || n.includes('towel')) mdi = 'mdi:washing-machine';
+          else if (n.includes('supplement') || n.includes('vitamin')) mdi = 'mdi:pill';
+          else if (n.includes('vacuum')) mdi = 'mdi:vacuum-outline';
+          else if (n.includes('bathroom') || n.includes('toilet') || n.includes('shower')) mdi = 'mdi:shower';
+          else if (n.includes('grocery') || n.includes('shopping')) mdi = 'mdi:cart-outline';
+          else if (n.includes('cook') || n.includes('meal') || n.includes('veg') || n.includes('dal')) mdi = 'mdi:pot-steam-outline';
+          else if (n.includes('mop')) mdi = 'mdi:broom';
+          else if (n.includes('bottle') || n.includes('pfand') || n.includes('recycl')) mdi = 'mdi:bottle-soda-classic-outline';
+          else if (n.includes('cupboard') || n.includes('cabinet')) mdi = 'mdi:wardrobe-outline';
+          else if (n.includes('trash') || n.includes('unneeded') || n.includes('declutter')) mdi = 'mdi:trash-can-outline';
+          else if (n.includes('desk')) mdi = 'mdi:desk';
+          else if (n.includes('window')) mdi = 'mdi:window-closed-variant';
+          else if (n.includes('door')) mdi = 'mdi:door';
+          else if (n.includes('sheet')) mdi = 'mdi:bed-king-outline';
+          else if (n.includes('quilt') || n.includes('blanket')) mdi = 'mdi:blanket';
+          else if (n.includes('bed') || n.includes('sofa')) mdi = 'mdi:bed-outline';
+          else if (n.includes('plant') || n.includes('water')) mdi = 'mdi:flower-outline';
+          else if (n.includes('toiletries') || n.includes('checklist')) mdi = 'mdi:format-list-checks';
+          else if (n.includes('kitchen') || n.includes('wipe') || n.includes('appliance') || n.includes('counter')) mdi = 'mdi:spray-bottle';
+          else mdi = 'mdi:checkbox-marked-circle-outline';
           const personPrefix = entity.entity_id.split('.')[1].split('_choreops_')[0];
-          const personEntity = personPrefix === 'satty' ? 'person.ram_sambamurthy' : 'person.bhavi';
-          return `<img src="${states[personEntity].attributes.entity_picture}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;display:block;">`;
+          const colorEntity = personPrefix === 'satty' ? 'input_text.satty_color' : 'input_text.bhavi_color';
+          const color = states[colorEntity].state;
+          return `<div style="width:40px;height:40px;border-radius:12px;background:${color}33;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <ha-icon icon="${mdi}" style="width:22px;height:22px;color:${color};"></ha-icon>
+          </div>`;
         ]]]
-      freq: |
+      meta: |
         [[[
           const st = states[entity.entity_id];
           const f = st.attributes.recurring_frequency;
           const interval = st.attributes.custom_frequency_interval;
           const unit = st.attributes.custom_frequency_unit;
-          let label;
-          if (f === 'daily') label = 'Daily';
-          else if (f === 'week_end') label = 'Weekly';
-          else if (f === 'month_end') label = 'Monthly';
-          else if (f === 'quarter_end') label = '3mo';
-          else if (f === 'custom' && unit === 'days' && interval <= 4) label = '2x/wk';
-          else if (f === 'custom' && unit === 'days' && interval <= 20) label = '2x/mo';
-          else label = f || '';
-          return `<span style="display:inline-block;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.65);font-size:0.65em;font-weight:600;white-space:nowrap;">${label}</span>`;
-        ]]]
-      badge: |
-        [[[
-          const st = states[entity.entity_id];
+          let freqLabel;
+          if (f === 'daily') freqLabel = 'Daily';
+          else if (f === 'week_end') freqLabel = 'Weekly';
+          else if (f === 'month_end') freqLabel = 'Monthly';
+          else if (f === 'quarter_end') freqLabel = '3mo';
+          else if (f === 'custom' && unit === 'days' && interval <= 4) freqLabel = '2x/wk';
+          else if (f === 'custom' && unit === 'days' && interval <= 20) freqLabel = '2x/mo';
+          else freqLabel = f || '';
+          const freqPill = `<span style="display:inline-block;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.65);font-size:0.65em;font-weight:600;white-space:nowrap;">${freqLabel}</span>`;
+
           const due = st.attributes.due_date;
           const isDone = ['claimed', 'approved', 'claimed_in_part', 'approved_in_part', 'completed', 'completed_in_part', 'completed_by_other'].includes(st.state);
           let label, bg;
@@ -177,20 +201,35 @@ button_card_templates:
               label = `Due ${shortDate} (${diffDays}d)`; bg = '#57606a';
             }
           }
-          return `<span style="display:inline-block;padding:2px 10px;border-radius:999px;background:${bg};color:#fff;font-size:0.72em;font-weight:700;white-space:nowrap;">${label}</span>`;
+          const duePill = `<span style="display:inline-block;padding:2px 10px;border-radius:999px;background:${bg};color:#fff;font-size:0.72em;font-weight:700;white-space:nowrap;">${label}</span>`;
+          return `<div style="display:flex;gap:6px;align-items:center;">${freqPill}${duePill}</div>`;
+        ]]]
+      check: |
+        [[[
+          const isDone = ['claimed', 'approved', 'claimed_in_part', 'approved_in_part', 'completed', 'completed_in_part', 'completed_by_other'].includes(states[entity.entity_id].state);
+          return isDone
+            ? '<ha-icon icon="mdi:check-circle" style="width:26px;height:26px;color:#3fb950;"></ha-icon>'
+            : '<ha-icon icon="mdi:checkbox-blank-circle-outline" style="width:26px;height:26px;color:rgba(255,255,255,0.3);"></ha-icon>';
         ]]]
     styles:
       card:
-        - background-color: rgba(20, 20, 26, 0.75)
+        - background-color: |
+            [[[
+              const isDone = ['claimed', 'approved', 'claimed_in_part', 'approved_in_part', 'completed', 'completed_in_part', 'completed_by_other'].includes(states[entity.entity_id].state);
+              const personPrefix = entity.entity_id.split('.')[1].split('_choreops_')[0];
+              const colorEntity = personPrefix === 'satty' ? 'input_text.satty_color' : 'input_text.bhavi_color';
+              const color = states[colorEntity].state;
+              return isDone ? color + '26' : 'rgba(20, 20, 26, 0.75)';
+            ]]]
         - border-left: |
             [[[
               const personPrefix = entity.entity_id.split('.')[1].split('_choreops_')[0];
               const colorEntity = personPrefix === 'satty' ? 'input_text.satty_color' : 'input_text.bhavi_color';
               return '4px solid ' + states[colorEntity].state;
             ]]]
-        - border-radius: 8px
-        - padding: 4px 10px 4px 4px
-        - margin-bottom: 4px
+        - border-radius: 12px
+        - padding: 8px 12px 8px 8px
+        - margin-bottom: 6px
         - display: |
             [[[
               const st = states[entity.entity_id];
@@ -206,30 +245,33 @@ button_card_templates:
             ]]]
         - grid-template-columns: 1fr
       grid:
-        - grid-template-areas: '"photo n freq badge"'
-        - grid-template-columns: 24px 1fr auto auto
-        - grid-template-rows: 1fr
+        - grid-template-areas: '"icon n check" "icon meta check"'
+        - grid-template-columns: 48px 1fr 34px
+        - grid-template-rows: auto auto
         - width: 100%
         - justify-content: stretch
         - align-items: center
-        - column-gap: 6px
+        - column-gap: 10px
+        - row-gap: 3px
       custom_fields:
-        photo:
+        icon:
+          - grid-area: icon
           - justify-self: start
           - align-self: center
-        freq:
-          - grid-area: freq
-          - justify-self: end
+        meta:
+          - grid-area: meta
+          - justify-self: start
           - align-self: center
-        badge:
-          - grid-area: badge
-          - justify-self: end
+        check:
+          - grid-area: check
+          - justify-self: center
           - align-self: center
       name:
         - grid-area: n
         - justify-self: start
-        - padding-left: 8px
-        - font-size: 0.95em
+        - align-self: end
+        - font-size: 1.05em
+        - font-weight: 600
         - text-decoration: |
             [[[
               const doneStates = ['claimed', 'approved', 'claimed_in_part', 'approved_in_part', 'completed', 'completed_in_part', 'completed_by_other'];
@@ -526,14 +568,14 @@ views:
                             entity: input_text.calendar1_calendar_filter
                             state: ".*"
                         card:
-                          # Two stacked auto-entities cards instead of one: not-done
-                          # chores sorted by due_date, then a second card for done
-                          # chores (also sorted by due_date) - this pushes completed/
-                          # claimed chores to the bottom of the list instead of them
-                          # interleaving by date, since auto-entities' own sort only
-                          # supports a single key (no composite/secondary sort).
                           type: vertical-stack
                           cards:
+                            - type: markdown
+                              content: "**Daily**"
+                              card_mod:
+                                style: |
+                                  ha-card { background: none !important; box-shadow: none !important; border: none !important; padding: 6px 4px 2px 4px !important; }
+                                  ha-markdown-element { font-size: 0.72em !important; font-weight: 700 !important; letter-spacing: 0.08em !important; text-transform: uppercase !important; color: rgba(255,255,255,0.4) !important; }
                             - type: custom:auto-entities
                               card:
                                 type: vertical-stack
@@ -541,15 +583,8 @@ views:
                               filter:
                                 include:
                                   - entity_id: "sensor.satty_choreops_chore_status_*"
-                                    # The sensor's own state (not the attributes.global_state
-                                    # attribute) is the reliable per-assignee completion signal -
-                                    # global_state is a CROSS-assignee aggregate that reports the
-                                    # literal string "independent" (not a real status) for chores
-                                    # with independent per-person completion tracking, which is
-                                    # every chore here. Confirmed by reading ChoreOps' sensor.py:
-                                    # native_value comes from get_chore_status_context()[STATE],
-                                    # while global_state comes from a separate
-                                    # get_global_chore_state_context() call.
+                                    attributes:
+                                      recurring_frequency: "/^daily$/"
                                     state: "/^(pending|due|waiting|overdue|missed|not_my_turn|standby|paused|independent|unknown)$/"
                                     options:
                                       type: custom:button-card
@@ -564,6 +599,154 @@ views:
                               filter:
                                 include:
                                   - entity_id: "sensor.satty_choreops_chore_status_*"
+                                    attributes:
+                                      recurring_frequency: "/^daily$/"
+                                    state: "/^(claimed|approved|claimed_in_part|approved_in_part|completed|completed_in_part|completed_by_other)$/"
+                                    options:
+                                      type: custom:button-card
+                                      template: chore_tile
+                              sort:
+                                method: attribute
+                                attribute: due_date
+                            - type: markdown
+                              content: "**Weekly**"
+                              card_mod:
+                                style: |
+                                  ha-card { background: none !important; box-shadow: none !important; border: none !important; padding: 14px 4px 2px 4px !important; }
+                                  ha-markdown-element { font-size: 0.72em !important; font-weight: 700 !important; letter-spacing: 0.08em !important; text-transform: uppercase !important; color: rgba(255,255,255,0.4) !important; }
+                            - type: custom:auto-entities
+                              card:
+                                type: vertical-stack
+                              card_param: cards
+                              filter:
+                                include:
+                                  - entity_id: "sensor.satty_choreops_chore_status_*"
+                                    attributes:
+                                      recurring_frequency: "/^week_end$/"
+                                    state: "/^(pending|due|waiting|overdue|missed|not_my_turn|standby|paused|independent|unknown)$/"
+                                    options:
+                                      type: custom:button-card
+                                      template: chore_tile
+                                  - entity_id: "sensor.satty_choreops_chore_status_*"
+                                    attributes:
+                                      recurring_frequency: "/^custom$/"
+                                      custom_frequency_interval: "<=4"
+                                    state: "/^(pending|due|waiting|overdue|missed|not_my_turn|standby|paused|independent|unknown)$/"
+                                    options:
+                                      type: custom:button-card
+                                      template: chore_tile
+                              sort:
+                                method: attribute
+                                attribute: due_date
+                            - type: custom:auto-entities
+                              card:
+                                type: vertical-stack
+                              card_param: cards
+                              filter:
+                                include:
+                                  - entity_id: "sensor.satty_choreops_chore_status_*"
+                                    attributes:
+                                      recurring_frequency: "/^week_end$/"
+                                    state: "/^(claimed|approved|claimed_in_part|approved_in_part|completed|completed_in_part|completed_by_other)$/"
+                                    options:
+                                      type: custom:button-card
+                                      template: chore_tile
+                                  - entity_id: "sensor.satty_choreops_chore_status_*"
+                                    attributes:
+                                      recurring_frequency: "/^custom$/"
+                                      custom_frequency_interval: "<=4"
+                                    state: "/^(claimed|approved|claimed_in_part|approved_in_part|completed|completed_in_part|completed_by_other)$/"
+                                    options:
+                                      type: custom:button-card
+                                      template: chore_tile
+                              sort:
+                                method: attribute
+                                attribute: due_date
+                            - type: markdown
+                              content: "**Monthly**"
+                              card_mod:
+                                style: |
+                                  ha-card { background: none !important; box-shadow: none !important; border: none !important; padding: 14px 4px 2px 4px !important; }
+                                  ha-markdown-element { font-size: 0.72em !important; font-weight: 700 !important; letter-spacing: 0.08em !important; text-transform: uppercase !important; color: rgba(255,255,255,0.4) !important; }
+                            - type: custom:auto-entities
+                              card:
+                                type: vertical-stack
+                              card_param: cards
+                              filter:
+                                include:
+                                  - entity_id: "sensor.satty_choreops_chore_status_*"
+                                    attributes:
+                                      recurring_frequency: "/^month_end$/"
+                                    state: "/^(pending|due|waiting|overdue|missed|not_my_turn|standby|paused|independent|unknown)$/"
+                                    options:
+                                      type: custom:button-card
+                                      template: chore_tile
+                                  - entity_id: "sensor.satty_choreops_chore_status_*"
+                                    attributes:
+                                      recurring_frequency: "/^custom$/"
+                                      custom_frequency_interval: ">4"
+                                    state: "/^(pending|due|waiting|overdue|missed|not_my_turn|standby|paused|independent|unknown)$/"
+                                    options:
+                                      type: custom:button-card
+                                      template: chore_tile
+                              sort:
+                                method: attribute
+                                attribute: due_date
+                            - type: custom:auto-entities
+                              card:
+                                type: vertical-stack
+                              card_param: cards
+                              filter:
+                                include:
+                                  - entity_id: "sensor.satty_choreops_chore_status_*"
+                                    attributes:
+                                      recurring_frequency: "/^month_end$/"
+                                    state: "/^(claimed|approved|claimed_in_part|approved_in_part|completed|completed_in_part|completed_by_other)$/"
+                                    options:
+                                      type: custom:button-card
+                                      template: chore_tile
+                                  - entity_id: "sensor.satty_choreops_chore_status_*"
+                                    attributes:
+                                      recurring_frequency: "/^custom$/"
+                                      custom_frequency_interval: ">4"
+                                    state: "/^(claimed|approved|claimed_in_part|approved_in_part|completed|completed_in_part|completed_by_other)$/"
+                                    options:
+                                      type: custom:button-card
+                                      template: chore_tile
+                              sort:
+                                method: attribute
+                                attribute: due_date
+                            - type: markdown
+                              content: "**Every 3 months**"
+                              card_mod:
+                                style: |
+                                  ha-card { background: none !important; box-shadow: none !important; border: none !important; padding: 14px 4px 2px 4px !important; }
+                                  ha-markdown-element { font-size: 0.72em !important; font-weight: 700 !important; letter-spacing: 0.08em !important; text-transform: uppercase !important; color: rgba(255,255,255,0.4) !important; }
+                            - type: custom:auto-entities
+                              card:
+                                type: vertical-stack
+                              card_param: cards
+                              filter:
+                                include:
+                                  - entity_id: "sensor.satty_choreops_chore_status_*"
+                                    attributes:
+                                      recurring_frequency: "/^quarter_end$/"
+                                    state: "/^(pending|due|waiting|overdue|missed|not_my_turn|standby|paused|independent|unknown)$/"
+                                    options:
+                                      type: custom:button-card
+                                      template: chore_tile
+                              sort:
+                                method: attribute
+                                attribute: due_date
+                            - type: custom:auto-entities
+                              card:
+                                type: vertical-stack
+                              card_param: cards
+                              filter:
+                                include:
+                                  - entity_id: "sensor.satty_choreops_chore_status_*"
+                                    attributes:
+                                      recurring_frequency: "/^quarter_end$/"
                                     state: "/^(claimed|approved|claimed_in_part|approved_in_part|completed|completed_in_part|completed_by_other)$/"
                                     options:
                                       type: custom:button-card
@@ -625,6 +808,12 @@ views:
                         card:
                           type: vertical-stack
                           cards:
+                            - type: markdown
+                              content: "**Daily**"
+                              card_mod:
+                                style: |
+                                  ha-card { background: none !important; box-shadow: none !important; border: none !important; padding: 6px 4px 2px 4px !important; }
+                                  ha-markdown-element { font-size: 0.72em !important; font-weight: 700 !important; letter-spacing: 0.08em !important; text-transform: uppercase !important; color: rgba(255,255,255,0.4) !important; }
                             - type: custom:auto-entities
                               card:
                                 type: vertical-stack
@@ -632,6 +821,8 @@ views:
                               filter:
                                 include:
                                   - entity_id: "sensor.priya_choreops_chore_status_*"
+                                    attributes:
+                                      recurring_frequency: "/^daily$/"
                                     state: "/^(pending|due|waiting|overdue|missed|not_my_turn|standby|paused|independent|unknown)$/"
                                     options:
                                       type: custom:button-card
@@ -646,6 +837,154 @@ views:
                               filter:
                                 include:
                                   - entity_id: "sensor.priya_choreops_chore_status_*"
+                                    attributes:
+                                      recurring_frequency: "/^daily$/"
+                                    state: "/^(claimed|approved|claimed_in_part|approved_in_part|completed|completed_in_part|completed_by_other)$/"
+                                    options:
+                                      type: custom:button-card
+                                      template: chore_tile
+                              sort:
+                                method: attribute
+                                attribute: due_date
+                            - type: markdown
+                              content: "**Weekly**"
+                              card_mod:
+                                style: |
+                                  ha-card { background: none !important; box-shadow: none !important; border: none !important; padding: 14px 4px 2px 4px !important; }
+                                  ha-markdown-element { font-size: 0.72em !important; font-weight: 700 !important; letter-spacing: 0.08em !important; text-transform: uppercase !important; color: rgba(255,255,255,0.4) !important; }
+                            - type: custom:auto-entities
+                              card:
+                                type: vertical-stack
+                              card_param: cards
+                              filter:
+                                include:
+                                  - entity_id: "sensor.priya_choreops_chore_status_*"
+                                    attributes:
+                                      recurring_frequency: "/^week_end$/"
+                                    state: "/^(pending|due|waiting|overdue|missed|not_my_turn|standby|paused|independent|unknown)$/"
+                                    options:
+                                      type: custom:button-card
+                                      template: chore_tile
+                                  - entity_id: "sensor.priya_choreops_chore_status_*"
+                                    attributes:
+                                      recurring_frequency: "/^custom$/"
+                                      custom_frequency_interval: "<=4"
+                                    state: "/^(pending|due|waiting|overdue|missed|not_my_turn|standby|paused|independent|unknown)$/"
+                                    options:
+                                      type: custom:button-card
+                                      template: chore_tile
+                              sort:
+                                method: attribute
+                                attribute: due_date
+                            - type: custom:auto-entities
+                              card:
+                                type: vertical-stack
+                              card_param: cards
+                              filter:
+                                include:
+                                  - entity_id: "sensor.priya_choreops_chore_status_*"
+                                    attributes:
+                                      recurring_frequency: "/^week_end$/"
+                                    state: "/^(claimed|approved|claimed_in_part|approved_in_part|completed|completed_in_part|completed_by_other)$/"
+                                    options:
+                                      type: custom:button-card
+                                      template: chore_tile
+                                  - entity_id: "sensor.priya_choreops_chore_status_*"
+                                    attributes:
+                                      recurring_frequency: "/^custom$/"
+                                      custom_frequency_interval: "<=4"
+                                    state: "/^(claimed|approved|claimed_in_part|approved_in_part|completed|completed_in_part|completed_by_other)$/"
+                                    options:
+                                      type: custom:button-card
+                                      template: chore_tile
+                              sort:
+                                method: attribute
+                                attribute: due_date
+                            - type: markdown
+                              content: "**Monthly**"
+                              card_mod:
+                                style: |
+                                  ha-card { background: none !important; box-shadow: none !important; border: none !important; padding: 14px 4px 2px 4px !important; }
+                                  ha-markdown-element { font-size: 0.72em !important; font-weight: 700 !important; letter-spacing: 0.08em !important; text-transform: uppercase !important; color: rgba(255,255,255,0.4) !important; }
+                            - type: custom:auto-entities
+                              card:
+                                type: vertical-stack
+                              card_param: cards
+                              filter:
+                                include:
+                                  - entity_id: "sensor.priya_choreops_chore_status_*"
+                                    attributes:
+                                      recurring_frequency: "/^month_end$/"
+                                    state: "/^(pending|due|waiting|overdue|missed|not_my_turn|standby|paused|independent|unknown)$/"
+                                    options:
+                                      type: custom:button-card
+                                      template: chore_tile
+                                  - entity_id: "sensor.priya_choreops_chore_status_*"
+                                    attributes:
+                                      recurring_frequency: "/^custom$/"
+                                      custom_frequency_interval: ">4"
+                                    state: "/^(pending|due|waiting|overdue|missed|not_my_turn|standby|paused|independent|unknown)$/"
+                                    options:
+                                      type: custom:button-card
+                                      template: chore_tile
+                              sort:
+                                method: attribute
+                                attribute: due_date
+                            - type: custom:auto-entities
+                              card:
+                                type: vertical-stack
+                              card_param: cards
+                              filter:
+                                include:
+                                  - entity_id: "sensor.priya_choreops_chore_status_*"
+                                    attributes:
+                                      recurring_frequency: "/^month_end$/"
+                                    state: "/^(claimed|approved|claimed_in_part|approved_in_part|completed|completed_in_part|completed_by_other)$/"
+                                    options:
+                                      type: custom:button-card
+                                      template: chore_tile
+                                  - entity_id: "sensor.priya_choreops_chore_status_*"
+                                    attributes:
+                                      recurring_frequency: "/^custom$/"
+                                      custom_frequency_interval: ">4"
+                                    state: "/^(claimed|approved|claimed_in_part|approved_in_part|completed|completed_in_part|completed_by_other)$/"
+                                    options:
+                                      type: custom:button-card
+                                      template: chore_tile
+                              sort:
+                                method: attribute
+                                attribute: due_date
+                            - type: markdown
+                              content: "**Every 3 months**"
+                              card_mod:
+                                style: |
+                                  ha-card { background: none !important; box-shadow: none !important; border: none !important; padding: 14px 4px 2px 4px !important; }
+                                  ha-markdown-element { font-size: 0.72em !important; font-weight: 700 !important; letter-spacing: 0.08em !important; text-transform: uppercase !important; color: rgba(255,255,255,0.4) !important; }
+                            - type: custom:auto-entities
+                              card:
+                                type: vertical-stack
+                              card_param: cards
+                              filter:
+                                include:
+                                  - entity_id: "sensor.priya_choreops_chore_status_*"
+                                    attributes:
+                                      recurring_frequency: "/^quarter_end$/"
+                                    state: "/^(pending|due|waiting|overdue|missed|not_my_turn|standby|paused|independent|unknown)$/"
+                                    options:
+                                      type: custom:button-card
+                                      template: chore_tile
+                              sort:
+                                method: attribute
+                                attribute: due_date
+                            - type: custom:auto-entities
+                              card:
+                                type: vertical-stack
+                              card_param: cards
+                              filter:
+                                include:
+                                  - entity_id: "sensor.priya_choreops_chore_status_*"
+                                    attributes:
+                                      recurring_frequency: "/^quarter_end$/"
                                     state: "/^(claimed|approved|claimed_in_part|approved_in_part|completed|completed_in_part|completed_by_other)$/"
                                     options:
                                       type: custom:button-card
