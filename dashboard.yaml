@@ -42,12 +42,13 @@ button_card_templates:
         const isDone = isMulti ? (progressCount >= 2) : nativeDone;
         const claimEntity = entity.entity_id.replace('sensor.', 'button.').replace('chore_status', 'claim_chore');
         const disapproveEntity = entity.entity_id.replace('sensor.', 'button.').replace('chore_status', 'disapprove_chore');
+        const approveEntity = entity.entity_id.replace('sensor.', 'button.').replace('chore_status', 'approve_chore');
         const personName = st.attributes.user_name;
         const choreName = st.attributes.chore_name;
         if (isDone) {
           return {action: 'call-service', service: 'script.chore_undo_funny', service_data: {disapprove_entity_id: disapproveEntity, chore_name: choreName, person_name: personName, is_multi: isMulti, chore_entity_id: entity.entity_id, period_type: periodType}};
         }
-        return {action: 'call-service', service: 'script.chore_complete_celebrate', service_data: {claim_entity_id: claimEntity, chore_name: choreName, person_name: personName, is_multi: isMulti, chore_entity_id: entity.entity_id, period_type: periodType}};
+        return {action: 'call-service', service: 'script.chore_complete_celebrate', service_data: {claim_entity_id: claimEntity, approve_entity_id: approveEntity, chore_name: choreName, person_name: personName, is_multi: isMulti, chore_entity_id: entity.entity_id, period_type: periodType}};
       ]]]
     double_tap_action: |
       [[[

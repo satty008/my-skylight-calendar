@@ -250,6 +250,17 @@ script:
         example: sensor.priya_choreops_chore_status_laundry_wash_fold
       period_type:
         example: week
+      approve_entity_id:
+        description: >-
+          Only used when is_multi is true. auto_approve is false on these
+          chores, so a plain claim leaves them sitting in "claimed, pending
+          approval" forever - ChoreOps only advances due_date (and allows a
+          fresh claim) once a claim is actually approved. Without this, a
+          second tap on a 2x/period chore just fails outright ("chore has a
+          pending claim"), which is exactly the stuck-at-1-of-2 bug this
+          fixes. Single-occurrence chores intentionally skip this - they're
+          meant to sit in "claimed" until explicitly undone.
+        example: button.priya_choreops_approve_chore_laundry_wash_fold
     sequence:
       - action: button.press
         target:
@@ -258,6 +269,11 @@ script:
           - condition: template
             value_template: "{{ is_multi | default(false) }}"
         then:
+          - delay:
+              milliseconds: 400
+          - action: button.press
+            target:
+              entity_id: "{{ approve_entity_id }}"
           - action: script.chore_progress_track
             data:
               chore_entity_id: "{{ chore_entity_id }}"
