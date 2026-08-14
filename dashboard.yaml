@@ -389,7 +389,7 @@ views:
                     show_attribute: false
                     card_mod:
                       style: |
-                        ha-card { zoom: 0.75 !important; max-width: 130px !important; margin-left: auto !important; margin-right: 0 !important; }
+                        ha-card { zoom: 0.46 !important; max-width: 260px !important; margin-left: auto !important; margin-right: 0 !important; }
                   - type: custom:bubble-card
                     card_type: button
                     button_type: state
@@ -411,7 +411,7 @@ views:
                       }
                     card_mod:
                       style: |
-                        ha-card { zoom: 0.75 !important; max-width: 130px !important; margin: 0 !important; }
+                        ha-card { zoom: 0.46 !important; max-width: 260px !important; margin: 0 !important; }
                   - type: custom:bubble-card
                     card_type: button
                     button_type: name
@@ -435,7 +435,7 @@ views:
                       }
                     card_mod:
                       style: |
-                        ha-card { zoom: 0.75 !important; max-width: 130px !important; margin: 0 !important; }
+                        ha-card { zoom: 0.46 !important; max-width: 260px !important; margin: 0 !important; }
             grid_options:
               columns: 120
               rows: auto
