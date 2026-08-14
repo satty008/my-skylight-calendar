@@ -324,7 +324,7 @@ button_card_templates:
             // Two small circles instead of one big one - filled left-to-right
             // as progressCount rises from 0 to 2 this period.
             const dot = (filled) => `<ha-icon icon="${filled ? 'mdi:circle' : 'mdi:circle-outline'}" style="width:13px;height:13px;color:${filled ? '#3fb950' : 'rgba(255,255,255,0.3)'};"></ha-icon>`;
-            return `<div style="display:flex;flex-direction:column;gap:2px;align-items:center;">${dot(progressCount >= 1)}${dot(progressCount >= 2)}</div>`;
+            return `<div style="display:flex;flex-direction:row;gap:3px;align-items:center;">${dot(progressCount >= 1)}${dot(progressCount >= 2)}</div>`;
           }
           const nativeDone = ['claimed', 'approved', 'claimed_in_part', 'approved_in_part', 'completed', 'completed_in_part', 'completed_by_other'].includes(st.state);
           return nativeDone
