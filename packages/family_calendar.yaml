@@ -111,41 +111,26 @@ input_boolean:
 # 2. SCRIPTS (The Logic)
 script:
   # --- Filter Toggles ---
-  # Exclusive select: tapping a person isolates their calendar+chores
-  # (hides the other person); tapping the same person again while they're
-  # the only one shown resets back to showing both. Tapping the OTHER
-  # button always isolates to that other person, regardless of prior state.
+  # Independent per-person collapse: tapping Satty only shows/hides Satty's
+  # own chores, tapping Priya only shows/hides Priya's - neither affects the
+  # other's visibility.
   calendar1_calendar_visible_filter:
-    alias: Toggle calendar1 Calendar (exclusive select)
+    alias: Toggle calendar1 Calendar
     sequence:
-      - variables:
-          only_calendar1_shown: "{{ is_state('input_text.calendar1_calendar_filter', '.*') and is_state('input_text.calendar2_calendar_filter', '^$') }}"
       - action: input_text.set_value
         target:
           entity_id: input_text.calendar1_calendar_filter
         data:
-          value: ".*"
-      - action: input_text.set_value
-        target:
-          entity_id: input_text.calendar2_calendar_filter
-        data:
-          value: "{% if only_calendar1_shown %}.*{% else %}^${% endif %}"
+          value: "{% if is_state('input_text.calendar1_calendar_filter', '.*') %}^${% else %}.*{% endif %}"
 
   calendar2_calendar_visible_filter:
-    alias: Toggle calendar2 Calendar (exclusive select)
+    alias: Toggle calendar2 Calendar
     sequence:
-      - variables:
-          only_calendar2_shown: "{{ is_state('input_text.calendar2_calendar_filter', '.*') and is_state('input_text.calendar1_calendar_filter', '^$') }}"
       - action: input_text.set_value
         target:
           entity_id: input_text.calendar2_calendar_filter
         data:
-          value: ".*"
-      - action: input_text.set_value
-        target:
-          entity_id: input_text.calendar1_calendar_filter
-        data:
-          value: "{% if only_calendar2_shown %}.*{% else %}^${% endif %}"
+          value: "{% if is_state('input_text.calendar2_calendar_filter', '.*') %}^${% else %}.*{% endif %}"
 
   # --- Per-person color cycling ---
   # Both share the same 8-color palette; each person's helper just tracks

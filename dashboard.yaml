@@ -323,7 +323,7 @@ views:
                 show_forecast: true
                 card_mod:
                   style: |
-                    ha-card { zoom: 0.78 !important; max-width: 280px !important; background: rgba(20, 20, 26, 0.75) !important; border: solid 1px rgba(255, 255, 255, 0.15) !important; border-right: none !important; border-radius: 24px 0 0 24px !important; box-shadow: none !important; padding: 0.25em 0.5em !important; box-sizing: border-box !important; }
+                    ha-card { zoom: 0.55 !important; max-width: 280px !important; background: rgba(20, 20, 26, 0.75) !important; border: solid 1px rgba(255, 255, 255, 0.15) !important; border-right: none !important; border-radius: 24px 0 0 24px !important; box-shadow: none !important; padding: 0.25em 0.5em !important; box-sizing: border-box !important; }
                     @media (max-width: 700px) {
                       ha-card { zoom: 0.65 !important; max-width: 40vw !important; }
                     }
@@ -334,7 +334,7 @@ views:
                 show_forecast: true
                 card_mod:
                   style: |
-                    ha-card { zoom: 0.78 !important; max-width: 280px !important; background: rgba(20, 20, 26, 0.75) !important; border: solid 1px rgba(255, 255, 255, 0.15) !important; border-left: solid 1px rgba(255,255,255,0.25) !important; border-radius: 0 24px 24px 0 !important; box-shadow: none !important; padding: 0.25em 0.5em !important; box-sizing: border-box !important; }
+                    ha-card { zoom: 0.55 !important; max-width: 280px !important; background: rgba(20, 20, 26, 0.75) !important; border: solid 1px rgba(255, 255, 255, 0.15) !important; border-left: solid 1px rgba(255,255,255,0.25) !important; border-radius: 0 24px 24px 0 !important; box-shadow: none !important; padding: 0.25em 0.5em !important; box-sizing: border-box !important; }
                     @media (max-width: 700px) {
                       ha-card { zoom: 0.65 !important; max-width: 40vw !important; }
                     }
@@ -418,7 +418,7 @@ views:
                 show_attribute: false
                 card_mod:
                   style: |
-                    ha-card { zoom: 0.62 !important; max-width: 190px !important; margin-left: auto !important; margin-right: 0 !important; }
+                    ha-card { zoom: 0.55 !important; max-width: 190px !important; margin-left: auto !important; margin-right: 0 !important; }
               - type: custom:bubble-card
                 card_type: button
                 button_type: state
@@ -440,7 +440,7 @@ views:
                   }
                 card_mod:
                   style: |
-                    ha-card { zoom: 0.62 !important; max-width: 190px !important; margin: 0 !important; }
+                    ha-card { zoom: 0.55 !important; max-width: 190px !important; margin: 0 !important; }
               - type: custom:bubble-card
                 card_type: button
                 button_type: name
@@ -464,7 +464,7 @@ views:
                   }
                 card_mod:
                   style: |
-                    ha-card { zoom: 0.62 !important; max-width: 190px !important; margin: 0 !important; }
+                    ha-card { zoom: 0.55 !important; max-width: 190px !important; margin: 0 !important; }
         column_span: 1
       # --- End TOP SECTION ---
       # --- START CHORES SECTION (Today + Weather + ChoreOps, tap to complete) ---
