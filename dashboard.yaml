@@ -805,7 +805,7 @@ views:
                     color: "var(--calendar1-default-primary-color)"
                     filter: ${ CAL1CAL }
                   - entity: calendar.160294bpl_gmail_com
-                    name: Bhavi
+                    name: Priya
                     color: "var(--calendar2-default-primary-color)"
                     filter: ${ CAL2CAL }
                 days: ${ DAYS }
@@ -1144,7 +1144,7 @@ views:
                   .bubble-button-card-container {
                     background:
                     ${hass.states['input_select.calendar_select'].state == 'Satty' ? 'var(--calendar1-default-primary-color)'
-                    : hass.states['input_select.calendar_select'].state == 'Bhavi' ? 'var(--calendar2-default-primary-color)'
+                    : hass.states['input_select.calendar_select'].state == 'Priya' ? 'var(--calendar2-default-primary-color)'
                     : 'gray'} !important;
                   }
               - type: vertical-stack
@@ -1192,7 +1192,7 @@ views:
                         - background-color: |
                             [[[
                               if (states['input_select.calendar_select'].state == 'Satty') return "var(--calendar1-default-primary-color)";
-                              if (states['input_select.calendar_select'].state == 'Bhavi') return "var(--calendar2-default-primary-color)";
+                              if (states['input_select.calendar_select'].state == 'Priya') return "var(--calendar2-default-primary-color)";
                               return "gray";
                             ]]]
     cards: []

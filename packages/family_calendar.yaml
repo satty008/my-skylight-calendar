@@ -52,7 +52,7 @@ input_text:
     name: Satty Color
     initial: "#fb8072"
   bhavi_color:
-    name: Bhavi Color
+    name: Priya Color
     initial: "#fdbf6f"
 
 input_select:
@@ -61,7 +61,7 @@ input_select:
     name: Select Calendar
     options:
       - Satty
-      - Bhavi
+      - Priya
     icon: mdi:calendar-check
   
   # The View selector (Week, Month, etc)
@@ -165,7 +165,7 @@ script:
           value: "{{ next_color }}"
 
   cycle_bhavi_color:
-    alias: Cycle Bhavi's chore/name color
+    alias: Cycle Priya's chore/name color
     sequence:
       - variables:
           palette: ["#fb8072", "#fdbf6f", "#80b1d3", "#b3de69", "#bc80bd", "#8dd3c7", "#fccde5", "#bebada"]
@@ -344,7 +344,7 @@ script:
           # ====================================================================
           calendar_map:
             "Satty": "calendar.srnarayanan1989_gmail_com"
-            "Bhavi": "calendar.160294bpl_gmail_com"
+            "Priya": "calendar.160294bpl_gmail_com"
           
           # Selects the entity based on the map above
           target_calendar: "{{ calendar_map.get(states('input_select.calendar_select'), 'calendar.family') }}"
