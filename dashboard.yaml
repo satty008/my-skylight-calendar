@@ -26,8 +26,8 @@ button_card_templates:
         [[[
           const st = states[entity.entity_id];
           const f = st.attributes.recurring_frequency;
-          const interval = st.attributes.custom_interval;
-          const unit = st.attributes.custom_interval_unit;
+          const interval = st.attributes.custom_frequency_interval;
+          const unit = st.attributes.custom_frequency_unit;
           let label;
           if (f === 'daily') label = 'Daily';
           else if (f === 'week_end') label = 'Weekly';
