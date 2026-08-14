@@ -411,7 +411,7 @@ button_card_templates:
           - grid-area: check
           - justify-self: center
           - align-self: start
-          - margin-top: 6px
+          - margin-top: -4px
       name:
         - grid-area: n
         - justify-self: start
