@@ -349,16 +349,17 @@ views:
                       ha-markdown-element > div:nth-child(3) { font-size: 0.9em !important; opacity: 0.65 !important; margin-top: 0.15em !important; text-align: center !important; }
               - type: horizontal-stack
                 # Three controls in one row. The outer horizontal-stack (line 268)
-                # splits its 3 children into equal thirds by default (flex:1 each),
-                # which left almost no room for 3 buttons - flex/max-width here
-                # override that default so this column claims a fixed, much wider
-                # share instead of an equal third, at the expense of the weather/
-                # markdown columns (which just have more flex to fill). Buttons
-                # are back to the original zoom:0.75/max-width:260px (proven
-                # legible from before they were ever squeezed onto one row).
+                # splits its 3 children into equal thirds (~370px here) and that
+                # split can't be overridden via card_mod - tried flex-basis/
+                # max-width on this wrapper's own .card class and it was a no-op
+                # (same class of issue as vertical-stack's card_mod being a no-op,
+                # noted elsewhere in this file). So the real, fixed budget for 3
+                # buttons is ~370px; zoom/max-width below are tuned to fill that
+                # budget as large as possible without wrapping to 2 lines or
+                # overflowing the column.
                 card_mod:
                   style: |
-                    .card { gap: 4px !important; flex: 0 0 620px !important; max-width: 620px !important; }
+                    .card { gap: 4px !important; }
                 cards:
                   - type: custom:bubble-card
                     card_type: select
@@ -370,7 +371,7 @@ views:
                     show_attribute: false
                     card_mod:
                       style: |
-                        ha-card { zoom: 0.75 !important; max-width: 260px !important; margin-left: auto !important; margin-right: 0 !important; }
+                        ha-card { zoom: 0.62 !important; max-width: 190px !important; margin-left: auto !important; margin-right: 0 !important; }
                   - type: custom:bubble-card
                     card_type: button
                     button_type: state
@@ -392,7 +393,7 @@ views:
                       }
                     card_mod:
                       style: |
-                        ha-card { zoom: 0.75 !important; max-width: 260px !important; margin: 0 !important; }
+                        ha-card { zoom: 0.62 !important; max-width: 190px !important; margin: 0 !important; }
                   - type: custom:bubble-card
                     card_type: button
                     button_type: name
@@ -416,7 +417,7 @@ views:
                       }
                     card_mod:
                       style: |
-                        ha-card { zoom: 0.75 !important; max-width: 260px !important; margin: 0 !important; }
+                        ha-card { zoom: 0.62 !important; max-width: 190px !important; margin: 0 !important; }
             grid_options:
               columns: 120
               rows: auto
