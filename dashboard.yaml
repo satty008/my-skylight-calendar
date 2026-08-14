@@ -824,10 +824,13 @@ views:
                                       type: custom:button-card
                                       template: chore_tile
                                   - entity_id: "sensor.satty_choreops_chore_status_*"
-                                    attributes:
-                                      recurring_frequency: "/^custom$/"
-                                      custom_frequency_interval: ">4"
-                                      custom_frequency_interval: "<=45"
+                                    and:
+                                      - attributes:
+                                          recurring_frequency: "/^custom$/"
+                                      - attributes:
+                                          custom_frequency_interval: ">4"
+                                      - attributes:
+                                          custom_frequency_interval: "<=45"
                                     state: "/^(pending|due|waiting|overdue|missed|not_my_turn|standby|paused|independent|unknown)$/"
                                     options:
                                       type: custom:button-card
@@ -849,10 +852,13 @@ views:
                                       type: custom:button-card
                                       template: chore_tile
                                   - entity_id: "sensor.satty_choreops_chore_status_*"
-                                    attributes:
-                                      recurring_frequency: "/^custom$/"
-                                      custom_frequency_interval: ">4"
-                                      custom_frequency_interval: "<=45"
+                                    and:
+                                      - attributes:
+                                          recurring_frequency: "/^custom$/"
+                                      - attributes:
+                                          custom_frequency_interval: ">4"
+                                      - attributes:
+                                          custom_frequency_interval: "<=45"
                                     state: "/^(claimed|approved|claimed_in_part|approved_in_part|completed|completed_in_part|completed_by_other)$/"
                                     options:
                                       type: custom:button-card
@@ -917,10 +923,13 @@ views:
                                       type: custom:button-card
                                       template: chore_tile
                                   - entity_id: "sensor.satty_choreops_chore_status_*"
-                                    attributes:
-                                      recurring_frequency: "/^custom$/"
-                                      custom_frequency_interval: ">45"
-                                      custom_frequency_interval: "<=135"
+                                    and:
+                                      - attributes:
+                                          recurring_frequency: "/^custom$/"
+                                      - attributes:
+                                          custom_frequency_interval: ">45"
+                                      - attributes:
+                                          custom_frequency_interval: "<=135"
                                     state: "/^(pending|due|waiting|overdue|missed|not_my_turn|standby|paused|independent|unknown)$/"
                                     options:
                                       type: custom:button-card
@@ -942,10 +951,13 @@ views:
                                       type: custom:button-card
                                       template: chore_tile
                                   - entity_id: "sensor.satty_choreops_chore_status_*"
-                                    attributes:
-                                      recurring_frequency: "/^custom$/"
-                                      custom_frequency_interval: ">45"
-                                      custom_frequency_interval: "<=135"
+                                    and:
+                                      - attributes:
+                                          recurring_frequency: "/^custom$/"
+                                      - attributes:
+                                          custom_frequency_interval: ">45"
+                                      - attributes:
+                                          custom_frequency_interval: "<=135"
                                     state: "/^(claimed|approved|claimed_in_part|approved_in_part|completed|completed_in_part|completed_by_other)$/"
                                     options:
                                       type: custom:button-card
@@ -1003,10 +1015,13 @@ views:
                               filter:
                                 include:
                                   - entity_id: "sensor.satty_choreops_chore_status_*"
-                                    attributes:
-                                      recurring_frequency: "/^custom$/"
-                                      custom_frequency_interval: ">135"
-                                      custom_frequency_interval: "<=270"
+                                    and:
+                                      - attributes:
+                                          recurring_frequency: "/^custom$/"
+                                      - attributes:
+                                          custom_frequency_interval: ">135"
+                                      - attributes:
+                                          custom_frequency_interval: "<=270"
                                     state: "/^(pending|due|waiting|overdue|missed|not_my_turn|standby|paused|independent|unknown)$/"
                                     options:
                                       type: custom:button-card
@@ -1021,10 +1036,13 @@ views:
                               filter:
                                 include:
                                   - entity_id: "sensor.satty_choreops_chore_status_*"
-                                    attributes:
-                                      recurring_frequency: "/^custom$/"
-                                      custom_frequency_interval: ">135"
-                                      custom_frequency_interval: "<=270"
+                                    and:
+                                      - attributes:
+                                          recurring_frequency: "/^custom$/"
+                                      - attributes:
+                                          custom_frequency_interval: ">135"
+                                      - attributes:
+                                          custom_frequency_interval: "<=270"
                                     state: "/^(claimed|approved|claimed_in_part|approved_in_part|completed|completed_in_part|completed_by_other)$/"
                                     options:
                                       type: custom:button-card
@@ -1414,10 +1432,13 @@ views:
                                       type: custom:button-card
                                       template: chore_tile
                                   - entity_id: "sensor.priya_choreops_chore_status_*"
-                                    attributes:
-                                      recurring_frequency: "/^custom$/"
-                                      custom_frequency_interval: ">4"
-                                      custom_frequency_interval: "<=45"
+                                    and:
+                                      - attributes:
+                                          recurring_frequency: "/^custom$/"
+                                      - attributes:
+                                          custom_frequency_interval: ">4"
+                                      - attributes:
+                                          custom_frequency_interval: "<=45"
                                     state: "/^(pending|due|waiting|overdue|missed|not_my_turn|standby|paused|independent|unknown)$/"
                                     options:
                                       type: custom:button-card
@@ -1439,10 +1460,13 @@ views:
                                       type: custom:button-card
                                       template: chore_tile
                                   - entity_id: "sensor.priya_choreops_chore_status_*"
-                                    attributes:
-                                      recurring_frequency: "/^custom$/"
-                                      custom_frequency_interval: ">4"
-                                      custom_frequency_interval: "<=45"
+                                    and:
+                                      - attributes:
+                                          recurring_frequency: "/^custom$/"
+                                      - attributes:
+                                          custom_frequency_interval: ">4"
+                                      - attributes:
+                                          custom_frequency_interval: "<=45"
                                     state: "/^(claimed|approved|claimed_in_part|approved_in_part|completed|completed_in_part|completed_by_other)$/"
                                     options:
                                       type: custom:button-card
@@ -1507,10 +1531,13 @@ views:
                                       type: custom:button-card
                                       template: chore_tile
                                   - entity_id: "sensor.priya_choreops_chore_status_*"
-                                    attributes:
-                                      recurring_frequency: "/^custom$/"
-                                      custom_frequency_interval: ">45"
-                                      custom_frequency_interval: "<=135"
+                                    and:
+                                      - attributes:
+                                          recurring_frequency: "/^custom$/"
+                                      - attributes:
+                                          custom_frequency_interval: ">45"
+                                      - attributes:
+                                          custom_frequency_interval: "<=135"
                                     state: "/^(pending|due|waiting|overdue|missed|not_my_turn|standby|paused|independent|unknown)$/"
                                     options:
                                       type: custom:button-card
@@ -1532,10 +1559,13 @@ views:
                                       type: custom:button-card
                                       template: chore_tile
                                   - entity_id: "sensor.priya_choreops_chore_status_*"
-                                    attributes:
-                                      recurring_frequency: "/^custom$/"
-                                      custom_frequency_interval: ">45"
-                                      custom_frequency_interval: "<=135"
+                                    and:
+                                      - attributes:
+                                          recurring_frequency: "/^custom$/"
+                                      - attributes:
+                                          custom_frequency_interval: ">45"
+                                      - attributes:
+                                          custom_frequency_interval: "<=135"
                                     state: "/^(claimed|approved|claimed_in_part|approved_in_part|completed|completed_in_part|completed_by_other)$/"
                                     options:
                                       type: custom:button-card
@@ -1593,10 +1623,13 @@ views:
                               filter:
                                 include:
                                   - entity_id: "sensor.priya_choreops_chore_status_*"
-                                    attributes:
-                                      recurring_frequency: "/^custom$/"
-                                      custom_frequency_interval: ">135"
-                                      custom_frequency_interval: "<=270"
+                                    and:
+                                      - attributes:
+                                          recurring_frequency: "/^custom$/"
+                                      - attributes:
+                                          custom_frequency_interval: ">135"
+                                      - attributes:
+                                          custom_frequency_interval: "<=270"
                                     state: "/^(pending|due|waiting|overdue|missed|not_my_turn|standby|paused|independent|unknown)$/"
                                     options:
                                       type: custom:button-card
@@ -1611,10 +1644,13 @@ views:
                               filter:
                                 include:
                                   - entity_id: "sensor.priya_choreops_chore_status_*"
-                                    attributes:
-                                      recurring_frequency: "/^custom$/"
-                                      custom_frequency_interval: ">135"
-                                      custom_frequency_interval: "<=270"
+                                    and:
+                                      - attributes:
+                                          recurring_frequency: "/^custom$/"
+                                      - attributes:
+                                          custom_frequency_interval: ">135"
+                                      - attributes:
+                                          custom_frequency_interval: "<=270"
                                     state: "/^(claimed|approved|claimed_in_part|approved_in_part|completed|completed_in_part|completed_by_other)$/"
                                     options:
                                       type: custom:button-card
