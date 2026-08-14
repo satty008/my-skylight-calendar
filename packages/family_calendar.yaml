@@ -107,6 +107,56 @@ input_boolean:
     name: Show Events
     icon: mdi:calendar-eye
     initial: false
+  # Per-person, per-frequency-block collapse state for the chores board.
+  # "on" means collapsed (hidden); default "off" (expanded).
+  chore_collapse_satty_daily:
+    name: Collapse Satty Daily chores
+    icon: mdi:chevron-down
+    initial: false
+  chore_collapse_satty_weekly:
+    name: Collapse Satty Weekly chores
+    icon: mdi:chevron-down
+    initial: false
+  chore_collapse_satty_monthly:
+    name: Collapse Satty Monthly chores
+    icon: mdi:chevron-down
+    initial: false
+  chore_collapse_satty_quarterly:
+    name: Collapse Satty Quarterly chores
+    icon: mdi:chevron-down
+    initial: false
+  chore_collapse_satty_semiannual:
+    name: Collapse Satty Semiannual chores
+    icon: mdi:chevron-down
+    initial: false
+  chore_collapse_satty_yearly:
+    name: Collapse Satty Yearly chores
+    icon: mdi:chevron-down
+    initial: false
+  chore_collapse_priya_daily:
+    name: Collapse Priya Daily chores
+    icon: mdi:chevron-down
+    initial: false
+  chore_collapse_priya_weekly:
+    name: Collapse Priya Weekly chores
+    icon: mdi:chevron-down
+    initial: false
+  chore_collapse_priya_monthly:
+    name: Collapse Priya Monthly chores
+    icon: mdi:chevron-down
+    initial: false
+  chore_collapse_priya_quarterly:
+    name: Collapse Priya Quarterly chores
+    icon: mdi:chevron-down
+    initial: false
+  chore_collapse_priya_semiannual:
+    name: Collapse Priya Semiannual chores
+    icon: mdi:chevron-down
+    initial: false
+  chore_collapse_priya_yearly:
+    name: Collapse Priya Yearly chores
+    icon: mdi:chevron-down
+    initial: false
 
 # 2. SCRIPTS (The Logic)
 script:
