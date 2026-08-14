@@ -413,7 +413,7 @@ views:
                 entity: input_select.calendar_view
                 show_name: true
                 show_state: true
-                name: Select View
+                name: View
                 show_last_changed: false
                 show_attribute: false
                 card_mod:
