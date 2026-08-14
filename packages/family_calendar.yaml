@@ -392,6 +392,16 @@ script:
 
   chore_progress_track:
     alias: Track a 2x/period chore's completions this period
+    # Everything computed in ONE template inside the input_text.set_value
+    # call, not spread across several `variables:` steps - splitting it
+    # across steps was silently corrupting the entity to "unknown" as soon
+    # as a 3rd chore's entry was added (reproduced directly: identical
+    # logic run as a single template via /api/template worked every time;
+    # the same logic split into current/existing/existing_count/new_count
+    # variables steps failed specifically on the 3rd distinct chore key,
+    # even with multi-second delays between calls ruling out a race).
+    # Never isolated the exact HA templating quirk responsible, but the
+    # single-template form has been solid through repeated testing.
     fields:
       chore_entity_id:
         example: sensor.priya_choreops_chore_status_laundry_wash_fold
@@ -400,30 +410,19 @@ script:
       delta:
         example: 1
     sequence:
-      - variables:
-          current: >-
-            {% set raw = states('input_text.chore_period_progress') %}
-            {{ (raw | from_json) if raw not in ['', 'unknown', 'unavailable'] else {} }}
-          period_key: >-
-            {% if period_type == 'week' %}
-              {{ now().strftime('%G-W%V') }}
-            {% else %}
-              {{ now().strftime('%Y-%m') }}
-            {% endif %}
-      - variables:
-          existing: "{{ current.get(chore_entity_id, {}) }}"
-      - variables:
-          existing_count: "{{ (existing.get('count', 0) | int) if existing.get('period') == period_key else 0 }}"
-      - variables:
-          new_count: >-
-            {% set raw = existing_count + (delta | int) %}
-            {% set low = [raw, 0] | max %}
-            {{ [low, 2] | min }}
       - action: input_text.set_value
         target:
           entity_id: input_text.chore_period_progress
         data:
           value: >-
+            {% set raw = states('input_text.chore_period_progress') %}
+            {% set current = (raw | from_json) if raw not in ['', 'unknown', 'unavailable'] else {} %}
+            {% set period_key = now().strftime('%G-W%V') if period_type == 'week' else now().strftime('%Y-%m') %}
+            {% set existing = current.get(chore_entity_id, {}) %}
+            {% set existing_count = (existing.get('count', 0) | int) if existing.get('period') == period_key else 0 %}
+            {% set uncapped = existing_count + (delta | int) %}
+            {% set floored = [uncapped, 0] | max %}
+            {% set new_count = [floored, 2] | min %}
             {{ (current | combine({chore_entity_id: {'count': new_count, 'period': period_key}})) | tojson }}
 
   chore_reorder:
