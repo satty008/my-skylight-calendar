@@ -574,7 +574,7 @@ views:
                                     # native_value comes from get_chore_status_context()[STATE],
                                     # while global_state comes from a separate
                                     # get_global_chore_state_context() call.
-                                    state: "^(pending|due|waiting|overdue|missed|not_my_turn|standby|paused|independent|unknown)$"
+                                    state: "/^(pending|due|waiting|overdue|missed|not_my_turn|standby|paused|independent|unknown)$/"
                                     options:
                                       type: custom:button-card
                                       template: chore_tile
@@ -588,7 +588,7 @@ views:
                               filter:
                                 include:
                                   - entity_id: "sensor.satty_choreops_chore_status_*"
-                                    state: "^(claimed|approved|claimed_in_part|approved_in_part|completed|completed_in_part|completed_by_other)$"
+                                    state: "/^(claimed|approved|claimed_in_part|approved_in_part|completed|completed_in_part|completed_by_other)$/"
                                     options:
                                       type: custom:button-card
                                       template: chore_tile
@@ -656,7 +656,7 @@ views:
                               filter:
                                 include:
                                   - entity_id: "sensor.priya_choreops_chore_status_*"
-                                    state: "^(pending|due|waiting|overdue|missed|not_my_turn|standby|paused|independent|unknown)$"
+                                    state: "/^(pending|due|waiting|overdue|missed|not_my_turn|standby|paused|independent|unknown)$/"
                                     options:
                                       type: custom:button-card
                                       template: chore_tile
@@ -670,7 +670,7 @@ views:
                               filter:
                                 include:
                                   - entity_id: "sensor.priya_choreops_chore_status_*"
-                                    state: "^(claimed|approved|claimed_in_part|approved_in_part|completed|completed_in_part|completed_by_other)$"
+                                    state: "/^(claimed|approved|claimed_in_part|approved_in_part|completed|completed_in_part|completed_by_other)$/"
                                     options:
                                       type: custom:button-card
                                       template: chore_tile
