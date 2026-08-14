@@ -7,7 +7,7 @@ button_card_templates:
     tap_action: |
       [[[
         const st = states[entity.entity_id];
-        const isDone = (st.attributes.global_state === 'completed' || st.attributes.global_state === 'claimed');
+        const isDone = ['claimed', 'approved', 'claimed_in_part', 'approved_in_part', 'completed', 'completed_in_part', 'completed_by_other'].includes(st.state);
         const claimEntity = entity.entity_id.replace('sensor.', 'button.').replace('chore_status', 'claim_chore');
         const disapproveEntity = entity.entity_id.replace('sensor.', 'button.').replace('chore_status', 'disapprove_chore');
         const personName = st.attributes.user_name;
@@ -169,7 +169,7 @@ button_card_templates:
         [[[
           const st = states[entity.entity_id];
           const due = st.attributes.due_date;
-          const isDone = (st.attributes.global_state === 'completed' || st.attributes.global_state === 'claimed');
+          const isDone = ['claimed', 'approved', 'claimed_in_part', 'approved_in_part', 'completed', 'completed_in_part', 'completed_by_other'].includes(st.state);
           let label, bg;
           if (isDone) {
             label = 'Done'; bg = '#238636';
@@ -257,9 +257,15 @@ button_card_templates:
         - padding-left: 8px
         - font-size: 0.95em
         - text-decoration: |
-            [[[ return (states[entity.entity_id].attributes.global_state === 'completed' || states[entity.entity_id].attributes.global_state === 'claimed') ? 'line-through' : 'none' ]]]
+            [[[
+              const doneStates = ['claimed', 'approved', 'claimed_in_part', 'approved_in_part', 'completed', 'completed_in_part', 'completed_by_other'];
+              return doneStates.includes(states[entity.entity_id].state) ? 'line-through' : 'none';
+            ]]]
         - opacity: |
-            [[[ return (states[entity.entity_id].attributes.global_state === 'completed' || states[entity.entity_id].attributes.global_state === 'claimed') ? '0.6' : '1' ]]]
+            [[[
+              const doneStates = ['claimed', 'approved', 'claimed_in_part', 'approved_in_part', 'completed', 'completed_in_part', 'completed_by_other'];
+              return doneStates.includes(states[entity.entity_id].state) ? '0.6' : '1';
+            ]]]
 views:
   - type: sections
     max_columns: 10
@@ -559,8 +565,16 @@ views:
                               filter:
                                 include:
                                   - entity_id: "sensor.satty_choreops_chore_status_*"
-                                    attributes:
-                                      global_state: "^(?!completed|claimed).*$"
+                                    # The sensor's own state (not the attributes.global_state
+                                    # attribute) is the reliable per-assignee completion signal -
+                                    # global_state is a CROSS-assignee aggregate that reports the
+                                    # literal string "independent" (not a real status) for chores
+                                    # with independent per-person completion tracking, which is
+                                    # every chore here. Confirmed by reading ChoreOps' sensor.py:
+                                    # native_value comes from get_chore_status_context()[STATE],
+                                    # while global_state comes from a separate
+                                    # get_global_chore_state_context() call.
+                                    state: "^(pending|due|waiting|overdue|missed|not_my_turn|standby|paused|independent|unknown)$"
                                     options:
                                       type: custom:button-card
                                       template: chore_tile
@@ -574,8 +588,7 @@ views:
                               filter:
                                 include:
                                   - entity_id: "sensor.satty_choreops_chore_status_*"
-                                    attributes:
-                                      global_state: "completed|claimed"
+                                    state: "^(claimed|approved|claimed_in_part|approved_in_part|completed|completed_in_part|completed_by_other)$"
                                     options:
                                       type: custom:button-card
                                       template: chore_tile
@@ -643,8 +656,7 @@ views:
                               filter:
                                 include:
                                   - entity_id: "sensor.priya_choreops_chore_status_*"
-                                    attributes:
-                                      global_state: "^(?!completed|claimed).*$"
+                                    state: "^(pending|due|waiting|overdue|missed|not_my_turn|standby|paused|independent|unknown)$"
                                     options:
                                       type: custom:button-card
                                       template: chore_tile
@@ -658,8 +670,7 @@ views:
                               filter:
                                 include:
                                   - entity_id: "sensor.priya_choreops_chore_status_*"
-                                    attributes:
-                                      global_state: "completed|claimed"
+                                    state: "^(claimed|approved|claimed_in_part|approved_in_part|completed|completed_in_part|completed_by_other)$"
                                     options:
                                       type: custom:button-card
                                       template: chore_tile
