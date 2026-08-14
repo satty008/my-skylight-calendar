@@ -2,6 +2,8 @@ button_card_templates:
   chore_tile:
     show_state: false
     show_icon: false
+    name: |
+      [[[ return states[entity.entity_id].attributes.chore_name ]]]
     tap_action: |
       [[[
         const st = states[entity.entity_id];
