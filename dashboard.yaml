@@ -41,6 +41,24 @@ button_card_templates:
             }
           }
         });
+        const mkReorderBtn = (name, direction) => ({
+          type: 'button',
+          name: name,
+          show_icon: false,
+          tap_action: {
+            action: 'fire-dom-event',
+            browser_mod: {
+              service: 'browser_mod.sequence',
+              data: {
+                sequence: [
+                  {service: 'script.chore_reorder', data: {chore_entity: entity.entity_id, direction: direction}},
+                  {service: 'browser_mod.refresh', data: {}},
+                  {service: 'browser_mod.close_popup', data: {}}
+                ]
+              }
+            }
+          }
+        });
         return {
           action: 'fire-dom-event',
           browser_mod: {
@@ -84,52 +102,8 @@ button_card_templates:
                       }
                     }
                   },
-                  {
-                    type: 'button',
-                    name: 'Cancel',
-                    show_icon: false,
-                    tap_action: closeAction
-                  }
-                ]
-              }
-            }
-          }
-        };
-      ]]]
-    hold_action: |
-      [[[
-        const st = states[entity.entity_id];
-        const choreName = st.attributes.chore_name;
-        const closeAction = {action: 'fire-dom-event', browser_mod: {service: 'browser_mod.close_popup', data: {}}};
-        const mkBtn = (name, direction) => ({
-          type: 'button',
-          name: name,
-          show_icon: false,
-          tap_action: {
-            action: 'fire-dom-event',
-            browser_mod: {
-              service: 'browser_mod.sequence',
-              data: {
-                sequence: [
-                  {service: 'script.chore_reorder', data: {chore_entity: entity.entity_id, direction: direction}},
-                  {service: 'browser_mod.refresh', data: {}},
-                  {service: 'browser_mod.close_popup', data: {}}
-                ]
-              }
-            }
-          }
-        });
-        return {
-          action: 'fire-dom-event',
-          browser_mod: {
-            service: 'browser_mod.popup',
-            data: {
-              title: choreName,
-              content: {
-                type: 'vertical-stack',
-                cards: [
-                  mkBtn('Move up', 'up'),
-                  mkBtn('Move down', 'down'),
+                  mkReorderBtn('Move up in list', 'up'),
+                  mkReorderBtn('Move down in list', 'down'),
                   {
                     type: 'button',
                     name: 'Cancel',
@@ -395,7 +369,7 @@ views:
                     show_attribute: false
                     card_mod:
                       style: |
-                        ha-card { zoom: 0.46 !important; max-width: 260px !important; margin-left: auto !important; margin-right: 0 !important; }
+                        ha-card { zoom: 0.6 !important; max-width: 260px !important; margin-left: auto !important; margin-right: 0 !important; }
                   - type: custom:bubble-card
                     card_type: button
                     button_type: state
@@ -417,7 +391,7 @@ views:
                       }
                     card_mod:
                       style: |
-                        ha-card { zoom: 0.46 !important; max-width: 260px !important; margin: 0 !important; }
+                        ha-card { zoom: 0.6 !important; max-width: 260px !important; margin: 0 !important; }
                   - type: custom:bubble-card
                     card_type: button
                     button_type: name
@@ -441,7 +415,7 @@ views:
                       }
                     card_mod:
                       style: |
-                        ha-card { zoom: 0.46 !important; max-width: 260px !important; margin: 0 !important; }
+                        ha-card { zoom: 0.6 !important; max-width: 260px !important; margin: 0 !important; }
             grid_options:
               columns: 120
               rows: auto
