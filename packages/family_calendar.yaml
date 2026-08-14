@@ -11,20 +11,6 @@
 
 # 1. HELPERS (The Variables)
 input_text:
-  # Tracks how many times each "2x/wk"/"2x/mo" chore has been completed
-  # within its CURRENT period. ChoreOps itself has no such counter (its
-  # chore_completed_count etc are all-time totals, and completing a
-  # custom-interval chore just pushes due_date forward by the interval -
-  # there's no native "1 of 2 this week" concept). JSON blob keyed by
-  # chore sensor entity_id: {"<entity_id>": {"count": N, "period": "<key>"}}.
-  # "period" is an ISO week ("2026-W33") or year-month ("2026-08") string -
-  # a stored entry for a past period is treated as count 0 by both the
-  # reader (chore_tile's JS) and writer (chore_progress_track script)
-  # rather than needing a scheduled reset automation.
-  chore_period_progress:
-    name: Chore Period Progress
-    initial: "{}"
-    max: 5000
   # Filter Toggles (RegEx: .* = Show, ^$ = Hide)
   calendar1_calendar_filter:
     name: calendar1 Filter
@@ -88,6 +74,46 @@ input_select:
       - Biweek
       - Month
     initial: Week
+
+# Tracks how many times each "2x/wk"/"2x/mo" chore has been completed
+# within its CURRENT period. ChoreOps itself has no such counter (its
+# chore_completed_count etc are all-time totals, and completing a
+# custom-interval chore just pushes due_date forward by the interval -
+# there's no native "1 of 2 this week" concept). One input_number per
+# tracked chore rather than a shared JSON blob in one input_text - the
+# JSON approach (tried first) reliably corrupted to "unknown" once the
+# stored value crossed ~255 characters: input_text.set_value enforces a
+# hard 255-char cap at the SERVICE layer regardless of the entity's own
+# configured `max` (reproduced directly - a compact 255-char JSON string
+# saved fine, the same data at 269 chars with normal tojson spacing did
+# not, even immediately after reloading input_text). Plain numbers have
+# no such ceiling. Add one more input_number (+ wire it into the
+# progress_entity map in dashboard.yaml's chore_tile template, + the
+# relevant reset automation below) whenever a new 2x/period chore shows
+# up - not fully automatic, but avoids re-hitting this failure mode as
+# the count of tracked chores grows.
+input_number:
+  chore_progress_priya_laundry_wash_fold:
+    name: Progress - Priya - Laundry (wash/fold)
+    min: 0
+    max: 2
+    step: 1
+    initial: 0
+    mode: box
+  chore_progress_priya_water_plants:
+    name: Progress - Priya - Water plants
+    min: 0
+    max: 2
+    step: 1
+    initial: 0
+    mode: box
+  chore_progress_priya_change_bedsheets:
+    name: Progress - Priya - Change bedsheets
+    min: 0
+    max: 2
+    step: 1
+    initial: 0
+    mode: box
 
 input_datetime:
   # Event start/end times
@@ -246,10 +272,9 @@ script:
       is_multi:
         description: True for a 2x/week or 2x/month chore - also increments its per-period progress counter.
         example: false
-      chore_entity_id:
-        example: sensor.priya_choreops_chore_status_laundry_wash_fold
-      period_type:
-        example: week
+      progress_entity_id:
+        description: Only used when is_multi is true - the input_number tracking this chore's progress.
+        example: input_number.chore_progress_priya_laundry_wash_fold
       approve_entity_id:
         description: >-
           Only used when is_multi is true. auto_approve is false on these
@@ -276,8 +301,7 @@ script:
               entity_id: "{{ approve_entity_id }}"
           - action: script.chore_progress_track
             data:
-              chore_entity_id: "{{ chore_entity_id }}"
-              period_type: "{{ period_type }}"
+              progress_entity_id: "{{ progress_entity_id }}"
               delta: 1
       - action: browser_mod.popup
         data:
@@ -312,10 +336,8 @@ script:
           already auto-rescheduled the chore's own claim/approval by the
           time this fires (there's nothing pending left for it to disapprove).
         example: false
-      chore_entity_id:
-        example: sensor.priya_choreops_chore_status_laundry_wash_fold
-      period_type:
-        example: week
+      progress_entity_id:
+        example: input_number.chore_progress_priya_laundry_wash_fold
     sequence:
       - if:
           - condition: template
@@ -323,8 +345,7 @@ script:
         then:
           - action: script.chore_progress_track
             data:
-              chore_entity_id: "{{ chore_entity_id }}"
-              period_type: "{{ period_type }}"
+              progress_entity_id: "{{ progress_entity_id }}"
               delta: -1
         else:
           - action: button.press
@@ -392,38 +413,24 @@ script:
 
   chore_progress_track:
     alias: Track a 2x/period chore's completions this period
-    # Everything computed in ONE template inside the input_text.set_value
-    # call, not spread across several `variables:` steps - splitting it
-    # across steps was silently corrupting the entity to "unknown" as soon
-    # as a 3rd chore's entry was added (reproduced directly: identical
-    # logic run as a single template via /api/template worked every time;
-    # the same logic split into current/existing/existing_count/new_count
-    # variables steps failed specifically on the 3rd distinct chore key,
-    # even with multi-second delays between calls ruling out a race).
-    # Never isolated the exact HA templating quirk responsible, but the
-    # single-template form has been solid through repeated testing.
+    # Adjusts a dedicated input_number (see input_number: block near the
+    # top of this file) rather than a shared JSON blob - see that block's
+    # comment for why. Reset to 0 at each period boundary is handled by
+    # the chore_progress_reset_weekly/monthly automations below, not here.
     fields:
-      chore_entity_id:
-        example: sensor.priya_choreops_chore_status_laundry_wash_fold
-      period_type:
-        example: week
+      progress_entity_id:
+        example: input_number.chore_progress_priya_laundry_wash_fold
       delta:
         example: 1
     sequence:
-      - action: input_text.set_value
+      - variables:
+          current_count: "{{ states(progress_entity_id) | int(0) }}"
+          new_count: "{{ [[current_count + (delta | int), 0] | max, 2] | min }}"
+      - action: input_number.set_value
         target:
-          entity_id: input_text.chore_period_progress
+          entity_id: "{{ progress_entity_id }}"
         data:
-          value: >-
-            {% set raw = states('input_text.chore_period_progress') %}
-            {% set current = (raw | from_json) if raw not in ['', 'unknown', 'unavailable'] else {} %}
-            {% set period_key = now().strftime('%G-W%V') if period_type == 'week' else now().strftime('%Y-%m') %}
-            {% set existing = current.get(chore_entity_id, {}) %}
-            {% set existing_count = (existing.get('count', 0) | int) if existing.get('period') == period_key else 0 %}
-            {% set uncapped = existing_count + (delta | int) %}
-            {% set floored = [uncapped, 0] | max %}
-            {% set new_count = [floored, 2] | min %}
-            {{ (current | combine({chore_entity_id: {'count': new_count, 'period': period_key}})) | tojson }}
+          value: "{{ new_count }}"
 
   chore_reorder:
     alias: Move a chore up/down within its due-date group
@@ -575,3 +582,47 @@ script:
           value: ""
       - action: browser_mod.close_popup
         data: {}
+
+automation:
+  - id: chore_progress_reset_weekly
+    alias: Reset weekly chore progress counters
+    description: >-
+      Resets 2x/week chore progress counters at the start of each week
+      (just after Monday midnight), so a "1 of 2 last week" doesn't carry
+      into the new week.
+    trigger:
+      - trigger: time
+        at: "00:00:05"
+    condition:
+      - condition: time
+        weekday:
+          - mon
+    action:
+      - action: input_number.set_value
+        target:
+          entity_id:
+            - input_number.chore_progress_priya_laundry_wash_fold
+            - input_number.chore_progress_priya_water_plants
+        data:
+          value: 0
+    mode: single
+
+  - id: chore_progress_reset_monthly
+    alias: Reset monthly chore progress counters
+    description: >-
+      Resets 2x/month chore progress counters on the 1st of each month,
+      just after midnight.
+    trigger:
+      - trigger: time
+        at: "00:00:10"
+    condition:
+      - condition: template
+        value_template: "{{ now().day == 1 }}"
+    action:
+      - action: input_number.set_value
+        target:
+          entity_id:
+            - input_number.chore_progress_priya_change_bedsheets
+        data:
+          value: 0
+    mode: single

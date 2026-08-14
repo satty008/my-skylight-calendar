@@ -6,38 +6,33 @@ button_card_templates:
       [[[ return states[entity.entity_id].attributes.chore_name ]]]
     tap_action: |
       [[[
-        // "2x/wk"/"2x/mo" chores (custom frequency, interval <=45 days) track
-        // completions-this-period via input_text.chore_period_progress instead
-        // of ChoreOps' own state, since ChoreOps has no native "N of M this
-        // period" concept - completing one just pushes its due_date forward
-        // by the interval, cycling its own state back to pending regardless
-        // of where we are in our own 2-count. This same block (isMulti/
-        // periodType/progressCount/isDone) is intentionally duplicated across
-        // tap_action/check/badge/name/card styles below - button-card
-        // template fields can't share helper functions with each other.
+        // "2x/wk"/"2x/mo" chores track completions-this-period via a
+        // dedicated input_number per chore (see PROGRESS_MAP), not
+        // ChoreOps' own state - ChoreOps has no native "N of M this
+        // period" concept, completing one just pushes its due_date
+        // forward by the interval, cycling its own state back to pending
+        // regardless of where we are in our own 2-count. An earlier
+        // version used one shared input_text JSON blob for all chores'
+        // progress, but input_text.set_value enforces a hard 255-char
+        // cap at the service layer regardless of the entity's own
+        // configured max, so it silently corrupted to "unknown" once a
+        // 3rd chore's entry pushed the JSON past that length. Add a new
+        // input_number (in family_calendar.yaml) + a line here whenever
+        // a new 2x/period chore shows up - not fully automatic, but a
+        // plain number has no length ceiling to re-hit.
+        // This map + isMulti/progressCount/isDone derivation is
+        // intentionally duplicated across tap_action/check/badge/name/
+        // card styles below - button-card template fields can't share
+        // helper functions with each other.
+        const PROGRESS_MAP = {
+          'sensor.priya_choreops_chore_status_laundry_wash_fold': 'input_number.chore_progress_priya_laundry_wash_fold',
+          'sensor.priya_choreops_chore_status_water_plants': 'input_number.chore_progress_priya_water_plants',
+          'sensor.priya_choreops_chore_status_change_bedsheets': 'input_number.chore_progress_priya_change_bedsheets',
+        };
         const st = states[entity.entity_id];
-        const freq = st.attributes.recurring_frequency;
-        const interval = st.attributes.custom_frequency_interval;
-        const isMulti = freq === 'custom' && interval && interval <= 45;
-        const periodType = isMulti ? (interval <= 4 ? 'week' : 'month') : '';
-        function isoWeekKey(d) {
-          const dt = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-          const day = (dt.getUTCDay() + 6) % 7;
-          dt.setUTCDate(dt.getUTCDate() - day + 3);
-          const firstThu = new Date(Date.UTC(dt.getUTCFullYear(), 0, 4));
-          const wk = 1 + Math.round(((dt - firstThu) / 86400000 - 3 + ((firstThu.getUTCDay() + 6) % 7)) / 7);
-          return `${dt.getUTCFullYear()}-W${String(wk).padStart(2, '0')}`;
-        }
-        function monthKey(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; }
-        let progressCount = 0;
-        if (isMulti) {
-          const raw = states['input_text.chore_period_progress'] ? states['input_text.chore_period_progress'].state : '{}';
-          let progress = {};
-          try { progress = JSON.parse(raw); } catch (e) {}
-          const entry = progress[entity.entity_id];
-          const currentKey = periodType === 'week' ? isoWeekKey(new Date()) : monthKey(new Date());
-          progressCount = (entry && entry.period === currentKey) ? entry.count : 0;
-        }
+        const progressEntity = PROGRESS_MAP[entity.entity_id];
+        const isMulti = !!progressEntity;
+        const progressCount = isMulti ? Math.round(Number(states[progressEntity] ? states[progressEntity].state : 0)) : 0;
         const nativeDone = ['claimed', 'approved', 'claimed_in_part', 'approved_in_part', 'completed', 'completed_in_part', 'completed_by_other'].includes(st.state);
         const isDone = isMulti ? (progressCount >= 2) : nativeDone;
         const claimEntity = entity.entity_id.replace('sensor.', 'button.').replace('chore_status', 'claim_chore');
@@ -46,9 +41,9 @@ button_card_templates:
         const personName = st.attributes.user_name;
         const choreName = st.attributes.chore_name;
         if (isDone) {
-          return {action: 'call-service', service: 'script.chore_undo_funny', service_data: {disapprove_entity_id: disapproveEntity, chore_name: choreName, person_name: personName, is_multi: isMulti, chore_entity_id: entity.entity_id, period_type: periodType}};
+          return {action: 'call-service', service: 'script.chore_undo_funny', service_data: {disapprove_entity_id: disapproveEntity, chore_name: choreName, person_name: personName, is_multi: isMulti, progress_entity_id: progressEntity}};
         }
-        return {action: 'call-service', service: 'script.chore_complete_celebrate', service_data: {claim_entity_id: claimEntity, approve_entity_id: approveEntity, chore_name: choreName, person_name: personName, is_multi: isMulti, chore_entity_id: entity.entity_id, period_type: periodType}};
+        return {action: 'call-service', service: 'script.chore_complete_celebrate', service_data: {claim_entity_id: claimEntity, approve_entity_id: approveEntity, chore_name: choreName, person_name: personName, is_multi: isMulti, progress_entity_id: progressEntity}};
       ]]]
     double_tap_action: |
       [[[
@@ -180,29 +175,14 @@ button_card_templates:
           const colorEntity = personPrefix === 'satty' ? 'input_text.satty_color' : 'input_text.bhavi_color';
           const color = states[colorEntity].state;
           const isDone = (() => {
-            const freq2 = st.attributes.recurring_frequency;
-            const interval2 = st.attributes.custom_frequency_interval;
-            const isMulti2 = freq2 === 'custom' && interval2 && interval2 <= 45;
-            if (!isMulti2) return ['claimed', 'approved', 'claimed_in_part', 'approved_in_part', 'completed', 'completed_in_part', 'completed_by_other'].includes(st.state);
-            const periodType2 = interval2 <= 4 ? 'week' : 'month';
-            const raw2 = states['input_text.chore_period_progress'] ? states['input_text.chore_period_progress'].state : '{}';
-            let progress2 = {};
-            try { progress2 = JSON.parse(raw2); } catch (e) {}
-            const entry2 = progress2[entity.entity_id];
-            const d2 = new Date();
-            let currentKey2;
-            if (periodType2 === 'week') {
-              const dt2 = new Date(Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate()));
-              const day2 = (dt2.getUTCDay() + 6) % 7;
-              dt2.setUTCDate(dt2.getUTCDate() - day2 + 3);
-              const firstThu2 = new Date(Date.UTC(dt2.getUTCFullYear(), 0, 4));
-              const wk2 = 1 + Math.round(((dt2 - firstThu2) / 86400000 - 3 + ((firstThu2.getUTCDay() + 6) % 7)) / 7);
-              currentKey2 = `${dt2.getUTCFullYear()}-W${String(wk2).padStart(2, '0')}`;
-            } else {
-              currentKey2 = `${d2.getFullYear()}-${String(d2.getMonth() + 1).padStart(2, '0')}`;
-            }
-            const count2 = (entry2 && entry2.period === currentKey2) ? entry2.count : 0;
-            return count2 >= 2;
+            const PROGRESS_MAP2 = {
+              'sensor.priya_choreops_chore_status_laundry_wash_fold': 'input_number.chore_progress_priya_laundry_wash_fold',
+              'sensor.priya_choreops_chore_status_water_plants': 'input_number.chore_progress_priya_water_plants',
+              'sensor.priya_choreops_chore_status_change_bedsheets': 'input_number.chore_progress_priya_change_bedsheets',
+            };
+            const pe2 = PROGRESS_MAP2[entity.entity_id];
+            if (!pe2) return ['claimed', 'approved', 'claimed_in_part', 'approved_in_part', 'completed', 'completed_in_part', 'completed_by_other'].includes(st.state);
+            return Math.round(Number(states[pe2] ? states[pe2].state : 0)) >= 2;
           })();
           // A gentle breathe+wiggle on the icon badge for anything still
           // pending, so the board reads as "alive" rather than a static
@@ -236,29 +216,14 @@ button_card_templates:
 
           const due = st.attributes.due_date;
           const isDone = (() => {
-            const freq2 = st.attributes.recurring_frequency;
-            const interval2 = st.attributes.custom_frequency_interval;
-            const isMulti2 = freq2 === 'custom' && interval2 && interval2 <= 45;
-            if (!isMulti2) return ['claimed', 'approved', 'claimed_in_part', 'approved_in_part', 'completed', 'completed_in_part', 'completed_by_other'].includes(st.state);
-            const periodType2 = interval2 <= 4 ? 'week' : 'month';
-            const raw2 = states['input_text.chore_period_progress'] ? states['input_text.chore_period_progress'].state : '{}';
-            let progress2 = {};
-            try { progress2 = JSON.parse(raw2); } catch (e) {}
-            const entry2 = progress2[entity.entity_id];
-            const d2 = new Date();
-            let currentKey2;
-            if (periodType2 === 'week') {
-              const dt2 = new Date(Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate()));
-              const day2 = (dt2.getUTCDay() + 6) % 7;
-              dt2.setUTCDate(dt2.getUTCDate() - day2 + 3);
-              const firstThu2 = new Date(Date.UTC(dt2.getUTCFullYear(), 0, 4));
-              const wk2 = 1 + Math.round(((dt2 - firstThu2) / 86400000 - 3 + ((firstThu2.getUTCDay() + 6) % 7)) / 7);
-              currentKey2 = `${dt2.getUTCFullYear()}-W${String(wk2).padStart(2, '0')}`;
-            } else {
-              currentKey2 = `${d2.getFullYear()}-${String(d2.getMonth() + 1).padStart(2, '0')}`;
-            }
-            const count2 = (entry2 && entry2.period === currentKey2) ? entry2.count : 0;
-            return count2 >= 2;
+            const PROGRESS_MAP2 = {
+              'sensor.priya_choreops_chore_status_laundry_wash_fold': 'input_number.chore_progress_priya_laundry_wash_fold',
+              'sensor.priya_choreops_chore_status_water_plants': 'input_number.chore_progress_priya_water_plants',
+              'sensor.priya_choreops_chore_status_change_bedsheets': 'input_number.chore_progress_priya_change_bedsheets',
+            };
+            const pe2 = PROGRESS_MAP2[entity.entity_id];
+            if (!pe2) return ['claimed', 'approved', 'claimed_in_part', 'approved_in_part', 'completed', 'completed_in_part', 'completed_by_other'].includes(st.state);
+            return Math.round(Number(states[pe2] ? states[pe2].state : 0)) >= 2;
           })();
           let label, bg;
           if (isDone) {
@@ -299,28 +264,14 @@ button_card_templates:
       check: |
         [[[
           const st = states[entity.entity_id];
-          const freq = st.attributes.recurring_frequency;
-          const interval = st.attributes.custom_frequency_interval;
-          const isMulti = freq === 'custom' && interval && interval <= 45;
-          const periodType = isMulti ? (interval <= 4 ? 'week' : 'month') : '';
-          function isoWeekKey(d) {
-            const dt = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-            const day = (dt.getUTCDay() + 6) % 7;
-            dt.setUTCDate(dt.getUTCDate() - day + 3);
-            const firstThu = new Date(Date.UTC(dt.getUTCFullYear(), 0, 4));
-            const wk = 1 + Math.round(((dt - firstThu) / 86400000 - 3 + ((firstThu.getUTCDay() + 6) % 7)) / 7);
-            return `${dt.getUTCFullYear()}-W${String(wk).padStart(2, '0')}`;
-          }
-          function monthKey(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; }
-          let progressCount = 0;
-          if (isMulti) {
-            const raw = states['input_text.chore_period_progress'] ? states['input_text.chore_period_progress'].state : '{}';
-            let progress = {};
-            try { progress = JSON.parse(raw); } catch (e) {}
-            const entry = progress[entity.entity_id];
-            const currentKey = periodType === 'week' ? isoWeekKey(new Date()) : monthKey(new Date());
-            progressCount = (entry && entry.period === currentKey) ? entry.count : 0;
-          }
+          const PROGRESS_MAP = {
+            'sensor.priya_choreops_chore_status_laundry_wash_fold': 'input_number.chore_progress_priya_laundry_wash_fold',
+            'sensor.priya_choreops_chore_status_water_plants': 'input_number.chore_progress_priya_water_plants',
+            'sensor.priya_choreops_chore_status_change_bedsheets': 'input_number.chore_progress_priya_change_bedsheets',
+          };
+          const progressEntity = PROGRESS_MAP[entity.entity_id];
+          const isMulti = !!progressEntity;
+          const progressCount = isMulti ? Math.round(Number(states[progressEntity] ? states[progressEntity].state : 0)) : 0;
           if (isMulti) {
             // Two small circles instead of one big one - filled left-to-right
             // as progressCount rises from 0 to 2 this period. Plain CSS
@@ -344,29 +295,14 @@ button_card_templates:
             [[[
               const st = states[entity.entity_id];
               const isDone = (() => {
-                const freq2 = st.attributes.recurring_frequency;
-                const interval2 = st.attributes.custom_frequency_interval;
-                const isMulti2 = freq2 === 'custom' && interval2 && interval2 <= 45;
-                if (!isMulti2) return ['claimed', 'approved', 'claimed_in_part', 'approved_in_part', 'completed', 'completed_in_part', 'completed_by_other'].includes(st.state);
-                const periodType2 = interval2 <= 4 ? 'week' : 'month';
-                const raw2 = states['input_text.chore_period_progress'] ? states['input_text.chore_period_progress'].state : '{}';
-                let progress2 = {};
-                try { progress2 = JSON.parse(raw2); } catch (e) {}
-                const entry2 = progress2[entity.entity_id];
-                const d2 = new Date();
-                let currentKey2;
-                if (periodType2 === 'week') {
-                  const dt2 = new Date(Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate()));
-                  const day2 = (dt2.getUTCDay() + 6) % 7;
-                  dt2.setUTCDate(dt2.getUTCDate() - day2 + 3);
-                  const firstThu2 = new Date(Date.UTC(dt2.getUTCFullYear(), 0, 4));
-                  const wk2 = 1 + Math.round(((dt2 - firstThu2) / 86400000 - 3 + ((firstThu2.getUTCDay() + 6) % 7)) / 7);
-                  currentKey2 = `${dt2.getUTCFullYear()}-W${String(wk2).padStart(2, '0')}`;
-                } else {
-                  currentKey2 = `${d2.getFullYear()}-${String(d2.getMonth() + 1).padStart(2, '0')}`;
-                }
-                const count2 = (entry2 && entry2.period === currentKey2) ? entry2.count : 0;
-                return count2 >= 2;
+                const PROGRESS_MAP2 = {
+              'sensor.priya_choreops_chore_status_laundry_wash_fold': 'input_number.chore_progress_priya_laundry_wash_fold',
+              'sensor.priya_choreops_chore_status_water_plants': 'input_number.chore_progress_priya_water_plants',
+              'sensor.priya_choreops_chore_status_change_bedsheets': 'input_number.chore_progress_priya_change_bedsheets',
+            };
+            const pe2 = PROGRESS_MAP2[entity.entity_id];
+            if (!pe2) return ['claimed', 'approved', 'claimed_in_part', 'approved_in_part', 'completed', 'completed_in_part', 'completed_by_other'].includes(st.state);
+            return Math.round(Number(states[pe2] ? states[pe2].state : 0)) >= 2;
               })();
               const personPrefix = entity.entity_id.split('.')[1].split('_choreops_')[0];
               const colorEntity = personPrefix === 'satty' ? 'input_text.satty_color' : 'input_text.bhavi_color';
@@ -436,65 +372,31 @@ button_card_templates:
         - text-decoration: |
             [[[
               const st = states[entity.entity_id];
-              const freq2 = st.attributes.recurring_frequency;
-              const interval2 = st.attributes.custom_frequency_interval;
-              const isMulti2 = freq2 === 'custom' && interval2 && interval2 <= 45;
-              let isDone;
-              if (!isMulti2) {
-                isDone = ['claimed', 'approved', 'claimed_in_part', 'approved_in_part', 'completed', 'completed_in_part', 'completed_by_other'].includes(st.state);
-              } else {
-                const periodType2 = interval2 <= 4 ? 'week' : 'month';
-                const raw2 = states['input_text.chore_period_progress'] ? states['input_text.chore_period_progress'].state : '{}';
-                let progress2 = {};
-                try { progress2 = JSON.parse(raw2); } catch (e) {}
-                const entry2 = progress2[entity.entity_id];
-                const d2 = new Date();
-                let currentKey2;
-                if (periodType2 === 'week') {
-                  const dt2 = new Date(Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate()));
-                  const day2 = (dt2.getUTCDay() + 6) % 7;
-                  dt2.setUTCDate(dt2.getUTCDate() - day2 + 3);
-                  const firstThu2 = new Date(Date.UTC(dt2.getUTCFullYear(), 0, 4));
-                  const wk2 = 1 + Math.round(((dt2 - firstThu2) / 86400000 - 3 + ((firstThu2.getUTCDay() + 6) % 7)) / 7);
-                  currentKey2 = `${dt2.getUTCFullYear()}-W${String(wk2).padStart(2, '0')}`;
-                } else {
-                  currentKey2 = `${d2.getFullYear()}-${String(d2.getMonth() + 1).padStart(2, '0')}`;
-                }
-                const count2 = (entry2 && entry2.period === currentKey2) ? entry2.count : 0;
-                isDone = count2 >= 2;
-              }
+              const PROGRESS_MAP2 = {
+                'sensor.priya_choreops_chore_status_laundry_wash_fold': 'input_number.chore_progress_priya_laundry_wash_fold',
+                'sensor.priya_choreops_chore_status_water_plants': 'input_number.chore_progress_priya_water_plants',
+                'sensor.priya_choreops_chore_status_change_bedsheets': 'input_number.chore_progress_priya_change_bedsheets',
+              };
+              const pe2 = PROGRESS_MAP2[entity.entity_id];
+              const isDone = !pe2
+                ? ['claimed', 'approved', 'claimed_in_part', 'approved_in_part', 'completed', 'completed_in_part', 'completed_by_other'].includes(st.state)
+                : Math.round(Number(states[pe2] ? states[pe2].state : 0)) >= 2;
+
               return isDone ? 'line-through' : 'none';
             ]]]
         - opacity: |
             [[[
               const st = states[entity.entity_id];
-              const freq2 = st.attributes.recurring_frequency;
-              const interval2 = st.attributes.custom_frequency_interval;
-              const isMulti2 = freq2 === 'custom' && interval2 && interval2 <= 45;
-              let isDone;
-              if (!isMulti2) {
-                isDone = ['claimed', 'approved', 'claimed_in_part', 'approved_in_part', 'completed', 'completed_in_part', 'completed_by_other'].includes(st.state);
-              } else {
-                const periodType2 = interval2 <= 4 ? 'week' : 'month';
-                const raw2 = states['input_text.chore_period_progress'] ? states['input_text.chore_period_progress'].state : '{}';
-                let progress2 = {};
-                try { progress2 = JSON.parse(raw2); } catch (e) {}
-                const entry2 = progress2[entity.entity_id];
-                const d2 = new Date();
-                let currentKey2;
-                if (periodType2 === 'week') {
-                  const dt2 = new Date(Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate()));
-                  const day2 = (dt2.getUTCDay() + 6) % 7;
-                  dt2.setUTCDate(dt2.getUTCDate() - day2 + 3);
-                  const firstThu2 = new Date(Date.UTC(dt2.getUTCFullYear(), 0, 4));
-                  const wk2 = 1 + Math.round(((dt2 - firstThu2) / 86400000 - 3 + ((firstThu2.getUTCDay() + 6) % 7)) / 7);
-                  currentKey2 = `${dt2.getUTCFullYear()}-W${String(wk2).padStart(2, '0')}`;
-                } else {
-                  currentKey2 = `${d2.getFullYear()}-${String(d2.getMonth() + 1).padStart(2, '0')}`;
-                }
-                const count2 = (entry2 && entry2.period === currentKey2) ? entry2.count : 0;
-                isDone = count2 >= 2;
-              }
+              const PROGRESS_MAP2 = {
+                'sensor.priya_choreops_chore_status_laundry_wash_fold': 'input_number.chore_progress_priya_laundry_wash_fold',
+                'sensor.priya_choreops_chore_status_water_plants': 'input_number.chore_progress_priya_water_plants',
+                'sensor.priya_choreops_chore_status_change_bedsheets': 'input_number.chore_progress_priya_change_bedsheets',
+              };
+              const pe2 = PROGRESS_MAP2[entity.entity_id];
+              const isDone = !pe2
+                ? ['claimed', 'approved', 'claimed_in_part', 'approved_in_part', 'completed', 'completed_in_part', 'completed_by_other'].includes(st.state)
+                : Math.round(Number(states[pe2] ? states[pe2].state : 0)) >= 2;
+
               return isDone ? '0.6' : '1';
             ]]]
 views:
