@@ -410,7 +410,8 @@ button_card_templates:
         check:
           - grid-area: check
           - justify-self: center
-          - align-self: center
+          - align-self: start
+          - margin-top: 6px
       name:
         - grid-area: n
         - justify-self: start
