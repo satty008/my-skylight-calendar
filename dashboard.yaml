@@ -52,6 +52,36 @@ button_card_templates:
         const userName = st.attributes.user_name;
         const otherPerson = userName === 'Satty' ? 'Priya' : 'Satty';
         const closeAction = {action: 'fire-dom-event', browser_mod: {service: 'browser_mod.close_popup', data: {}}};
+        // Single-tap only ever increments a 2x/period chore's progress
+        // (except at 2/2, where it decrements once via undo) - there's no
+        // tap-based way to walk 1/2 back down to 0/2. This popup's "Undo
+        // last completion" fills that gap: available whenever count > 0,
+        // regardless of whether the tile currently reads as done.
+        const PROGRESS_MAP = {
+          'sensor.priya_choreops_chore_status_laundry_wash_fold': 'input_number.chore_progress_priya_laundry_wash_fold',
+          'sensor.priya_choreops_chore_status_water_plants': 'input_number.chore_progress_priya_water_plants',
+          'sensor.priya_choreops_chore_status_change_bedsheets': 'input_number.chore_progress_priya_change_bedsheets',
+        };
+        const progressEntity = PROGRESS_MAP[entity.entity_id];
+        const progressCount = progressEntity ? Math.round(Number(states[progressEntity] ? states[progressEntity].state : 0)) : 0;
+        const undoProgressAction = progressEntity && progressCount > 0 ? {
+          type: 'button',
+          name: `Undo last completion (${progressCount}/2)`,
+          show_icon: false,
+          tap_action: {
+            action: 'fire-dom-event',
+            browser_mod: {
+              service: 'browser_mod.sequence',
+              data: {
+                sequence: [
+                  {service: 'script.chore_progress_track', data: {progress_entity_id: progressEntity, delta: -1}},
+                  {service: 'browser_mod.refresh', data: {}},
+                  {service: 'browser_mod.close_popup', data: {}}
+                ]
+              }
+            }
+          }
+        } : null;
         const mkBtn = (name, offset) => ({
           type: 'button',
           name: name,
@@ -132,13 +162,14 @@ button_card_templates:
                   },
                   mkReorderBtn('Move up in list', 'up'),
                   mkReorderBtn('Move down in list', 'down'),
+                  undoProgressAction,
                   {
                     type: 'button',
                     name: 'Cancel',
                     show_icon: false,
                     tap_action: closeAction
                   }
-                ]
+                ].filter(Boolean)
               }
             }
           }
