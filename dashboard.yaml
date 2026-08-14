@@ -338,7 +338,7 @@ views:
                     @media (max-width: 700px) {
                       ha-card { zoom: 0.65 !important; max-width: 40vw !important; }
                     }
-        column_span: 3
+        column_span: 1
       - type: grid
         cards:
           - type: markdown
@@ -400,7 +400,7 @@ views:
                   ha-markdown-element > div:nth-child(2) > span:first-child { font-size: 2.3em !important; font-weight: bold !important; line-height: 1 !important; background: orange !important; color: #1a1a1a !important; border-radius: 8px !important; padding: 0 0.2em !important; }
                   ha-markdown-element > div:nth-child(2) > span:last-child { font-size: 1.2em !important; font-weight: 600 !important; }
                   ha-markdown-element > div:nth-child(3) { font-size: 0.9em !important; opacity: 0.65 !important; margin-top: 0.15em !important; text-align: center !important; }
-        column_span: 4
+        column_span: 1
       - type: grid
         cards:
           - type: horizontal-stack
@@ -465,7 +465,7 @@ views:
                 card_mod:
                   style: |
                     ha-card { zoom: 0.62 !important; max-width: 190px !important; margin: 0 !important; }
-        column_span: 3
+        column_span: 1
       # --- End TOP SECTION ---
       # --- START CHORES SECTION (Today + Weather + ChoreOps, tap to complete) ---
       # Satty and Priya are now two separate sections (not one section with an
@@ -733,7 +733,7 @@ views:
                           sort:
                             method: attribute
                             attribute: due_date
-        column_span: 5
+        column_span: 1
       - type: grid
         cards:
           - type: vertical-stack
@@ -985,7 +985,7 @@ views:
                           sort:
                             method: attribute
                             attribute: due_date
-        column_span: 5
+        column_span: 1
       # --- End CHORES SECTION ---
       # --- START CALENDAR SECTION (Week Planner Card) ---
       - type: grid
