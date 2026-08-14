@@ -311,10 +311,15 @@ script:
             value_template: "{{ due is not none }}"
         then:
           - variables:
+              # isoformat() keeps the UTC offset (e.g. "...+00:00") - a bare
+              # strftime() strips it, and set_chore_due_date's parser then
+              # reinterprets the naive string as LOCAL time, silently
+              # shifting the due date by the local UTC offset (2+ hours,
+              # not 1 minute) on every single press.
               new_due: >-
                 {% set dt = as_datetime(due) %}
                 {% set delta = timedelta(minutes=1) %}
-                {{ (dt - delta if direction == 'up' else dt + delta).strftime('%Y-%m-%dT%H:%M:%S') }}
+                {{ (dt - delta if direction == 'up' else dt + delta).isoformat() }}
           - if:
               - condition: template
                 value_template: "{{ as_datetime(new_due) > now() }}"
