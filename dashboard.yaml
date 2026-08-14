@@ -149,9 +149,12 @@ button_card_templates:
               const st = states[entity.entity_id];
               const freq = st.attributes.recurring_frequency;
               const due = st.attributes.due_date;
-              const t = new Date();
-              const todayStr = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
-              const visible = freq === 'daily' || (due && due.slice(0, 10) <= todayStr);
+              const view = states['input_select.calendar_view'] ? states['input_select.calendar_view'].state : 'Today';
+              const viewDays = {Today: 0, Tomorrow: 1, Week: 7, Biweek: 14, Month: 30}[view] ?? 0;
+              const windowEnd = new Date();
+              windowEnd.setDate(windowEnd.getDate() + viewDays);
+              const windowEndStr = windowEnd.getFullYear() + '-' + String(windowEnd.getMonth() + 1).padStart(2, '0') + '-' + String(windowEnd.getDate()).padStart(2, '0');
+              const visible = freq === 'daily' || (due && due.slice(0, 10) <= windowEndStr);
               return visible ? 'grid' : 'none';
             ]]]
         - grid-template-columns: 1fr
@@ -322,6 +325,30 @@ views:
                       .bubble-button-background {
                         opacity: 1 !important;
                         background-color: ${hass.states['input_boolean.family_calendar_show'].state === 'on' ? 'var(--calendar1-default-primary-color)' : 'light-grey'} !important;
+                      }
+                    card_mod:
+                      style: |
+                        ha-card { zoom: 0.75 !important; max-width: 260px !important; margin-left: auto !important; margin-right: 0 !important; }
+                  - type: custom:bubble-card
+                    card_type: button
+                    button_type: name
+                    entity: input_select.calendar_view
+                    name: Manage Chores
+                    icon: mdi:playlist-edit
+                    show_icon: true
+                    show_name: true
+                    show_state: false
+                    # Jumps to ChoreOps' own Add/Edit/Delete Chore screen (Settings >
+                    # Devices & Services > ChoreOps > gear icon > Manage Chore) - that
+                    # UI works cleanly (confirmed live), no need to duplicate it here.
+                    button_action:
+                      tap_action:
+                        action: navigate
+                        navigation_path: /config/integrations/integration/choreops
+                    styles: |
+                      .bubble-button-background {
+                        opacity: 1 !important;
+                        background-color: light-grey !important;
                       }
                     card_mod:
                       style: |
