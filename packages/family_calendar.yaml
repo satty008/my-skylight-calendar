@@ -288,6 +288,43 @@ script:
           user_name: "{{ user_name }}"
           due_date: "{{ due_date }}"
 
+  chore_reorder:
+    alias: Move a chore up/down within its due-date group
+    # The chore list is sorted by due_date; chores sharing the same day
+    # (e.g. all "due today") tie-break in whatever order ChoreOps returns
+    # them. Nudging the time-of-day by a minute (without changing the
+    # calendar day) reorders a chore among its same-day siblings without
+    # affecting which day it's due/overdue on - the badge and visibility
+    # logic only ever look at the date portion (due.slice(0, 10)).
+    fields:
+      chore_entity:
+        example: sensor.satty_choreops_chore_status_wash_dishes
+      direction:
+        example: up
+    sequence:
+      - variables:
+          due: "{{ state_attr(chore_entity, 'due_date') }}"
+          chore_name: "{{ state_attr(chore_entity, 'chore_name') }}"
+          user_name: "{{ state_attr(chore_entity, 'user_name') }}"
+      - if:
+          - condition: template
+            value_template: "{{ due is not none }}"
+        then:
+          - variables:
+              new_due: >-
+                {% set dt = as_datetime(due) %}
+                {% set delta = timedelta(minutes=1) %}
+                {{ (dt - delta if direction == 'up' else dt + delta).strftime('%Y-%m-%dT%H:%M:%S') }}
+          - if:
+              - condition: template
+                value_template: "{{ as_datetime(new_due) > now() }}"
+            then:
+              - action: choreops.set_chore_due_date
+                data:
+                  chore_name: "{{ chore_name }}"
+                  user_name: "{{ user_name }}"
+                  due_date: "{{ new_due }}"
+
   calendar3_calendar_visible_filter:
     alias: Toggle calendar3 Calendar
     sequence:

@@ -96,6 +96,52 @@ button_card_templates:
           }
         };
       ]]]
+    hold_action: |
+      [[[
+        const st = states[entity.entity_id];
+        const choreName = st.attributes.chore_name;
+        const closeAction = {action: 'fire-dom-event', browser_mod: {service: 'browser_mod.close_popup', data: {}}};
+        const mkBtn = (name, direction) => ({
+          type: 'button',
+          name: name,
+          show_icon: false,
+          tap_action: {
+            action: 'fire-dom-event',
+            browser_mod: {
+              service: 'browser_mod.sequence',
+              data: {
+                sequence: [
+                  {service: 'script.chore_reorder', data: {chore_entity: entity.entity_id, direction: direction}},
+                  {service: 'browser_mod.refresh', data: {}},
+                  {service: 'browser_mod.close_popup', data: {}}
+                ]
+              }
+            }
+          }
+        });
+        return {
+          action: 'fire-dom-event',
+          browser_mod: {
+            service: 'browser_mod.popup',
+            data: {
+              title: choreName,
+              content: {
+                type: 'vertical-stack',
+                cards: [
+                  mkBtn('Move up', 'up'),
+                  mkBtn('Move down', 'down'),
+                  {
+                    type: 'button',
+                    name: 'Cancel',
+                    show_icon: false,
+                    tap_action: closeAction
+                  }
+                ]
+              }
+            }
+          }
+        };
+      ]]]
     custom_fields:
       photo: |
         [[[
@@ -123,13 +169,40 @@ button_card_templates:
         [[[
           const st = states[entity.entity_id];
           const due = st.attributes.due_date;
-          const t = new Date();
-          const todayStr = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+          const isDone = (st.attributes.global_state === 'completed' || st.attributes.global_state === 'claimed');
           let label, bg;
-          if ((st.attributes.global_state === 'completed' || st.attributes.global_state === 'claimed')) { label = 'Done'; bg = '#238636'; }
-          else if (due && due.slice(0, 10) < todayStr) { label = 'Overdue'; bg = '#da3633'; }
-          else if (due && due.slice(0, 10) === todayStr) { label = 'Due'; bg = '#9a6700'; }
-          else { label = 'Open'; bg = '#57606a'; }
+          if (isDone) {
+            label = 'Done'; bg = '#238636';
+          } else if (!due) {
+            label = 'Open'; bg = '#57606a';
+          } else {
+            const dueD = new Date(due);
+            const dueMid = new Date(dueD.getFullYear(), dueD.getMonth(), dueD.getDate());
+            const t = new Date();
+            const todayMid = new Date(t.getFullYear(), t.getMonth(), t.getDate());
+            const diffDays = Math.round((dueMid - todayMid) / 86400000);
+            const shortDate = dueD.toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
+            const lastDayOfMonth = new Date(dueD.getFullYear(), dueD.getMonth() + 1, 0).getDate();
+            const isMonthEnd = dueD.getDate() === lastDayOfMonth;
+            const dayOfWeek = todayMid.getDay();
+            const daysUntilThisWeekEnd = (7 - dayOfWeek) % 7;
+            const daysUntilNextWeekEnd = daysUntilThisWeekEnd + 7;
+            if (diffDays < 0) {
+              label = `Overdue · ${shortDate} (${Math.abs(diffDays)}d)`; bg = '#da3633';
+            } else if (diffDays === 0) {
+              label = 'Due today'; bg = '#9a6700';
+            } else if (diffDays === 1) {
+              label = 'Due tomorrow'; bg = '#9a6700';
+            } else if (isMonthEnd) {
+              label = `Month end · ${shortDate} (${diffDays}d)`; bg = '#57606a';
+            } else if (diffDays <= daysUntilThisWeekEnd) {
+              label = `This week · ${shortDate} (${diffDays}d)`; bg = '#9a6700';
+            } else if (diffDays <= daysUntilNextWeekEnd) {
+              label = `Next week · ${shortDate} (${diffDays}d)`; bg = '#57606a';
+            } else {
+              label = `Due ${shortDate} (${diffDays}d)`; bg = '#57606a';
+            }
+          }
           return `<span style="display:inline-block;padding:2px 10px;border-radius:999px;background:${bg};color:#fff;font-size:0.72em;font-weight:700;white-space:nowrap;">${label}</span>`;
         ]]]
     styles:
@@ -294,7 +367,17 @@ views:
                       ha-markdown-element > div:nth-child(2) > span:first-child { font-size: 2.3em !important; font-weight: bold !important; line-height: 1 !important; background: orange !important; color: #1a1a1a !important; border-radius: 8px !important; padding: 0 0.2em !important; }
                       ha-markdown-element > div:nth-child(2) > span:last-child { font-size: 1.2em !important; font-weight: 600 !important; }
                       ha-markdown-element > div:nth-child(3) { font-size: 0.9em !important; opacity: 0.65 !important; margin-top: 0.15em !important; text-align: center !important; }
-              - type: vertical-stack
+              - type: horizontal-stack
+                # Three controls in one row instead of stacked. Each card keeps
+                # its own zoom:0.75 but max-width is trimmed from 260px to 130px
+                # so all three fit the column; margin-left:auto sits ONLY on the
+                # first card so the whole row hugs the right edge as a group (a
+                # flexbox trick - margin-left:auto on the first flex item pushes
+                # it and everything after it to the right) instead of each card
+                # independently right-aligning (which just re-stacks them).
+                card_mod:
+                  style: |
+                    .card { gap: 4px !important; }
                 cards:
                   - type: custom:bubble-card
                     card_type: select
@@ -306,7 +389,7 @@ views:
                     show_attribute: false
                     card_mod:
                       style: |
-                        ha-card { zoom: 0.75 !important; max-width: 260px !important; margin-left: auto !important; margin-right: 0 !important; }
+                        ha-card { zoom: 0.75 !important; max-width: 130px !important; margin-left: auto !important; margin-right: 0 !important; }
                   - type: custom:bubble-card
                     card_type: button
                     button_type: state
@@ -328,7 +411,7 @@ views:
                       }
                     card_mod:
                       style: |
-                        ha-card { zoom: 0.75 !important; max-width: 260px !important; margin-left: auto !important; margin-right: 0 !important; }
+                        ha-card { zoom: 0.75 !important; max-width: 130px !important; margin: 0 !important; }
                   - type: custom:bubble-card
                     card_type: button
                     button_type: name
@@ -352,7 +435,7 @@ views:
                       }
                     card_mod:
                       style: |
-                        ha-card { zoom: 0.75 !important; max-width: 260px !important; margin-left: auto !important; margin-right: 0 !important; }
+                        ha-card { zoom: 0.75 !important; max-width: 130px !important; margin: 0 !important; }
             grid_options:
               columns: 120
               rows: auto
@@ -461,19 +544,44 @@ views:
                             entity: input_text.calendar1_calendar_filter
                             state: ".*"
                         card:
-                          type: custom:auto-entities
-                          card:
-                            type: vertical-stack
-                          card_param: cards
-                          filter:
-                            include:
-                              - entity_id: "sensor.satty_choreops_chore_status_*"
-                                options:
-                                  type: custom:button-card
-                                  template: chore_tile
-                          sort:
-                            method: attribute
-                            attribute: due_date
+                          # Two stacked auto-entities cards instead of one: not-done
+                          # chores sorted by due_date, then a second card for done
+                          # chores (also sorted by due_date) - this pushes completed/
+                          # claimed chores to the bottom of the list instead of them
+                          # interleaving by date, since auto-entities' own sort only
+                          # supports a single key (no composite/secondary sort).
+                          type: vertical-stack
+                          cards:
+                            - type: custom:auto-entities
+                              card:
+                                type: vertical-stack
+                              card_param: cards
+                              filter:
+                                include:
+                                  - entity_id: "sensor.satty_choreops_chore_status_*"
+                                    attributes:
+                                      global_state: "^(?!completed|claimed).*$"
+                                    options:
+                                      type: custom:button-card
+                                      template: chore_tile
+                              sort:
+                                method: attribute
+                                attribute: due_date
+                            - type: custom:auto-entities
+                              card:
+                                type: vertical-stack
+                              card_param: cards
+                              filter:
+                                include:
+                                  - entity_id: "sensor.satty_choreops_chore_status_*"
+                                    attributes:
+                                      global_state: "completed|claimed"
+                                    options:
+                                      type: custom:button-card
+                                      template: chore_tile
+                              sort:
+                                method: attribute
+                                attribute: due_date
                   - type: vertical-stack
                     cards:
                       - type: horizontal-stack
@@ -526,19 +634,38 @@ views:
                             entity: input_text.calendar2_calendar_filter
                             state: ".*"
                         card:
-                          type: custom:auto-entities
-                          card:
-                            type: vertical-stack
-                          card_param: cards
-                          filter:
-                            include:
-                              - entity_id: "sensor.priya_choreops_chore_status_*"
-                                options:
-                                  type: custom:button-card
-                                  template: chore_tile
-                          sort:
-                            method: attribute
-                            attribute: due_date
+                          type: vertical-stack
+                          cards:
+                            - type: custom:auto-entities
+                              card:
+                                type: vertical-stack
+                              card_param: cards
+                              filter:
+                                include:
+                                  - entity_id: "sensor.priya_choreops_chore_status_*"
+                                    attributes:
+                                      global_state: "^(?!completed|claimed).*$"
+                                    options:
+                                      type: custom:button-card
+                                      template: chore_tile
+                              sort:
+                                method: attribute
+                                attribute: due_date
+                            - type: custom:auto-entities
+                              card:
+                                type: vertical-stack
+                              card_param: cards
+                              filter:
+                                include:
+                                  - entity_id: "sensor.priya_choreops_chore_status_*"
+                                    attributes:
+                                      global_state: "completed|claimed"
+                                    options:
+                                      type: custom:button-card
+                                      template: chore_tile
+                              sort:
+                                method: attribute
+                                attribute: due_date
             grid_options:
               columns: 120
               rows: auto
